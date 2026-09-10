@@ -11,6 +11,9 @@ Rails.application.routes.draw do
       patch :switch
     end
   end
+  get "cari", to: "search#index", as: :search
+  get "panduan", to: "panduan#index", as: :panduan
+  get "brand", to: "brand#index", as: :brand
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

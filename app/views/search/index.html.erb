@@ -1,0 +1,26 @@
+<h1 class="text-xl font-bold text-gray-900">Pencarian</h1>
+
+<%= form_with url: search_path, method: :get, class: "mt-4" do |f| %>
+  <%= f.text_field :q, value: @query, placeholder: "Cari nama atau email pengguna...",
+        class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+<% end %>
+
+<% if @query.present? %>
+  <div class="mt-6 space-y-2">
+    <% if @users.any? %>
+      <% @users.each do |user| %>
+        <div class="bg-white rounded-xl ring-1 ring-gray-200 p-4 flex items-center gap-3">
+          <span class="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold">
+            <%= user.full_name.first.upcase %>
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-gray-800"><%= user.full_name %></p>
+            <p class="text-xs text-gray-400"><%= user.email %></p>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-sm text-gray-400">Tidak ada pengguna yang cocok dengan "<%= @query %>".</p>
+    <% end %>
+  </div>
+<% end %>

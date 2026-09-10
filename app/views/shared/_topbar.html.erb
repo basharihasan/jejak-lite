@@ -1,6 +1,12 @@
 <header class="bg-white border-b border-gray-200">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-    <%= link_to "Jejak Lite", dashboard_path, class: "font-bold text-lg text-indigo-600" %>
+    <div class="flex items-center gap-6">
+      <%= link_to "Jejak Lite", dashboard_path, class: "font-bold text-lg text-indigo-600" %>
+      <nav class="hidden sm:flex items-center gap-4 text-sm text-gray-600">
+        <%= link_to "Cari", search_path, class: "hover:text-indigo-600" %>
+        <%= link_to "Panduan", panduan_path, class: "hover:text-indigo-600" %>
+      </nav>
+    </div>
 
     <div class="flex items-center gap-4">
       <% if current_user.roles.size > 1 %>

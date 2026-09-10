@@ -1,0 +1,16 @@
+<style>
+  /* Tailwind belum memasang plugin typography — gaya markdown ditulis manual
+     di sini alih-alih bergantung pada kelas `prose` yang tidak akan berefek. */
+  .markdown-body h1 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 0.75rem; }
+  .markdown-body h2 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
+  .markdown-body h3 { font-size: 1.1rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
+  .markdown-body p { margin: 0.75rem 0; line-height: 1.6; color: #374151; }
+  .markdown-body ul, .markdown-body ol { margin: 0.75rem 0; padding-left: 1.5rem; color: #374151; }
+  .markdown-body li { margin: 0.25rem 0; }
+  .markdown-body a { color: #4f46e5; text-decoration: underline; }
+  .markdown-body code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 0.25rem; font-size: 0.85em; }
+</style>
+
+<div class="bg-white rounded-2xl ring-1 ring-gray-200 p-8 markdown-body">
+  <%= @content_html %>
+</div>
