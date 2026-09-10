@@ -1,0 +1,54 @@
+<div class="max-w-md mx-auto bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-8">
+  <h2 class="text-xl font-bold mb-6">Daftar Akun</h2>
+
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-4" }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div>
+      <%= f.label :full_name, "Nama Lengkap", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :full_name, autofocus: true,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :email, "Email", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.email_field :email, autocomplete: "email",
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <div>
+      <%= label_tag "user_role_code", "Peran", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= select_tag "user[role_code]", options_for_select(Role.pluck(:name, :code)),
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :password, "Kata Sandi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <% if @minimum_password_length %>
+        <p class="text-xs text-gray-400 mb-1">(minimal <%= @minimum_password_length %> karakter)</p>
+      <% end %>
+      <%= f.password_field :password, autocomplete: "new-password",
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :password_confirmation, "Ulangi Kata Sandi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password",
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <%= f.submit "Daftar",
+          class: "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm cursor-pointer" %>
+  <% end %>
+
+  <% if Devise.omniauth_providers.include?(:google_oauth2) %>
+    <div class="mt-4">
+      <%= link_to "Daftar dengan Google", user_google_oauth2_omniauth_authorize_path, method: :post,
+            class: "block text-center w-full border border-gray-300 hover:bg-gray-50 font-semibold py-2.5 rounded-xl text-sm" %>
+    </div>
+  <% end %>
+
+  <div class="mt-6 text-sm text-gray-500">
+    <%= render "devise/shared/links" %>
+  </div>
+</div>

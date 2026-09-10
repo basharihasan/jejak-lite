@@ -1,0 +1,11 @@
+mahasiswa:
+  code: mahasiswa
+  name: Mahasiswa
+
+dosen:
+  code: dosen
+  name: Dosen
+
+admin:
+  code: admin
+  name: Admin

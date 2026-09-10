@@ -1,0 +1,25 @@
+<%- if controller_name != 'sessions' %>
+  <p><%= link_to "Masuk", new_session_path(resource_name) %></p>
+<% end %>
+
+<%- if devise_mapping.registerable? && controller_name != 'registrations' %>
+  <p><%= link_to "Daftar", new_registration_path(resource_name) %></p>
+<% end %>
+
+<%- if devise_mapping.recoverable? && controller_name != 'passwords' && controller_name != 'registrations' %>
+  <p><%= link_to "Lupa kata sandi?", new_password_path(resource_name) %></p>
+<% end %>
+
+<%- if devise_mapping.confirmable? && controller_name != 'confirmations' %>
+  <p><%= link_to "Belum menerima instruksi konfirmasi?", new_confirmation_path(resource_name) %></p>
+<% end %>
+
+<%- if devise_mapping.lockable? && resource_class.unlock_strategy_enabled?(:email) && controller_name != 'unlocks' %>
+  <p><%= link_to "Belum menerima instruksi buka kunci?", new_unlock_path(resource_name) %></p>
+<% end %>
+
+<%# Tombol Google dirender terpisah di sessions/new & registrations/new (dicek
+    lewat Devise.omniauth_providers, bukan devise_mapping.omniauthable? —
+    User selalu mendeklarasikan :omniauthable, tapi provider-nya sendiri
+    hanya benar-benar terdaftar kalau ENV Google terisi). Sengaja tidak
+    diulang di sini supaya tombolnya tidak dobel. %>

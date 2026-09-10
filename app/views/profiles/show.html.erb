@@ -1,0 +1,22 @@
+<div class="max-w-lg bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+  <div class="flex items-center gap-4">
+    <% if @user.avatar.attached? %>
+      <%= image_tag @user.avatar, class: "h-16 w-16 rounded-full object-cover" %>
+    <% else %>
+      <span class="h-16 w-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xl font-semibold">
+        <%= @user.full_name.first.upcase %>
+      </span>
+    <% end %>
+    <div>
+      <p class="font-bold text-lg"><%= @user.full_name %></p>
+      <p class="text-sm text-gray-500"><%= @user.email %></p>
+    </div>
+  </div>
+
+  <p class="mt-4 text-sm text-gray-600">
+    Peran: <%= @user.roles.map(&:name).join(", ").presence || "Belum ada" %>
+  </p>
+
+  <%= link_to "Sunting Profil", edit_profile_path,
+        class: "mt-6 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>

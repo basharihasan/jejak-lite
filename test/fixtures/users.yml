@@ -1,0 +1,13 @@
+budi:
+  full_name: Budi Dosen
+  email: budi@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  confirmed_at: <%= Time.current %>
+  active_role: dosen
+
+siti:
+  full_name: Siti Mahasiswa
+  email: siti@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  confirmed_at: <%= Time.current %>
+  active_role: mahasiswa

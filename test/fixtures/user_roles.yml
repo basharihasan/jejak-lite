@@ -1,0 +1,7 @@
+budi_dosen:
+  user: budi
+  role: dosen
+
+siti_mahasiswa:
+  user: siti
+  role: mahasiswa
