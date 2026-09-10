@@ -19,19 +19,7 @@ Login Google (opsional) aktif otomatis kalau `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_S
 
 ## Status Pengembangan
 
-Dibangun bertahap mengikuti roadmap fase di rencana implementasi. Status saat ini:
-
-- [x] Fase 0 — Skeleton (Rails 8, Postgres, Tailwind, Solid Queue/Cache/Cable)
-- [x] Fase 1 — Auth & Peran (Devise + Google OAuth opsional, multi-peran per akun, ganti peran aktif, profil + avatar)
-- [ ] Fase 2 — Dashboard & Navigasi lanjutan, Pencarian global, Panduan Pengguna
-- [ ] Fase 3 — Notifikasi (in-app + Web Push)
-- [ ] Fase 4 — Logbook & Aktivitas
-- [ ] Fase 5 — Community Feed
-- [ ] Fase 6 — Kasus Klinis dasar
-- [ ] Fase 7 — Rotasi minimal + DOPS/Mini-CEX
-- [ ] Fase 8 — Kurikulum dasar (Blueprinting, Peta Kompetensi, Analisis Capaian)
-- [ ] Fase 9 — Import CBT/OSCE (CSV generik)
-- [ ] Fase 10 — Deploy & Poles
+Lihat [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md) untuk rencana lengkap, keputusan arsitektur, dan status progres per fase (diperbarui tiap fase selesai).
 
 ## Test
 
