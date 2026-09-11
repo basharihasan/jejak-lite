@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_011232) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_012631) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -177,6 +177,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_011232) do
     t.index ["student_id"], name: "index_dops_evaluations_on_student_id"
   end
 
+  create_table "examiner_scores", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "examiner_id", null: false
+    t.text "feedback"
+    t.bigint "final_project_id", null: false
+    t.decimal "score", precision: 5, scale: 2, null: false
+    t.date "session_date", null: false
+    t.datetime "updated_at", null: false
+    t.index ["examiner_id"], name: "index_examiner_scores_on_examiner_id"
+    t.index ["final_project_id"], name: "index_examiner_scores_on_final_project_id"
+  end
+
+  create_table "final_project_milestones", force: :cascade do |t|
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.bigint "final_project_id", null: false
+    t.date "target_date", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["final_project_id"], name: "index_final_project_milestones_on_final_project_id"
+  end
+
+  create_table "final_projects", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "status", default: "proposal", null: false
+    t.bigint "student_id", null: false
+    t.bigint "supervisor_id"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["student_id"], name: "index_final_projects_on_student_id"
+    t.index ["supervisor_id"], name: "index_final_projects_on_supervisor_id"
+  end
+
   create_table "mini_cex_evaluations", force: :cascade do |t|
     t.string "case_description", null: false
     t.bigint "clinical_rotation_id", null: false
@@ -303,6 +337,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_011232) do
   add_foreign_key "dops_evaluations", "clinical_rotations"
   add_foreign_key "dops_evaluations", "users", column: "evaluator_id"
   add_foreign_key "dops_evaluations", "users", column: "student_id"
+  add_foreign_key "examiner_scores", "final_projects"
+  add_foreign_key "examiner_scores", "users", column: "examiner_id"
+  add_foreign_key "final_project_milestones", "final_projects"
+  add_foreign_key "final_projects", "users", column: "student_id"
+  add_foreign_key "final_projects", "users", column: "supervisor_id"
   add_foreign_key "mini_cex_evaluations", "clinical_rotations"
   add_foreign_key "mini_cex_evaluations", "users", column: "evaluator_id"
   add_foreign_key "mini_cex_evaluations", "users", column: "student_id"

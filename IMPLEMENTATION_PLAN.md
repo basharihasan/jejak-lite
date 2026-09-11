@@ -67,8 +67,8 @@ Kartu "Kegiatan Bulan Ini" (hitung nyata), "Kegiatan Terbaru" (3 log terakhir), 
 ### ✅ Fase 10 — Formulir Evaluasi (digabung dengan Fase 9, tuntas sekaligus)
 Tiga templat baku di-seed lewat `db/seeds.rb` memakai infrastruktur Fase 9 — bukan model/kode terpisah, sesuai rencana ("didefinisikan lewat Form Builder"): **Evaluasi Dosen Tutor** (anonim, wajib pilih subjek dosen, 4 pertanyaan), **Evaluasi Blok** (anonim, tanpa subjek personal, 4 pertanyaan termasuk ya/tidak), **Asesmen Tambahan** (formulir umum non-anonim, 2 pertanyaan). Admin bebas menambah/mengubah templat lain kapan pun tanpa kode baru. Diverifikasi tampil dengan badge Anonim yang benar di index.
 
-### ⬜ Fase 11 — Tugas Akhir
-Alur skripsi/proyek akhir: milestone, sesi ujian, skor penguji — versi ringan dari `ScholarlyProject` JEJAK.
+### ✅ Fase 11 — Tugas Akhir
+`FinalProject` (mahasiswa, dosen pembimbing opsional, judul, deskripsi, status proposal/berjalan/selesai) + `FinalProjectMilestone` (checklist bertanggal, bisa ditandai selesai/dibuka lagi, deteksi terlambat) + `ExaminerScore` (skor 0–100 + umpan balik per sesi ujian, banyak penguji per proyek). Pundit (`FinalProjectPolicy`): mahasiswa mendaftarkan & mengelola miliknya sendiri, **dosen mana pun bisa melihat semua tugas akhir** (berpotensi jadi penguji, bukan cuma pembimbing), hanya instruktur yang bisa memberi skor. Notifikasi otomatis ke mahasiswa saat skor ujian baru masuk. 10 test baru (112 total). Diverifikasi manual: mahasiswa daftar TA + tambah milestone → dosen beri skor+umpan balik → rata-rata skor benar & notifikasi terkirim.
 
 ### ⬜ Fase 12 — Progress Test
 Tes berkala lintas periode; skor lewat skema `exam_imports`/`exam_scores` (kolom `kind: "progress_test"`) — dibangun bareng Fase 14 (Import CBT/OSCE) untuk satu skema tiga jenis ujian.
@@ -98,7 +98,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 | `reflection_entries` | 7 | ✅ |
 | `dops_evaluations`, `mini_cex_evaluations` | 8 | ✅ |
 | `assessment_form_templates`, `assessment_form_fields`, `assessment_form_submissions`, `assessment_form_answers` | 9 | ✅ |
-| `final_projects`, `final_project_milestones`, `examiner_scores` | 11 | ⬜ |
+| `final_projects`, `final_project_milestones`, `examiner_scores` | 11 | ✅ |
 | `assessment_blueprints`, `competency_frameworks`, `competency_items`, `academic_assessment_results` | 13 | ⬜ |
 | `exam_imports`, `exam_scores` (cbt/osce/progress_test) | 12, 14 | ⬜ |
 
@@ -107,7 +107,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 102 test lulus per Fase 9-10
+bin/rails test       # 112 test lulus per Fase 11
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

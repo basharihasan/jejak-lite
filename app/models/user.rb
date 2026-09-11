@@ -25,6 +25,9 @@ class User < ApplicationRecord
   has_many :mini_cex_evaluations_as_student, class_name: "MiniCexEvaluation", foreign_key: :student_id, inverse_of: :student, dependent: :destroy
   has_many :mini_cex_evaluations_as_evaluator, class_name: "MiniCexEvaluation", foreign_key: :evaluator_id, inverse_of: :evaluator, dependent: :destroy
   has_many :assessment_form_submissions, foreign_key: :respondent_id, inverse_of: :respondent, dependent: :destroy
+  has_many :final_projects, foreign_key: :student_id, inverse_of: :student, dependent: :destroy
+  has_many :supervised_final_projects, class_name: "FinalProject", foreign_key: :supervisor_id, inverse_of: :supervisor, dependent: :nullify
+  has_many :examiner_scores_given, class_name: "ExaminerScore", foreign_key: :examiner_id, inverse_of: :examiner, dependent: :destroy
 
   # Peran yang boleh menilai/memverifikasi mahasiswa (DOPS, Mini-CEX, Kasus
   # Klinis). Belum ada peran `preseptor` (menyusul Fase Dashboard Analitik)

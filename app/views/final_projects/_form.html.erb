@@ -1,0 +1,36 @@
+<%= form_with model: final_project, class: "space-y-4" do |f| %>
+  <% if final_project.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
+      <%= final_project.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :title, "Judul Tugas Akhir", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_field :title,
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+  </div>
+
+  <div>
+    <%= f.label :description, "Deskripsi Singkat", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_area :description, rows: 3,
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+  </div>
+
+  <% if @supervisors %>
+    <div>
+      <%= f.label :supervisor_id, "Dosen Pembimbing", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.collection_select :supervisor_id, @supervisors, :id, :full_name, { include_blank: "Pilih dosen..." },
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :status, "Status", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.select :status, FinalProject::STATUSES.invert, {},
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+  <% end %>
+
+  <%= f.submit final_project.persisted? ? "Simpan Perubahan" : "Daftarkan Tugas Akhir",
+        class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+<% end %>

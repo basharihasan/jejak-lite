@@ -1,0 +1,30 @@
+<div class="max-w-md">
+  <h1 class="text-xl font-bold text-gray-900 mb-6">Beri Skor Ujian — <%= @final_project.title %></h1>
+  <%= form_with model: @examiner_score, url: final_project_examiner_scores_path(@final_project), class: "space-y-4" do |f| %>
+    <% if @examiner_score.errors.any? %>
+      <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
+        <%= @examiner_score.errors.full_messages.to_sentence %>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :session_date, "Tanggal Ujian", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.date_field :session_date,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :score, "Skor (0–100)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.number_field :score, min: 0, max: 100, step: 0.5,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :feedback, "Umpan Balik (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_area :feedback, rows: 3,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+    </div>
+
+    <%= f.submit "Simpan Skor", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+  <% end %>
+</div>

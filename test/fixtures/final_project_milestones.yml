@@ -1,0 +1,10 @@
+seminar_proposal:
+  final_project: skripsi_siti
+  title: Seminar Proposal
+  target_date: <%= 10.days.ago.to_date %>
+  completed_at: <%= 8.days.ago %>
+
+sidang_akhir:
+  final_project: skripsi_siti
+  title: Sidang Akhir
+  target_date: <%= 30.days.from_now.to_date %>

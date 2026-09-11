@@ -1,0 +1,93 @@
+<% status_colors = { "proposal" => "bg-gray-100 text-gray-600", "ongoing" => "bg-sky-50 text-sky-700", "completed" => "bg-emerald-50 text-emerald-700" } %>
+<div class="max-w-2xl">
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= status_colors[@final_project.status] %>"><%= @final_project.status_label %></span>
+      <h1 class="text-xl font-bold text-gray-900 mt-2"><%= @final_project.title %></h1>
+      <p class="text-sm text-gray-400 mt-1">
+        <%= @final_project.student.full_name %>
+        <% if @final_project.supervisor.present? %> · Pembimbing: <%= @final_project.supervisor.full_name %><% end %>
+      </p>
+    </div>
+    <% if policy(@final_project).update? %>
+      <%= link_to "Sunting", edit_final_project_path(@final_project), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
+    <% end %>
+  </div>
+
+  <% if @final_project.description.present? %>
+    <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <p class="text-sm text-gray-700 whitespace-pre-line"><%= @final_project.description %></p>
+    </div>
+  <% end %>
+
+  <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-sm font-semibold text-gray-700">Milestone (<%= @final_project.milestones_completed_count %>/<%= @final_project.final_project_milestones.count %>)</p>
+      <% if policy(@final_project).manage_milestones? %>
+        <%= link_to "+ Tambah", new_final_project_final_project_milestone_path(@final_project), class: "text-xs text-indigo-600 font-medium" %>
+      <% end %>
+    </div>
+    <div class="space-y-1.5">
+      <% @final_project.final_project_milestones.each do |milestone| %>
+        <div class="flex items-center justify-between text-sm bg-gray-50 rounded-lg px-3 py-2">
+          <div class="flex items-center gap-2">
+            <% if policy(@final_project).manage_milestones? %>
+              <%= button_to (milestone.completed? ? "✅" : "⬜"), toggle_final_project_milestone_path(milestone), method: :patch,
+                    class: "text-base leading-none bg-transparent border-0 p-0 cursor-pointer" %>
+            <% else %>
+              <span><%= milestone.completed? ? "✅" : "⬜" %></span>
+            <% end %>
+            <span class="<%= "line-through text-gray-400" if milestone.completed? %>"><%= milestone.title %></span>
+            <% if milestone.overdue? %>
+              <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-rose-50 text-rose-600">Terlambat</span>
+            <% end %>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-400">
+            <span><%= l(milestone.target_date, format: :long) %></span>
+            <% if policy(@final_project).manage_milestones? %>
+              <%= button_to "Hapus", final_project_milestone_path(milestone), method: :delete,
+                    class: "text-rose-500 hover:underline",
+                    form: { data: { turbo_confirm: "Hapus milestone ini?" } } %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      <% if @final_project.final_project_milestones.empty? %>
+        <p class="text-sm text-gray-400">Belum ada milestone.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-sm font-semibold text-gray-700">
+        Skor Ujian
+        <% if @final_project.average_examiner_score.present? %>
+          <span class="text-indigo-600">— rata-rata <%= @final_project.average_examiner_score %></span>
+        <% end %>
+      </p>
+      <% if policy(@final_project).score? %>
+        <%= link_to "+ Beri Skor", new_final_project_examiner_score_path(@final_project), class: "text-xs text-indigo-600 font-medium" %>
+      <% end %>
+    </div>
+    <div class="space-y-1.5">
+      <% @final_project.examiner_scores.order(session_date: :desc).each do |score| %>
+        <div class="bg-gray-50 rounded-lg px-3 py-2">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-700"><%= score.examiner.full_name %></span>
+            <span class="font-bold text-indigo-600"><%= score.score %>/100</span>
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5"><%= l(score.session_date, format: :long) %></p>
+          <% if score.feedback.present? %>
+            <p class="text-sm text-gray-600 mt-1"><%= score.feedback %></p>
+          <% end %>
+        </div>
+      <% end %>
+      <% if @final_project.examiner_scores.empty? %>
+        <p class="text-sm text-gray-400">Belum ada skor ujian.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <%= link_to "← Kembali ke Tugas Akhir", final_projects_path, class: "mt-6 inline-block text-sm text-gray-500 hover:text-indigo-600" %>
+</div>

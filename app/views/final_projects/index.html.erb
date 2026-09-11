@@ -1,0 +1,32 @@
+<% status_colors = { "proposal" => "bg-gray-100 text-gray-600", "ongoing" => "bg-sky-50 text-sky-700", "completed" => "bg-emerald-50 text-emerald-700" } %>
+
+<div class="flex items-center justify-between">
+  <h1 class="text-xl font-bold text-gray-900">Tugas Akhir</h1>
+  <% if current_user.has_role?("mahasiswa") && current_user.final_projects.empty? %>
+    <%= link_to "+ Daftarkan Tugas Akhir", new_final_project_path,
+          class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+  <% end %>
+</div>
+
+<div class="mt-4 space-y-2">
+  <% @final_projects.each do |project| %>
+    <%= link_to final_project_path(project), class: "block bg-white rounded-2xl ring-1 ring-gray-200 p-5 hover:ring-indigo-300 transition" do %>
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= status_colors[project.status] %>"><%= project.status_label %></span>
+          <p class="mt-1.5 font-semibold text-gray-800"><%= project.title %></p>
+          <p class="text-xs text-gray-400 mt-1">
+            <%= project.student.full_name %>
+            <% if project.supervisor.present? %> · Pembimbing: <%= project.supervisor.full_name %><% end %>
+          </p>
+        </div>
+        <% if project.average_examiner_score.present? %>
+          <span class="text-sm font-bold text-indigo-600 shrink-0">Skor: <%= project.average_examiner_score %></span>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+  <% if @final_projects.empty? %>
+    <p class="text-sm text-gray-400">Belum ada tugas akhir terdaftar.</p>
+  <% end %>
+</div>

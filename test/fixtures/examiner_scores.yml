@@ -1,0 +1,5 @@
+skor_siti_budi:
+  final_project: skripsi_siti
+  examiner: budi
+  session_date: <%= 5.days.ago.to_date %>
+  score: 82.5

@@ -62,6 +62,13 @@ Rails.application.routes.draw do
   end
   resources :assessment_form_submissions, only: %i[index show]
 
+  resources :final_projects do
+    resources :final_project_milestones, only: %i[new create destroy], shallow: true do
+      member { patch :toggle }
+    end
+    resources :examiner_scores, only: %i[new create], shallow: true
+  end
+
   # Service worker perlu di-root (bukan /assets) supaya scope-nya mencakup
   # seluruh situs — syarat Push API.
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
