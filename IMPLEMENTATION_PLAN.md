@@ -110,6 +110,13 @@ Sadar penuh **tidak** membawa arsitektur JEJAK asli untuk kasus klinis (`Activit
 
 18 test baru (160 total). Diverifikasi manual via HTTP sungguhan: catat kegiatan bertag kompetensi → muncul di timeline & lolos filter kompetensi → verifikasi kasus dengan entrustment level + flag remediasi → riwayat verifikasi bertambah baris & badge remediasi tampil → panel statistik index berubah.
 
+### ✅ Fase 19 — Perkaya Dashboard & Dashboard Analitik
+**Dashboard utama**: kartu quick-action untuk dosen/preseptor/admin — "N Evaluasi Draf Belum Dikirim" & "N Kasus Klinis Menunggu Verifikasi", masing-masing tautan langsung ke halaman terkait (bukan cuma "Langkah Berikutnya" statis). Mahasiswa dengan evaluasi DOPS/Mini-CEX submitted melihat peta kompetensi (radar chart) dimensi rata-ratanya sendiri.
+
+**Dashboard Analitik (`/analitik`)**: (1) **badge skor berwarna** (hijau/kuning/merah, helper `score_band_classes` dari Fase 17) di ketiga tabel; (2) **sort berdasar risiko** — mahasiswa dengan rata-rata skor terendah muncul paling atas di tiap daftar (mahasiswa TANPA data sama sekali diletakkan di akhir, bukan dianggap paling berisiko — beda kondisi yang sengaja dibedakan); (3) **radar chart kohort** di bagian Program Studi (rata-rata dimensi DOPS+Mini-CEX se-prodi, muncul kalau ada data pada periode terpilih); (4) **filter periode akademik** (dropdown di header halaman) yang men-scope ketiga bagian ke rotasi/kasus/kegiatan dalam satu periode — bonus: menemukan bug laten bahwa skor draft ikut terhitung ke rata-rata (belum di-scope `.submitted`), sekalian diperbaiki.
+
+4 test baru (164 total). Diverifikasi manual via HTTP sungguhan: dosen dengan evaluasi draft & kasus pending melihat kedua kartu quick-action di dashboard; mahasiswa dengan evaluasi submitted melihat radar kompetensinya; halaman analitik menampilkan radar kohort + badge warna + filter periode berfungsi (ganti periode → daftar & radar ikut berubah).
+
 ## Model Data (ringkas, akan detail per fase saat digarap)
 
 | Tabel | Fase | Status |
@@ -133,7 +140,7 @@ Sadar penuh **tidak** membawa arsitektur JEJAK asli untuk kasus klinis (`Activit
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 160 test lulus per Fase 18
+bin/rails test       # 164 test lulus per Fase 19
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

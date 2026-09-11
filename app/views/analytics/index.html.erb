@@ -1,5 +1,20 @@
-<h1 class="text-xl font-bold text-gray-900">Dashboard Analitik</h1>
-<p class="text-sm text-gray-400 mt-1">Ringkasan progres mahasiswa dari sudut pandang peran Anda.</p>
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Dashboard Analitik</h1>
+    <p class="text-sm text-gray-400 mt-1">Ringkasan progres mahasiswa dari sudut pandang peran Anda.</p>
+  </div>
+  <% if @academic_periods.any? %>
+    <%= form_with url: analytics_path, method: :get do %>
+      <%= hidden_field_tag :study_program_id, params[:study_program_id] if params[:study_program_id].present? %>
+      <select name="academic_period_id" onchange="this.form.requestSubmit()"
+            class="rounded-xl border-0 py-2 px-3.5 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500">
+        <% @academic_periods.each do |period| %>
+          <option value="<%= period.id %>" <%= "selected" if @selected_period == period %>><%= period.name %></option>
+        <% end %>
+      </select>
+    <% end %>
+  <% end %>
+</div>
 
 <% if @mentee_snapshots %>
   <div class="mt-6">
@@ -21,8 +36,8 @@
               <tr class="border-b border-gray-50 last:border-0">
                 <td class="px-4 py-2.5 font-medium text-gray-800"><%= s[:user].full_name %></td>
                 <td class="px-4 py-2.5"><%= s[:activity_logs_this_month] %></td>
-                <td class="px-4 py-2.5"><%= s[:avg_dops] || "-" %><%= "/9" if s[:avg_dops] %></td>
-                <td class="px-4 py-2.5"><%= s[:avg_mini_cex] || "-" %><%= "/9" if s[:avg_mini_cex] %></td>
+                <td class="px-4 py-2.5"><span class="text-xs font-bold px-2 py-0.5 rounded-full <%= score_band_classes(s[:avg_dops]) %>"><%= s[:avg_dops] || "-" %><%= "/9" if s[:avg_dops] %></span></td>
+                <td class="px-4 py-2.5"><span class="text-xs font-bold px-2 py-0.5 rounded-full <%= score_band_classes(s[:avg_mini_cex]) %>"><%= s[:avg_mini_cex] || "-" %><%= "/9" if s[:avg_mini_cex] %></span></td>
                 <td class="px-4 py-2.5"><%= s[:cases_verified] %>/<%= s[:cases_total] %> terverifikasi</td>
               </tr>
             <% end %>
@@ -30,7 +45,7 @@
         </table>
       </div>
     <% else %>
-      <p class="text-sm text-gray-400">Belum ada mahasiswa bimbingan (belum membimbing tugas akhir atau menilai DOPS/Mini-CEX siapa pun).</p>
+      <p class="text-sm text-gray-400">Belum ada mahasiswa bimbingan (belum membimbing tugas akhir atau menilai DOPS/Mini-CEX siapa pun) pada periode ini.</p>
     <% end %>
   </div>
 <% end %>
@@ -77,6 +92,7 @@
       <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Program Studi</h2>
       <% if @study_programs.size > 1 %>
         <%= form_with url: analytics_path, method: :get do %>
+          <%= hidden_field_tag :academic_period_id, @selected_period&.id if @selected_period %>
           <select name="study_program_id" onchange="this.form.requestSubmit()"
                 class="rounded-xl border-0 py-1.5 px-3 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500">
             <% @study_programs.each do |program| %>
@@ -112,6 +128,31 @@
         </div>
       </div>
 
+      <% if @program_radar && (@program_radar[:dops] || @program_radar[:mini_cex]) %>
+        <div class="grid sm:grid-cols-2 gap-4 mb-4">
+          <% if @program_radar[:dops] %>
+            <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+              <p class="text-sm font-semibold text-gray-700 mb-2">Peta Kompetensi DOPS Kohort</p>
+              <div data-controller="radar-chart"
+                   data-radar-chart-labels-value="<%= DopsEvaluation::DIMENSIONS.values.to_json %>"
+                   data-radar-chart-datasets-value="<%= [ { label: "Rata-rata Kohort", data: DopsEvaluation::DIMENSIONS.keys.map { |k| @program_radar[:dops][k] || 0 }, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.15)" } ].to_json %>">
+                <canvas data-radar-chart-target="canvas" height="220"></canvas>
+              </div>
+            </div>
+          <% end %>
+          <% if @program_radar[:mini_cex] %>
+            <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+              <p class="text-sm font-semibold text-gray-700 mb-2">Peta Kompetensi Mini-CEX Kohort</p>
+              <div data-controller="radar-chart"
+                   data-radar-chart-labels-value="<%= MiniCexEvaluation::DIMENSIONS.values.to_json %>"
+                   data-radar-chart-datasets-value="<%= [ { label: "Rata-rata Kohort", data: MiniCexEvaluation::DIMENSIONS.keys.map { |k| @program_radar[:mini_cex][k] || 0 }, borderColor: "#059669", backgroundColor: "rgba(5,150,105,0.15)" } ].to_json %>">
+                <canvas data-radar-chart-target="canvas" height="220"></canvas>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
       <div class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
@@ -128,8 +169,8 @@
               <tr class="border-b border-gray-50 last:border-0">
                 <td class="px-4 py-2.5 font-medium text-gray-800"><%= s[:user].full_name %></td>
                 <td class="px-4 py-2.5"><%= s[:activity_logs_this_month] %></td>
-                <td class="px-4 py-2.5"><%= s[:avg_dops] || "-" %><%= "/9" if s[:avg_dops] %></td>
-                <td class="px-4 py-2.5"><%= s[:avg_mini_cex] || "-" %><%= "/9" if s[:avg_mini_cex] %></td>
+                <td class="px-4 py-2.5"><span class="text-xs font-bold px-2 py-0.5 rounded-full <%= score_band_classes(s[:avg_dops]) %>"><%= s[:avg_dops] || "-" %><%= "/9" if s[:avg_dops] %></span></td>
+                <td class="px-4 py-2.5"><span class="text-xs font-bold px-2 py-0.5 rounded-full <%= score_band_classes(s[:avg_mini_cex]) %>"><%= s[:avg_mini_cex] || "-" %><%= "/9" if s[:avg_mini_cex] %></span></td>
                 <td class="px-4 py-2.5"><%= s[:cases_verified] %>/<%= s[:cases_total] %> terverifikasi</td>
               </tr>
             <% end %>
