@@ -1,0 +1,17 @@
+<div id="<%= dom_id(notification) %>" class="bg-white rounded-xl ring-1 ring-gray-200 p-4 flex items-start justify-between gap-3 transition-colors <%= "bg-indigo-50/60" unless notification.read? %>">
+  <div class="min-w-0">
+    <p class="text-sm font-semibold text-gray-800"><%= notification.title %></p>
+    <% if notification.message.present? %>
+      <p class="text-sm text-gray-500 mt-0.5"><%= notification.message %></p>
+    <% end %>
+    <p class="text-xs text-gray-400 mt-1.5"><%= time_ago_in_words(notification.created_at) %> yang lalu</p>
+  </div>
+  <div class="flex items-center gap-2 shrink-0">
+    <% unless notification.read? %>
+      <%= button_to "Tandai dibaca", mark_as_read_notification_path(notification), method: :patch,
+            class: "text-xs text-indigo-600 font-medium hover:underline whitespace-nowrap" %>
+    <% end %>
+    <%= button_to "Arsipkan", archive_notification_path(notification), method: :patch,
+          class: "text-xs text-gray-400 hover:text-rose-600 whitespace-nowrap" %>
+  </div>
+</div>

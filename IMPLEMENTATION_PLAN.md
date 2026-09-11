@@ -41,14 +41,14 @@ Kerangka dashboard per peran, Pencarian pengguna, Panduan, `/brand`.
 ### ⬜ Fase 2b — Dashboard Mahasiswa Berisi Data (revisit setelah Fase 3, 4, 6)
 Ringkasan progres (dari Logbook+Rotasi), agenda (dari Jadwal Rotasi+kalender kegiatan), widget notifikasi terbaru — menggantikan kartu "Langkah Berikutnya" generik begitu datanya nyata ada.
 
-### ⬜ Fase 3 — Notifikasi
-`Notification` (in-app) + `DevicePushToken` (Web Push) + job pengiriman.
+### ✅ Fase 3 — Notifikasi
+`Notification` (in-app: tandai dibaca/arsipkan/tandai semua via Turbo Stream, tanpa reload halaman) + `DevicePushToken` (Web Push: kunci VAPID, service worker, tombol aktifkan/matikan) + `NotificationDeliveryJob`. Lonceng notifikasi di topbar (badge unread + pratinjau 5 terbaru) tampil di semua halaman. Locale Indonesia (`rails-i18n`) dipasang supaya `time_ago_in_words` & pesan validasi ikut berbahasa Indonesia, bukan cuma teks yang saya tulis manual. 33 test lulus.
 
 ### ⬜ Fase 4 — Logbook Aktivitas Klinis & Non-Klinis + Portfolio
 `ActivityLog` (klinis & non-klinis, refleksi ringkas, skor, evidence/attachment), kalender + feed iCal, QR pasien. **Portfolio** = tampilan kumulatif/rekap seluruh aktivitas tersimpan seorang mahasiswa (bisa diekspor).
 
-### ⬜ Fase 5 — Kasus Klinis Dasar & Portal Pasien
-Kasus klinis + verifikasi supervisor, portal pasien token publik (consent/feedback/survei tanpa login). Household/family graph ditunda.
+### ⬜ Fase 5 — Kasus Klinis Dasar
+Kasus klinis + verifikasi supervisor. Portal pasien token publik (consent/feedback/survei tanpa login) **tidak diperlukan** — dihapus dari cakupan. Household/family graph ditunda.
 
 ### ⬜ Fase 6 — Jadwal Rotasi & Periode Akademik
 `study_programs` (2 baris tetap, ditautkan ke `users.study_program_id`), `AcademicPeriod`, `ClinicalRotation` — termasuk **tampilan jadwal** untuk mahasiswa (kalender rotasi per periode, wahana, preseptor pembimbing). Fondasi bagi DOPS/Mini-CEX (Fase 8) dan Dashboard Analitik (Fase 15).

@@ -4,7 +4,7 @@ class UserTest < ActiveSupport::TestCase
   test "full_name wajib diisi" do
     user = User.new(email: "tanpa_nama@example.com", password: "password123")
     assert_not user.valid?
-    assert_includes user.errors[:full_name], "can't be blank"
+    assert_includes user.errors[:full_name], "tidak boleh kosong"
   end
 
   test "has_role? membaca lewat asosiasi roles" do

@@ -1,0 +1,18 @@
+unread_for_budi:
+  recipient: budi
+  title: Selamat datang di Jejak Lite
+  message: Lengkapi profil Anda untuk memulai.
+  created_at: <%= 1.hour.ago %>
+
+read_for_budi:
+  recipient: budi
+  title: Notifikasi lama
+  message: Ini sudah dibaca.
+  read_at: <%= 2.hours.ago %>
+  created_at: <%= 3.hours.ago %>
+
+archived_for_budi:
+  recipient: budi
+  title: Notifikasi terarsip
+  archived_at: <%= 1.day.ago %>
+  created_at: <%= 2.days.ago %>

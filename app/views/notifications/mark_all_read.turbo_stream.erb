@@ -1,0 +1,5 @@
+<%= turbo_stream.replace "notifications-list" do %>
+  <div id="notifications-list" class="mt-4 space-y-2">
+    <%= render current_user.notifications.active.recent %>
+  </div>
+<% end %>

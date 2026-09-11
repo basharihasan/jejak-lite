@@ -11,6 +11,9 @@ class User < ApplicationRecord
 
   has_one_attached :avatar
 
+  has_many :notifications, foreign_key: :recipient_id, inverse_of: :recipient, dependent: :destroy
+  has_many :device_push_tokens, dependent: :destroy
+
   validates :full_name, presence: true
 
   # Akun yang masuk lewat Google tidak pernah mengisi form registrasi biasa,
