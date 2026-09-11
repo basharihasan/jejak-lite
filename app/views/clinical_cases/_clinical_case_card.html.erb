@@ -1,0 +1,20 @@
+<% status_colors = {
+  "draft" => "bg-gray-100 text-gray-600",
+  "submitted" => "bg-amber-50 text-amber-700",
+  "verified" => "bg-emerald-50 text-emerald-700",
+  "needs_revision" => "bg-rose-50 text-rose-700"
+} %>
+<%= link_to clinical_case_path(clinical_case), class: "block bg-white rounded-2xl ring-1 ring-gray-200 p-5 hover:ring-indigo-300 transition" do %>
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0">
+      <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= status_colors[clinical_case.status] %>">
+        <%= clinical_case.status_label %>
+      </span>
+      <p class="mt-1.5 font-semibold text-gray-800 truncate"><%= clinical_case.chief_complaint %></p>
+      <p class="text-xs text-gray-400 mt-1">
+        <%= l(clinical_case.case_date, format: :long) %>
+        <% if clinical_case.user != current_user %> · <%= clinical_case.user.full_name %><% end %>
+      </p>
+    </div>
+  </div>
+<% end %>

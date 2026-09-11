@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_000701) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_002204) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -57,6 +57,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_000701) do
     t.index ["category"], name: "index_activity_logs_on_category"
     t.index ["user_id", "activity_date"], name: "index_activity_logs_on_user_id_and_activity_date"
     t.index ["user_id"], name: "index_activity_logs_on_user_id"
+  end
+
+  create_table "clinical_cases", force: :cascade do |t|
+    t.date "case_date", null: false
+    t.string "chief_complaint", null: false
+    t.datetime "created_at", null: false
+    t.text "diagnosis"
+    t.text "learning_points"
+    t.text "management"
+    t.string "patient_age_group"
+    t.string "patient_gender"
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.text "verification_comment"
+    t.datetime "verified_at"
+    t.bigint "verified_by_id"
+    t.index ["status"], name: "index_clinical_cases_on_status"
+    t.index ["user_id", "status"], name: "index_clinical_cases_on_user_id_and_status"
+    t.index ["user_id"], name: "index_clinical_cases_on_user_id"
+    t.index ["verified_by_id"], name: "index_clinical_cases_on_verified_by_id"
   end
 
   create_table "device_push_tokens", force: :cascade do |t|
@@ -140,6 +161,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_000701) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_logs", "users"
+  add_foreign_key "clinical_cases", "users"
+  add_foreign_key "clinical_cases", "users", column: "verified_by_id"
   add_foreign_key "device_push_tokens", "users"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "notifications", "users", column: "sender_id"

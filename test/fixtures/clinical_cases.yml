@@ -1,0 +1,13 @@
+draft_case_siti:
+  user: siti
+  case_date: <%= 2.days.ago.to_date %>
+  chief_complaint: Demam 3 hari
+  status: draft
+
+submitted_case_siti:
+  user: siti
+  case_date: <%= 1.day.ago.to_date %>
+  chief_complaint: Nyeri perut kanan bawah
+  status: submitted
+  patient_age_group: Dewasa
+  patient_gender: Perempuan

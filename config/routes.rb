@@ -39,6 +39,14 @@ Rails.application.routes.draw do
   resource :portfolio, only: %i[show]
   get "portfolio/export", to: "portfolios#export", as: :export_portfolio
 
+  resources :clinical_cases do
+    member do
+      patch :submit
+      patch :verify
+      patch :request_revision
+    end
+  end
+
   # Service worker perlu di-root (bukan /assets) supaya scope-nya mencakup
   # seluruh situs — syarat Push API.
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

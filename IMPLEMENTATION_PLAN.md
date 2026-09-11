@@ -38,7 +38,7 @@ Devise, Google OAuth opsional, `Role`/`UserRole`, Ganti Peran, Profil+avatar. *(
 ### ✅ Fase 2 — Dashboard & Navigasi Dasar (commit `479cdf6`)
 Kerangka dashboard per peran, Pencarian pengguna, Panduan, `/brand`.
 
-### ✅ Fase 2b — Dashboard Mahasiswa Berisi Data (sebagian, commit `<pending>`)
+### ✅ Fase 2b — Dashboard Mahasiswa Berisi Data (sebagian, commit `db59080`)
 Kartu "Kegiatan Bulan Ini" (hitung nyata), "Kegiatan Terbaru" (3 log terakhir), dan "Notifikasi Belum Dibaca" — semua dari data sungguhan. Agenda dari Jadwal Rotasi menyusul setelah Fase 6.
 
 ### ✅ Fase 3 — Notifikasi
@@ -47,8 +47,10 @@ Kartu "Kegiatan Bulan Ini" (hitung nyata), "Kegiatan Terbaru" (3 log terakhir), 
 ### ✅ Fase 4 — Logbook Aktivitas Klinis & Non-Klinis + Portfolio
 `ActivityLog` (klinis/non-klinis, deskripsi, refleksi, evidence files, kode pasien anonim + QR via `rqrcode`), kalender bulanan (grid HTML tanpa JS lib) + feed iCal pribadi (token, bisa di-reset). **Portfolio**: ringkasan (total, per kategori, tren 6 bulan via Chartkick, jenis kegiatan terbanyak) + ekspor CSV. 16 test baru (49 total).
 
-### ⬜ Fase 5 — Kasus Klinis Dasar
-Kasus klinis + verifikasi supervisor. Portal pasien token publik (consent/feedback/survei tanpa login) **tidak diperlukan** — dihapus dari cakupan. Household/family graph ditunda.
+### ✅ Fase 5 — Kasus Klinis Dasar
+`ClinicalCase` (keluhan utama, kelompok usia/jenis kelamin pasien non-identifikasi, diagnosis, tatalaksana, poin pembelajaran, evidence files) dengan alur status draf→diajukan→terverifikasi/perlu revisi. Verifikasi memakai Pundit (`ClinicalCasePolicy`) — hanya dosen/admin, dan akun multi-peran **tidak bisa memverifikasi kasus miliknya sendiri** (celah ditemukan & ditutup saat verifikasi manual). Notifikasi otomatis ke mahasiswa saat kasus diverifikasi/diminta revisi (numpang `Notification.notify!` dari Fase 3). Portal pasien token publik **tidak diperlukan** — dihapus dari cakupan. Household/family graph ditunda.
+
+**Catatan infrastruktur test**: `parallelize(workers: :number_of_processors, with: :threads)` bawaan Rails 8 menyebabkan deadlock Postgres nyata (thread berebut lock tabel saat reload fixture) begitu jumlah test bertambah — dimatikan (`workers: 1`) karena suite masih di bawah 3 detik serial.
 
 ### ⬜ Fase 6 — Jadwal Rotasi & Periode Akademik
 `study_programs` (2 baris tetap, ditautkan ke `users.study_program_id`), `AcademicPeriod`, `ClinicalRotation` — termasuk **tampilan jadwal** untuk mahasiswa (kalender rotasi per periode, wahana, preseptor pembimbing). Fondasi bagi DOPS/Mini-CEX (Fase 8) dan Dashboard Analitik (Fase 15).
@@ -89,9 +91,9 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 |---|---|---|
 | `users`, `roles`, `user_roles` | 1 | ✅ |
 | `active_storage_*` | 1 | ✅ |
-| `notifications`, `device_push_tokens` | 3 | ⬜ |
-| `activity_logs`, `activity_case_data` | 4, 5 | ⬜ |
-| `patient_consents`/`case_reviews` (token publik) | 5 | ⬜ |
+| `notifications`, `device_push_tokens` | 3 | ✅ |
+| `activity_logs` | 4 | ✅ |
+| `clinical_cases` | 5 | ✅ |
 | `study_programs`, `academic_periods`, `clinical_rotations` | 6 | ⬜ |
 | `reflection_entries` | 7 | ⬜ |
 | `dops_evaluations`, `mini_cex_evaluations` | 8 | ⬜ |
@@ -106,7 +108,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 18 test lulus per Fase 2
+bin/rails test       # 63 test lulus per Fase 5
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

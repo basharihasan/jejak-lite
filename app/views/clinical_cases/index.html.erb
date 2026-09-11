@@ -1,0 +1,32 @@
+<style>
+  .pagination { display: flex; gap: 0.25rem; margin-top: 1.5rem; justify-content: center; }
+  .pagination span, .pagination a { padding: 0.4rem 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; }
+  .pagination a { color: #4f46e5; border: 1px solid #e5e7eb; }
+  .pagination a:hover { background: #eef2ff; }
+  .pagination .current { background: #4f46e5; color: white; font-weight: 600; }
+</style>
+
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <h1 class="text-xl font-bold text-gray-900">Kasus Klinis</h1>
+  <%= link_to "+ Kasus Baru", new_clinical_case_path,
+        class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>
+
+<% if current_user.can_verify_clinical_cases? %>
+  <div class="mt-4 flex items-center gap-2">
+    <%= link_to "Punya Saya", clinical_cases_path, class: "text-xs px-3 py-1.5 rounded-full font-medium #{@scope == 'mine' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+    <%= link_to "Perlu Diverifikasi", clinical_cases_path(scope: "to_verify"), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@scope == 'to_verify' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+  </div>
+<% end %>
+
+<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+  <% if @clinical_cases.any? %>
+    <%= render partial: "clinical_case_card", collection: @clinical_cases, as: :clinical_case %>
+  <% else %>
+    <p class="text-sm text-gray-400 col-span-2">
+      <%= @scope == "to_verify" ? "Tidak ada kasus yang menunggu verifikasi." : "Belum ada kasus klinis tercatat." %>
+    </p>
+  <% end %>
+</div>
+
+<%= paginate @clinical_cases %>

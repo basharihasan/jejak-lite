@@ -1,0 +1,10 @@
+<div class="max-w-2xl">
+  <h1 class="text-xl font-bold text-gray-900 mb-6">Sunting Kasus Klinis</h1>
+  <% if @clinical_case.status == "needs_revision" && @clinical_case.verification_comment.present? %>
+    <div class="mb-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm">
+      <p class="font-semibold">Catatan revisi dari <%= @clinical_case.verified_by&.full_name %>:</p>
+      <p class="mt-1"><%= @clinical_case.verification_comment %></p>
+    </div>
+  <% end %>
+  <%= render "form", clinical_case: @clinical_case %>
+</div>

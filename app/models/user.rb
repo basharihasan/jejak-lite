@@ -14,6 +14,15 @@ class User < ApplicationRecord
   has_many :notifications, foreign_key: :recipient_id, inverse_of: :recipient, dependent: :destroy
   has_many :device_push_tokens, dependent: :destroy
   has_many :activity_logs, dependent: :destroy
+  has_many :clinical_cases, dependent: :destroy
+  has_many :verified_clinical_cases, class_name: "ClinicalCase", foreign_key: :verified_by_id, inverse_of: :verified_by, dependent: :nullify
+
+  # Peran yang boleh memverifikasi kasus klinis mahasiswa. Belum ada peran
+  # `preseptor` (menyusul Fase Dashboard Analitik) — untuk sekarang dosen
+  # dan admin yang berwenang.
+  def can_verify_clinical_cases?
+    has_role?("dosen") || has_role?("admin")
+  end
 
   validates :full_name, presence: true
 
