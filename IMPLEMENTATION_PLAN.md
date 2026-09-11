@@ -84,6 +84,21 @@ Target deploy: **Render** (`render.yaml` blueprint, native Ruby runtime — tanp
 
 **Jejak Lite selesai Fase 0–16.** Seluruh fitur dari `DAFTAR_FITUR_JEJAK.md` tingkat Dasar plus perluasan yang diminta pengguna (Form Builder, Tugas Akhir, Progress Test, Dashboard Analitik per peran, Kurikulum) sudah terimplementasi, teruji (145 test), dan siap didemokan atau di-deploy.
 
+## Fase 17-20 — Perkaya Kesenjangan dengan JEJAK Asli
+
+Setelah dicoba, fitur jejak-lite dinilai terlalu tipis dibanding JEJAK asli untuk modul yang sama. Riset mendalam (4 agen Explore membaca source code JEJAK) menemukan kesenjangan konkret sekaligus batas yang harus dijaga: beberapa bagian JEJAK asli (`ActivityCaseDatum` 100+ kolom+PII terenkripsi+lab/radiologi, mesin kurva pertumbuhan lintas-kohort) justru terlalu berat untuk tujuan "lite" dan sengaja TIDAK dibawa. Rencana lengkap & alasan tiap keputusan ada di plan file sesi (`floofy-tickling-dahl.md`). Lihat juga bagian "Sengaja Tidak Dibawa" di bawah untuk daftar eksplisit yang dilewati.
+
+### ✅ Fase 17 — Perkaya DOPS & Mini-CEX
+**Pondasi bersama baru**: `radar_chart_controller.js` (Stimulus, panggil `window.Chart` type radar langsung — Chart.js sudah dimuat lewat Chartkick tapi Chartkick sendiri tak punya tipe radar) dan `ClinicalContextOptions` (module konstanta `CLINICAL_SETTINGS`/`AGE_GROUPS`/`CASE_COMPLEXITY`, dipakai DOPS, Mini-CEX, dan nanti Kasus Klinis Fase 18).
+
+DOPS: `DIMENSIONS` diperluas dari 6 ke **10** meniru rubrik JEJAK asli (tambah persetujuan tindakan, analgesia/sedasi, meminta bantuan, penilaian global; `teknik`→`kemampuan_teknis`). `REQUIRED_DIMENSIONS` jadi 3 (komunikasi/profesionalisme/penilaian_global — SELALU wajib, sisanya boleh N/A). Mini-CEX: `konseling`+`kompetensi_keseluruhan` diganti `komunikasi` (dimensi numerik ke-6) + `global_rating` (field kualitatif 4-pilihan TERPISAH dari `scores`, meniru cara Mini-CEX standar menilai keseluruhan — bukan skala 1-9 lagi).
+
+Field konteks baru di kedua model: `clinical_setting`, `patient_age_group`, `case_complexity`, `observation_minutes`, `feedback_minutes`, `video_recording_url` (tervalidasi format http/https). Form scoring diganti dari dropdown jadi **radio-card 1-9** dengan pita warna (merah 1-3/kuning 4-6/hijau 7-9, partial bersama `shared/_dimension_score_radio`) + opsi N/A untuk dimensi tak wajib; DOPS dapat `<datalist>` autocomplete nama prosedur umum.
+
+**Status draft/submitted** (concern `DimensionScorable` diperluas): dua tombol submit ("Simpan Draf"/"Kirim Evaluasi") menyetel `status` langsung dari nama tombol yang diklik (tanpa JS) — notifikasi ke mahasiswa baru terkirim saat `submit!` (transisi ke submitted), bukan saat draf dibuat. Method `avg_dimension_scores` baru (agregat rata-rata per dimensi lintas evaluasi) — pondasi radar chart kohort di Fase 19-20. Halaman show kini menampilkan radar chart peta dimensi (di atas progress bar lama yang dipertahankan untuk angka presisi). `/asesmen` dipecah dua bagian: "Menunggu Diselesaikan" (draf milik evaluator sendiri) vs daftar submitted seperti biasa, dengan badge skor berwarna (helper baru `score_band_classes`).
+
+14 test baru (154 total). Diverifikasi manual via HTTP sungguhan: draf dibuat → notifikasi BELUM terkirim → radar chart tampil di show dengan 10 sumbu → submit → notifikasi terkirim & status berubah → panel "Menunggu Diselesaikan" menghilang dari `/asesmen`.
+
 ## Model Data (ringkas, akan detail per fase saat digarap)
 
 | Tabel | Fase | Status |
@@ -107,7 +122,7 @@ Target deploy: **Render** (`render.yaml` blueprint, native Ruby runtime — tanp
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 145 test lulus per Fase 15
+bin/rails test       # 154 test lulus per Fase 17
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

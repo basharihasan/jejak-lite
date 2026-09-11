@@ -92,12 +92,25 @@ namespace :demo do
 
     DopsEvaluation.find_or_create_by!(student: mahasiswa1, evaluator: dosen, clinical_rotation: rotation1, procedure_name: "Pemasangan Infus (Demo)") do |d|
       d.evaluated_at = 2.days.ago.to_date
-      d.scores = { "persiapan" => 7, "teknik" => 7, "asepsis" => 8, "komunikasi" => 7, "profesionalisme" => 8, "pasca_tindakan" => 7 }
+      d.clinical_setting = "rawat_inap"
+      d.patient_age_group = "dewasa"
+      d.case_complexity = "sedang"
+      d.observation_minutes = 15
+      d.feedback_minutes = 5
+      d.scores = {
+        "persetujuan_tindakan" => 8, "persiapan" => 7, "analgesia_sedasi" => 7, "kemampuan_teknis" => 7,
+        "asepsis" => 8, "meminta_bantuan" => 7, "pasca_tindakan" => 7, "komunikasi" => 7,
+        "profesionalisme" => 8, "penilaian_global" => 7
+      }
       d.overall_feedback = "Baik, pertahankan kehati-hatian asepsis."
     end
     MiniCexEvaluation.find_or_create_by!(student: mahasiswa1, evaluator: preseptor, clinical_rotation: rotation1, case_description: "Anamnesis Nyeri Dada (Demo)") do |m|
       m.evaluated_at = 1.day.ago.to_date
-      m.scores = { "anamnesis" => 7, "profesionalisme" => 8, "clinical_judgment" => 6, "kompetensi_keseluruhan" => 7 }
+      m.clinical_setting = "igd"
+      m.patient_age_group = "dewasa"
+      m.case_complexity = "sedang"
+      m.global_rating = "performed"
+      m.scores = { "anamnesis" => 7, "profesionalisme" => 8, "clinical_judgment" => 6, "komunikasi" => 7, "organisasi" => 7, "pemeriksaan_fisik" => 7 }
     end
 
     final_project = FinalProject.find_or_create_by!(student: mahasiswa1, title: "Skripsi Demo: Faktor Risiko Hipertensi") do |f|

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_014521) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_104159) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -190,15 +190,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_014521) do
   end
 
   create_table "dops_evaluations", force: :cascade do |t|
+    t.string "case_complexity"
     t.bigint "clinical_rotation_id", null: false
+    t.string "clinical_setting"
     t.datetime "created_at", null: false
     t.date "evaluated_at", null: false
     t.bigint "evaluator_id", null: false
+    t.integer "feedback_minutes"
+    t.integer "observation_minutes"
     t.text "overall_feedback"
+    t.string "patient_age_group"
     t.string "procedure_name", null: false
     t.jsonb "scores", default: {}, null: false
+    t.string "status", default: "submitted", null: false
     t.bigint "student_id", null: false
     t.datetime "updated_at", null: false
+    t.string "video_recording_url"
     t.index ["clinical_rotation_id"], name: "index_dops_evaluations_on_clinical_rotation_id"
     t.index ["evaluator_id"], name: "index_dops_evaluations_on_evaluator_id"
     t.index ["student_id", "evaluated_at"], name: "index_dops_evaluations_on_student_id_and_evaluated_at"
@@ -264,15 +271,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_014521) do
   end
 
   create_table "mini_cex_evaluations", force: :cascade do |t|
+    t.string "case_complexity"
     t.string "case_description", null: false
     t.bigint "clinical_rotation_id", null: false
+    t.string "clinical_setting"
     t.datetime "created_at", null: false
     t.date "evaluated_at", null: false
     t.bigint "evaluator_id", null: false
+    t.integer "feedback_minutes"
+    t.string "global_rating"
+    t.integer "observation_minutes"
     t.text "overall_feedback"
+    t.string "patient_age_group"
     t.jsonb "scores", default: {}, null: false
+    t.string "status", default: "submitted", null: false
     t.bigint "student_id", null: false
     t.datetime "updated_at", null: false
+    t.string "video_recording_url"
     t.index ["clinical_rotation_id"], name: "index_mini_cex_evaluations_on_clinical_rotation_id"
     t.index ["evaluator_id"], name: "index_mini_cex_evaluations_on_evaluator_id"
     t.index ["student_id", "evaluated_at"], name: "index_mini_cex_evaluations_on_student_id_and_evaluated_at"

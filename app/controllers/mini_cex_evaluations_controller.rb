@@ -2,7 +2,7 @@
 
 class MiniCexEvaluationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_mini_cex_evaluation, only: %i[show edit update destroy]
+  before_action :set_mini_cex_evaluation, only: %i[show edit update destroy submit]
 
   def show
     authorize @mini_cex_evaluation
@@ -48,6 +48,12 @@ class MiniCexEvaluationsController < ApplicationController
     redirect_to assessments_path, notice: "Evaluasi Mini-CEX dihapus.", status: :see_other
   end
 
+  def submit
+    authorize @mini_cex_evaluation
+    @mini_cex_evaluation.submit!
+    redirect_to @mini_cex_evaluation, notice: "Evaluasi Mini-CEX dikirim ke mahasiswa."
+  end
+
   private
 
   def set_mini_cex_evaluation
@@ -62,6 +68,8 @@ class MiniCexEvaluationsController < ApplicationController
   def mini_cex_evaluation_params
     permitted = params.require(:mini_cex_evaluation).permit(
       :student_id, :clinical_rotation_id, :case_description, :evaluated_at, :overall_feedback,
+      :status, :global_rating, :clinical_setting, :patient_age_group, :case_complexity,
+      :observation_minutes, :feedback_minutes, :video_recording_url,
       scores: MiniCexEvaluation::DIMENSIONS.keys
     )
     permitted[:scores] = permitted[:scores].to_h.compact_blank if permitted[:scores]

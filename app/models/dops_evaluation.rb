@@ -2,16 +2,33 @@
 
 class DopsEvaluation < ApplicationRecord
   include DimensionScorable
+  include ClinicalContextOptions
 
+  # 10 dimensi meniru rubrik DOPS JEJAK asli (bukan versi ringkas 6 dimensi
+  # sebelumnya). Komunikasi, profesionalisme, dan penilaian global SELALU
+  # wajib diisi (tidak boleh N/A) — dimensi teknis lainnya boleh N/A kalau
+  # memang tidak relevan untuk prosedur tertentu.
   DIMENSIONS = {
+    "persetujuan_tindakan" => "Persetujuan Tindakan (Informed Consent)",
     "persiapan" => "Persiapan Tindakan",
-    "teknik" => "Teknik Pelaksanaan",
+    "analgesia_sedasi" => "Analgesia/Sedasi",
+    "kemampuan_teknis" => "Kemampuan Teknis",
     "asepsis" => "Asepsis & Keamanan Pasien",
+    "meminta_bantuan" => "Meminta Bantuan Saat Diperlukan",
+    "pasca_tindakan" => "Evaluasi Pasca Tindakan",
     "komunikasi" => "Komunikasi dengan Pasien",
     "profesionalisme" => "Profesionalisme",
-    "pasca_tindakan" => "Evaluasi Pasca Tindakan"
+    "penilaian_global" => "Penilaian Global"
   }.freeze
-  REQUIRED_DIMENSIONS = %w[komunikasi profesionalisme].freeze
+  REQUIRED_DIMENSIONS = %w[komunikasi profesionalisme penilaian_global].freeze
+
+  # Datalist autocomplete ringan di form — bukan daftar tertutup (evaluator
+  # tetap bisa mengetik nama lain), cuma mempercepat entri untuk prosedur umum.
+  COMMON_PROCEDURES = [
+    "Pemasangan Infus", "Pemasangan Kateter Urin", "Jahit Luka", "Pungsi Vena",
+    "Insisi Abses", "Pemasangan NGT", "Resusitasi Jantung Paru", "Injeksi Intramuskular",
+    "Pemasangan Bidai", "Pemeriksaan Rectal Toucher"
+  ].freeze
 
   belongs_to :student, class_name: "User"
   belongs_to :evaluator, class_name: "User"
@@ -20,8 +37,6 @@ class DopsEvaluation < ApplicationRecord
   validates :procedure_name, presence: true
 
   scope :recent, -> { order(evaluated_at: :desc) }
-
-  after_create_commit :notify_student
 
   private
 

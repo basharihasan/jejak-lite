@@ -17,7 +17,7 @@ class MiniCexEvaluationsControllerTest < ActionDispatch::IntegrationTest
         mini_cex_evaluation: {
           student_id: users(:siti).id, clinical_rotation_id: clinical_rotations(:ongoing_rotation_siti).id,
           case_description: "Konsultasi hipertensi", evaluated_at: Date.current,
-          scores: { profesionalisme: 8 }
+          scores: { komunikasi: 7, profesionalisme: 8 }, global_rating: "performed"
         }
       }
     end

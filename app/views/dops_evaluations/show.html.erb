@@ -1,29 +1,52 @@
 <div class="max-w-2xl">
   <div class="flex items-center justify-between flex-wrap gap-3">
     <div>
-      <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">DOPS</span>
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">DOPS</span>
+        <% if @dops_evaluation.draft? %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Draf</span>
+        <% else %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">Terkirim</span>
+        <% end %>
+      </div>
       <h1 class="text-xl font-bold text-gray-900 mt-2"><%= @dops_evaluation.procedure_name %></h1>
       <p class="text-sm text-gray-400 mt-1">
         <%= l(@dops_evaluation.evaluated_at, format: :long) %> ·
         <%= @dops_evaluation.student.full_name %> · dinilai oleh <%= @dops_evaluation.evaluator.full_name %>
       </p>
+      <p class="text-xs text-gray-400 mt-1">
+        <% [@dops_evaluation.clinical_setting && ClinicalContextOptions::CLINICAL_SETTINGS[@dops_evaluation.clinical_setting],
+             @dops_evaluation.patient_age_group && ClinicalContextOptions::AGE_GROUPS[@dops_evaluation.patient_age_group],
+             @dops_evaluation.case_complexity && "Kompleksitas #{ClinicalContextOptions::CASE_COMPLEXITY[@dops_evaluation.case_complexity]}"].compact.join(" · ") %>
+      </p>
     </div>
-    <% if policy(@dops_evaluation).update? %>
-      <div class="flex items-center gap-2 shrink-0">
+    <div class="flex items-center gap-2 shrink-0">
+      <% if @dops_evaluation.draft? && policy(@dops_evaluation).submit? %>
+        <%= button_to "Kirim Evaluasi", submit_dops_evaluation_path(@dops_evaluation), method: :patch,
+              class: "text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl cursor-pointer" %>
+      <% end %>
+      <% if policy(@dops_evaluation).update? %>
         <%= link_to "Sunting", edit_dops_evaluation_path(@dops_evaluation), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
         <%= button_to "Hapus", dops_evaluation_path(@dops_evaluation), method: :delete,
               class: "text-sm text-rose-600 hover:underline",
               form: { data: { turbo_confirm: "Hapus evaluasi ini?" } } %>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 
   <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
     <div class="flex items-center justify-between mb-3">
-      <p class="text-sm font-semibold text-gray-700">Rubrik Penilaian</p>
+      <p class="text-sm font-semibold text-gray-700">Peta Dimensi</p>
       <p class="text-sm font-bold text-indigo-600">Rata-rata: <%= @dops_evaluation.average_score || "-" %>/9</p>
     </div>
-    <div class="space-y-2.5">
+    <div data-controller="radar-chart"
+         data-radar-chart-labels-value="<%= DopsEvaluation::DIMENSIONS.values.to_json %>"
+         data-radar-chart-datasets-value="<%= [ { label: "Skor", data: DopsEvaluation::DIMENSIONS.keys.map { |k| @dops_evaluation.score_for(k).to_i }, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.15)" } ].to_json %>">
+      <canvas data-radar-chart-target="canvas" height="240"></canvas>
+    </div>
+    <p class="text-[11px] text-gray-400 mt-2">Dimensi N/A dihitung 0 pada grafik.</p>
+
+    <div class="mt-4 space-y-2.5">
       <% DopsEvaluation::DIMENSIONS.each do |key, label| %>
         <% score = @dops_evaluation.score_for(key) %>
         <div>
@@ -40,6 +63,21 @@
       <% end %>
     </div>
   </div>
+
+  <% if @dops_evaluation.observation_minutes.present? || @dops_evaluation.feedback_minutes.present? || @dops_evaluation.video_recording_url.present? %>
+    <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+      <% if @dops_evaluation.observation_minutes.present? %>
+        <span class="px-2.5 py-1 rounded-full bg-gray-100">Observasi <%= @dops_evaluation.observation_minutes %> menit</span>
+      <% end %>
+      <% if @dops_evaluation.feedback_minutes.present? %>
+        <span class="px-2.5 py-1 rounded-full bg-gray-100">Umpan balik <%= @dops_evaluation.feedback_minutes %> menit</span>
+      <% end %>
+      <% if @dops_evaluation.video_recording_url.present? %>
+        <%= link_to "Buka Rekaman Video 🎬", @dops_evaluation.video_recording_url, target: "_blank", rel: "noopener",
+              class: "px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-medium hover:bg-indigo-100" %>
+      <% end %>
+    </div>
+  <% end %>
 
   <% if @dops_evaluation.overall_feedback.present? %>
     <div class="mt-4 bg-indigo-50/50 rounded-2xl ring-1 ring-indigo-100 p-5">

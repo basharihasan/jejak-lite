@@ -18,6 +18,7 @@ class DopsEvaluationPolicy < ApplicationPolicy
   def destroy?
     update?
   end
+  alias submit? update?
 
   class Scope < Scope
     def resolve

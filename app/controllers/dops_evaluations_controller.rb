@@ -2,7 +2,7 @@
 
 class DopsEvaluationsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_dops_evaluation, only: %i[show edit update destroy]
+  before_action :set_dops_evaluation, only: %i[show edit update destroy submit]
 
   def show
     authorize @dops_evaluation
@@ -48,6 +48,12 @@ class DopsEvaluationsController < ApplicationController
     redirect_to assessments_path, notice: "Evaluasi DOPS dihapus.", status: :see_other
   end
 
+  def submit
+    authorize @dops_evaluation
+    @dops_evaluation.submit!
+    redirect_to @dops_evaluation, notice: "Evaluasi DOPS dikirim ke mahasiswa."
+  end
+
   private
 
   def set_dops_evaluation
@@ -62,6 +68,8 @@ class DopsEvaluationsController < ApplicationController
   def dops_evaluation_params
     permitted = params.require(:dops_evaluation).permit(
       :student_id, :clinical_rotation_id, :procedure_name, :evaluated_at, :overall_feedback,
+      :status, :clinical_setting, :patient_age_group, :case_complexity,
+      :observation_minutes, :feedback_minutes, :video_recording_url,
       scores: DopsEvaluation::DIMENSIONS.keys
     )
     permitted[:scores] = permitted[:scores].to_h.compact_blank if permitted[:scores]

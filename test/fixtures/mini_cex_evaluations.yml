@@ -7,8 +7,8 @@ minicex_siti_demam:
   scores:
     anamnesis: 7
     pemeriksaan_fisik: 6
-    profesionalisme: 8
     clinical_judgment: 7
-    konseling: 6
+    komunikasi: 6
+    profesionalisme: 8
     organisasi: 7
-    kompetensi_keseluruhan: 7
+  global_rating: performed

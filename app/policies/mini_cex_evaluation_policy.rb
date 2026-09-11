@@ -18,6 +18,7 @@ class MiniCexEvaluationPolicy < ApplicationPolicy
   def destroy?
     update?
   end
+  alias submit? update?
 
   class Scope < Scope
     def resolve

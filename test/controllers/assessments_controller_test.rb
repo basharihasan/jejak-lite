@@ -26,4 +26,17 @@ class AssessmentsControllerTest < ActionDispatch::IntegrationTest
     get assessments_path
     assert_match new_dops_evaluation_path, response.body
   end
+
+  test "draf milik evaluator sendiri muncul di panel Menunggu Diselesaikan" do
+    draft = DopsEvaluation.create!(
+      student: users(:siti), evaluator: users(:budi), clinical_rotation: clinical_rotations(:ongoing_rotation_siti),
+      procedure_name: "Draf Tes", evaluated_at: Date.current, status: "draft",
+      scores: { komunikasi: 7, profesionalisme: 7, penilaian_global: 7 }
+    )
+
+    sign_in users(:budi)
+    get assessments_path
+    assert_match "Menunggu Diselesaikan", response.body
+    assert_match draft.procedure_name, response.body
+  end
 end

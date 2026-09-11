@@ -2,27 +2,42 @@
 
 class MiniCexEvaluation < ApplicationRecord
   include DimensionScorable
+  include ClinicalContextOptions
 
+  # 6 dimensi numerik (1-9) meniru rubrik Mini-CEX JEJAK asli. Penilaian
+  # keseluruhan TIDAK jadi dimensi numerik ke-7 lagi — dipindah ke
+  # `global_rating`, field kualitatif 4-pilihan terpisah (lihat
+  # GLOBAL_RATING_OPTIONS), karena itu memang bagaimana Mini-CEX standar
+  # menilainya (bukan skala 1-9).
   DIMENSIONS = {
     "anamnesis" => "Keterampilan Anamnesis",
     "pemeriksaan_fisik" => "Keterampilan Pemeriksaan Fisik",
-    "profesionalisme" => "Profesionalisme",
     "clinical_judgment" => "Clinical Judgment",
-    "konseling" => "Keterampilan Konseling",
-    "organisasi" => "Organisasi & Efisiensi",
-    "kompetensi_keseluruhan" => "Kompetensi Klinis Keseluruhan"
+    "komunikasi" => "Keterampilan Komunikasi",
+    "profesionalisme" => "Profesionalisme",
+    "organisasi" => "Organisasi & Efisiensi"
   }.freeze
-  REQUIRED_DIMENSIONS = %w[profesionalisme].freeze
+  REQUIRED_DIMENSIONS = %w[komunikasi profesionalisme].freeze
+
+  GLOBAL_RATING_OPTIONS = {
+    "needs_development" => "Perlu Banyak Perbaikan",
+    "borderline" => "Batas Bawah",
+    "performed" => "Sesuai Harapan",
+    "exceptional" => "Melebihi Harapan"
+  }.freeze
 
   belongs_to :student, class_name: "User"
   belongs_to :evaluator, class_name: "User"
   belongs_to :clinical_rotation
 
   validates :case_description, presence: true
+  validates :global_rating, inclusion: { in: GLOBAL_RATING_OPTIONS.keys }
 
   scope :recent, -> { order(evaluated_at: :desc) }
 
-  after_create_commit :notify_student
+  def global_rating_label
+    GLOBAL_RATING_OPTIONS.fetch(global_rating, global_rating)
+  end
 
   private
 

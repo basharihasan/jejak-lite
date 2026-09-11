@@ -7,7 +7,13 @@ class AssessmentsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @dops_evaluations = policy_scope(DopsEvaluation).includes(:student, :evaluator).recent.limit(10)
-    @mini_cex_evaluations = policy_scope(MiniCexEvaluation).includes(:student, :evaluator).recent.limit(10)
+    dops_scope = policy_scope(DopsEvaluation).includes(:student, :evaluator)
+    mini_cex_scope = policy_scope(MiniCexEvaluation).includes(:student, :evaluator)
+
+    @draft_dops_evaluations = dops_scope.draft.where(evaluator: current_user).recent
+    @draft_mini_cex_evaluations = mini_cex_scope.draft.where(evaluator: current_user).recent
+
+    @dops_evaluations = dops_scope.submitted.recent.limit(10)
+    @mini_cex_evaluations = mini_cex_scope.submitted.recent.limit(10)
   end
 end

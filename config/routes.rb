@@ -52,8 +52,12 @@ Rails.application.routes.draw do
 
   resources :reflection_entries
 
-  resources :dops_evaluations, except: %i[index]
-  resources :mini_cex_evaluations, except: %i[index]
+  resources :dops_evaluations, except: %i[index] do
+    member { patch :submit }
+  end
+  resources :mini_cex_evaluations, except: %i[index] do
+    member { patch :submit }
+  end
   get "asesmen", to: "assessments#index", as: :assessments
 
   resources :assessment_form_templates do

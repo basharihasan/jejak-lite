@@ -1,29 +1,53 @@
 <div class="max-w-2xl">
   <div class="flex items-center justify-between flex-wrap gap-3">
     <div>
-      <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Mini-CEX</span>
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Mini-CEX</span>
+        <% if @mini_cex_evaluation.draft? %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Draf</span>
+        <% else %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">Terkirim</span>
+        <% end %>
+        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"><%= @mini_cex_evaluation.global_rating_label %></span>
+      </div>
       <h1 class="text-xl font-bold text-gray-900 mt-2"><%= @mini_cex_evaluation.case_description %></h1>
       <p class="text-sm text-gray-400 mt-1">
         <%= l(@mini_cex_evaluation.evaluated_at, format: :long) %> ·
         <%= @mini_cex_evaluation.student.full_name %> · dinilai oleh <%= @mini_cex_evaluation.evaluator.full_name %>
       </p>
+      <p class="text-xs text-gray-400 mt-1">
+        <% [@mini_cex_evaluation.clinical_setting && ClinicalContextOptions::CLINICAL_SETTINGS[@mini_cex_evaluation.clinical_setting],
+             @mini_cex_evaluation.patient_age_group && ClinicalContextOptions::AGE_GROUPS[@mini_cex_evaluation.patient_age_group],
+             @mini_cex_evaluation.case_complexity && "Kompleksitas #{ClinicalContextOptions::CASE_COMPLEXITY[@mini_cex_evaluation.case_complexity]}"].compact.join(" · ") %>
+      </p>
     </div>
-    <% if policy(@mini_cex_evaluation).update? %>
-      <div class="flex items-center gap-2 shrink-0">
+    <div class="flex items-center gap-2 shrink-0">
+      <% if @mini_cex_evaluation.draft? && policy(@mini_cex_evaluation).submit? %>
+        <%= button_to "Kirim Evaluasi", submit_mini_cex_evaluation_path(@mini_cex_evaluation), method: :patch,
+              class: "text-sm bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-xl cursor-pointer" %>
+      <% end %>
+      <% if policy(@mini_cex_evaluation).update? %>
         <%= link_to "Sunting", edit_mini_cex_evaluation_path(@mini_cex_evaluation), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
         <%= button_to "Hapus", mini_cex_evaluation_path(@mini_cex_evaluation), method: :delete,
               class: "text-sm text-rose-600 hover:underline",
               form: { data: { turbo_confirm: "Hapus evaluasi ini?" } } %>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
 
   <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
     <div class="flex items-center justify-between mb-3">
-      <p class="text-sm font-semibold text-gray-700">Rubrik Penilaian</p>
+      <p class="text-sm font-semibold text-gray-700">Peta Dimensi</p>
       <p class="text-sm font-bold text-emerald-600">Rata-rata: <%= @mini_cex_evaluation.average_score || "-" %>/9</p>
     </div>
-    <div class="space-y-2.5">
+    <div data-controller="radar-chart"
+         data-radar-chart-labels-value="<%= MiniCexEvaluation::DIMENSIONS.values.to_json %>"
+         data-radar-chart-datasets-value="<%= [ { label: "Skor", data: MiniCexEvaluation::DIMENSIONS.keys.map { |k| @mini_cex_evaluation.score_for(k).to_i }, borderColor: "#059669", backgroundColor: "rgba(5,150,105,0.15)" } ].to_json %>">
+      <canvas data-radar-chart-target="canvas" height="240"></canvas>
+    </div>
+    <p class="text-[11px] text-gray-400 mt-2">Dimensi N/A dihitung 0 pada grafik.</p>
+
+    <div class="mt-4 space-y-2.5">
       <% MiniCexEvaluation::DIMENSIONS.each do |key, label| %>
         <% score = @mini_cex_evaluation.score_for(key) %>
         <div>
@@ -40,6 +64,21 @@
       <% end %>
     </div>
   </div>
+
+  <% if @mini_cex_evaluation.observation_minutes.present? || @mini_cex_evaluation.feedback_minutes.present? || @mini_cex_evaluation.video_recording_url.present? %>
+    <div class="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+      <% if @mini_cex_evaluation.observation_minutes.present? %>
+        <span class="px-2.5 py-1 rounded-full bg-gray-100">Observasi <%= @mini_cex_evaluation.observation_minutes %> menit</span>
+      <% end %>
+      <% if @mini_cex_evaluation.feedback_minutes.present? %>
+        <span class="px-2.5 py-1 rounded-full bg-gray-100">Umpan balik <%= @mini_cex_evaluation.feedback_minutes %> menit</span>
+      <% end %>
+      <% if @mini_cex_evaluation.video_recording_url.present? %>
+        <%= link_to "Buka Rekaman Video 🎬", @mini_cex_evaluation.video_recording_url, target: "_blank", rel: "noopener",
+              class: "px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100" %>
+      <% end %>
+    </div>
+  <% end %>
 
   <% if @mini_cex_evaluation.overall_feedback.present? %>
     <div class="mt-4 bg-emerald-50/50 rounded-2xl ring-1 ring-emerald-100 p-5">

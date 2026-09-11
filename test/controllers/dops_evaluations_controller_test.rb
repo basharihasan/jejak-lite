@@ -32,7 +32,7 @@ class DopsEvaluationsControllerTest < ActionDispatch::IntegrationTest
         dops_evaluation: {
           student_id: users(:siti).id, clinical_rotation_id: clinical_rotations(:ongoing_rotation_siti).id,
           procedure_name: "Kateter Urin", evaluated_at: Date.current,
-          scores: { komunikasi: 7, profesionalisme: 8 }
+          scores: { komunikasi: 7, profesionalisme: 8, penilaian_global: 7 }
         }
       }
     end
@@ -49,5 +49,24 @@ class DopsEvaluationsControllerTest < ActionDispatch::IntegrationTest
     sign_in dosen_lain
     get edit_dops_evaluation_path(dops_evaluations(:dops_siti_infus))
     assert_response :redirect
+  end
+
+  test "evaluator bisa menyimpan draf lalu mengirimkannya" do
+    sign_in users(:budi)
+
+    post dops_evaluations_path, params: {
+      dops_evaluation: {
+        student_id: users(:siti).id, clinical_rotation_id: clinical_rotations(:ongoing_rotation_siti).id,
+        procedure_name: "Jahit Luka", evaluated_at: Date.current, status: "draft",
+        scores: { komunikasi: 7, profesionalisme: 8, penilaian_global: 7 }
+      }
+    }
+    dops = DopsEvaluation.order(:id).last
+    assert dops.draft?
+
+    assert_difference "Notification.count", 1 do
+      patch submit_dops_evaluation_path(dops)
+    end
+    assert dops.reload.submitted?
   end
 end

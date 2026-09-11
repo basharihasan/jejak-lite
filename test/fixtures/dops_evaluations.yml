@@ -5,9 +5,13 @@ dops_siti_infus:
   procedure_name: Pemasangan Infus
   evaluated_at: <%= 1.day.ago.to_date %>
   scores:
+    persetujuan_tindakan: 7
     persiapan: 7
-    teknik: 6
+    analgesia_sedasi: 6
+    kemampuan_teknis: 6
     asepsis: 8
+    meminta_bantuan: 7
+    pasca_tindakan: 6
     komunikasi: 7
     profesionalisme: 8
-    pasca_tindakan: 6
+    penilaian_global: 7
