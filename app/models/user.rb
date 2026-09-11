@@ -20,13 +20,18 @@ class User < ApplicationRecord
   has_many :precepted_rotations, class_name: "ClinicalRotation", foreign_key: :preceptor_id, inverse_of: :preceptor, dependent: :nullify
   belongs_to :study_program, optional: true
   has_many :reflection_entries, dependent: :destroy
+  has_many :dops_evaluations_as_student, class_name: "DopsEvaluation", foreign_key: :student_id, inverse_of: :student, dependent: :destroy
+  has_many :dops_evaluations_as_evaluator, class_name: "DopsEvaluation", foreign_key: :evaluator_id, inverse_of: :evaluator, dependent: :destroy
+  has_many :mini_cex_evaluations_as_student, class_name: "MiniCexEvaluation", foreign_key: :student_id, inverse_of: :student, dependent: :destroy
+  has_many :mini_cex_evaluations_as_evaluator, class_name: "MiniCexEvaluation", foreign_key: :evaluator_id, inverse_of: :evaluator, dependent: :destroy
 
-  # Peran yang boleh memverifikasi kasus klinis mahasiswa. Belum ada peran
-  # `preseptor` (menyusul Fase Dashboard Analitik) — untuk sekarang dosen
-  # dan admin yang berwenang.
-  def can_verify_clinical_cases?
+  # Peran yang boleh menilai/memverifikasi mahasiswa (DOPS, Mini-CEX, Kasus
+  # Klinis). Belum ada peran `preseptor` (menyusul Fase Dashboard Analitik)
+  # — untuk sekarang dosen dan admin yang berwenang.
+  def instructor?
     has_role?("dosen") || has_role?("admin")
   end
+  alias can_verify_clinical_cases? instructor?
 
   validates :full_name, presence: true
 

@@ -1,0 +1,13 @@
+dops_siti_infus:
+  student: siti
+  evaluator: budi
+  clinical_rotation: ongoing_rotation_siti
+  procedure_name: Pemasangan Infus
+  evaluated_at: <%= 1.day.ago.to_date %>
+  scores:
+    persiapan: 7
+    teknik: 6
+    asepsis: 8
+    komunikasi: 7
+    profesionalisme: 8
+    pasca_tindakan: 6

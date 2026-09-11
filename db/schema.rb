@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_005349) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_010023) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -115,6 +115,38 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_005349) do
     t.index ["user_id"], name: "index_device_push_tokens_on_user_id"
   end
 
+  create_table "dops_evaluations", force: :cascade do |t|
+    t.bigint "clinical_rotation_id", null: false
+    t.datetime "created_at", null: false
+    t.date "evaluated_at", null: false
+    t.bigint "evaluator_id", null: false
+    t.text "overall_feedback"
+    t.string "procedure_name", null: false
+    t.jsonb "scores", default: {}, null: false
+    t.bigint "student_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["clinical_rotation_id"], name: "index_dops_evaluations_on_clinical_rotation_id"
+    t.index ["evaluator_id"], name: "index_dops_evaluations_on_evaluator_id"
+    t.index ["student_id", "evaluated_at"], name: "index_dops_evaluations_on_student_id_and_evaluated_at"
+    t.index ["student_id"], name: "index_dops_evaluations_on_student_id"
+  end
+
+  create_table "mini_cex_evaluations", force: :cascade do |t|
+    t.string "case_description", null: false
+    t.bigint "clinical_rotation_id", null: false
+    t.datetime "created_at", null: false
+    t.date "evaluated_at", null: false
+    t.bigint "evaluator_id", null: false
+    t.text "overall_feedback"
+    t.jsonb "scores", default: {}, null: false
+    t.bigint "student_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["clinical_rotation_id"], name: "index_mini_cex_evaluations_on_clinical_rotation_id"
+    t.index ["evaluator_id"], name: "index_mini_cex_evaluations_on_evaluator_id"
+    t.index ["student_id", "evaluated_at"], name: "index_mini_cex_evaluations_on_student_id_and_evaluated_at"
+    t.index ["student_id"], name: "index_mini_cex_evaluations_on_student_id"
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.datetime "archived_at"
     t.datetime "created_at", null: false
@@ -215,6 +247,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_005349) do
   add_foreign_key "clinical_rotations", "users"
   add_foreign_key "clinical_rotations", "users", column: "preceptor_id"
   add_foreign_key "device_push_tokens", "users"
+  add_foreign_key "dops_evaluations", "clinical_rotations"
+  add_foreign_key "dops_evaluations", "users", column: "evaluator_id"
+  add_foreign_key "dops_evaluations", "users", column: "student_id"
+  add_foreign_key "mini_cex_evaluations", "clinical_rotations"
+  add_foreign_key "mini_cex_evaluations", "users", column: "evaluator_id"
+  add_foreign_key "mini_cex_evaluations", "users", column: "student_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "notifications", "users", column: "sender_id"
   add_foreign_key "reflection_entries", "activity_logs"

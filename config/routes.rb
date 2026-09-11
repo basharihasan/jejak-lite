@@ -52,6 +52,10 @@ Rails.application.routes.draw do
 
   resources :reflection_entries
 
+  resources :dops_evaluations, except: %i[index]
+  resources :mini_cex_evaluations, except: %i[index]
+  get "asesmen", to: "assessments#index", as: :assessments
+
   # Service worker perlu di-root (bukan /assets) supaya scope-nya mencakup
   # seluruh situs — syarat Push API.
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

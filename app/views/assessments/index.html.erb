@@ -1,0 +1,49 @@
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <h1 class="text-xl font-bold text-gray-900">Asesmen Tahap Akademik & Profesi</h1>
+  <% if current_user.instructor? %>
+    <div class="flex items-center gap-2">
+      <%= link_to "+ DOPS", new_dops_evaluation_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+      <%= link_to "+ Mini-CEX", new_mini_cex_evaluation_path, class: "bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+    </div>
+  <% end %>
+</div>
+
+<div class="mt-6">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">DOPS Terbaru</h2>
+  <div class="space-y-2">
+    <% @dops_evaluations.each do |ev| %>
+      <%= link_to dops_evaluation_path(ev), class: "block bg-white rounded-2xl ring-1 ring-gray-200 p-4 hover:ring-indigo-300 transition" do %>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-semibold text-gray-800"><%= ev.procedure_name %></p>
+            <p class="text-xs text-gray-400 mt-0.5"><%= ev.student.full_name %> · <%= l(ev.evaluated_at, format: :long) %></p>
+          </div>
+          <span class="text-sm font-bold text-indigo-600"><%= ev.average_score || "-" %>/9</span>
+        </div>
+      <% end %>
+    <% end %>
+    <% if @dops_evaluations.empty? %>
+      <p class="text-sm text-gray-400">Belum ada evaluasi DOPS.</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="mt-8">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Mini-CEX Terbaru</h2>
+  <div class="space-y-2">
+    <% @mini_cex_evaluations.each do |ev| %>
+      <%= link_to mini_cex_evaluation_path(ev), class: "block bg-white rounded-2xl ring-1 ring-gray-200 p-4 hover:ring-emerald-300 transition" do %>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-semibold text-gray-800"><%= ev.case_description %></p>
+            <p class="text-xs text-gray-400 mt-0.5"><%= ev.student.full_name %> · <%= l(ev.evaluated_at, format: :long) %></p>
+          </div>
+          <span class="text-sm font-bold text-emerald-600"><%= ev.average_score || "-" %>/9</span>
+        </div>
+      <% end %>
+    <% end %>
+    <% if @mini_cex_evaluations.empty? %>
+      <p class="text-sm text-gray-400">Belum ada evaluasi Mini-CEX.</p>
+    <% end %>
+  </div>
+</div>

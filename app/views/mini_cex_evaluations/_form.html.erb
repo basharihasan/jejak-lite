@@ -1,0 +1,57 @@
+<%= form_with model: mini_cex_evaluation, class: "space-y-4" do |f| %>
+  <% if mini_cex_evaluation.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
+      <%= mini_cex_evaluation.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :student_id, "Mahasiswa", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.collection_select :student_id, @students, :id, :full_name, { include_blank: "Pilih mahasiswa..." },
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :clinical_rotation_id, "Rotasi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.collection_select :clinical_rotation_id, @clinical_rotations, :id, ->(r) { "#{r.station_name} — #{r.user.full_name}" }, { include_blank: "Pilih rotasi..." },
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :case_description, "Kasus yang Diamati", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :case_description, placeholder: "Contoh: Anamnesis pasien demam berdarah",
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :evaluated_at, "Tanggal Penilaian", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.date_field :evaluated_at,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <p class="text-sm font-semibold text-gray-700 mb-1">Rubrik Penilaian (skala 1–9)</p>
+    <p class="text-xs text-gray-400 mb-3">1–3 di bawah harapan · 4–6 sesuai harapan · 7–9 melebihi harapan. Dimensi bertanda * wajib diisi.</p>
+    <div class="space-y-3">
+      <% MiniCexEvaluation::DIMENSIONS.each do |key, label| %>
+        <% required = MiniCexEvaluation::REQUIRED_DIMENSIONS.include?(key) %>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-sm text-gray-700"><%= label %><%= " *" if required %></label>
+          <%= select_tag "mini_cex_evaluation[scores][#{key}]", options_for_select((1..9).to_a, mini_cex_evaluation.score_for(key)),
+                include_blank: (required ? false : "N/A"),
+                class: "w-32 rounded-lg border-0 py-1.5 px-2 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :overall_feedback, "Umpan Balik Keseluruhan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_area :overall_feedback, rows: 3,
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+  </div>
+
+  <%= f.submit "Simpan Evaluasi", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+<% end %>

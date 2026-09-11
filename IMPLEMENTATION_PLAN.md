@@ -58,8 +58,8 @@ Kartu "Kegiatan Bulan Ini" (hitung nyata), "Kegiatan Terbaru" (3 log terakhir), 
 ### ✅ Fase 7 — Modul Refleksi (Jurnal Digital)
 `ReflectionEntry` (tanggal, judul opsional, isi bebas, tertaut opsional ke `ActivityLog`/`ClinicalCase`) — jurnal tersendiri, terpisah dari field `reflection` ringkas di Logbook/Kasus Klinis. CRUD kepemilikan sederhana (bukan Pundit — pola `current_user.reflection_entries.find` seperti ActivityLog/Portfolio). Topbar dirapikan dengan dropdown "Lainnya" untuk tautan yang lebih jarang dipakai (Cari, Panduan, Periode Akademik). 6 test baru (79 total). Diverifikasi manual: tulis refleksi tertaut ke kegiatan → tautannya tampil & bisa diklik balik ke kegiatan asal.
 
-### ⬜ Fase 8 — DOPS & Mini-CEX
-Form skor tetap (rubrik baku, bukan builder), pakai `ClinicalRotation`+`AcademicPeriod` dari Fase 6.
+### ✅ Fase 8 — DOPS & Mini-CEX
+`DopsEvaluation` (6 dimensi: persiapan/teknik/asepsis/komunikasi/profesionalisme/pasca tindakan) & `MiniCexEvaluation` (7 dimensi: anamnesis/pemeriksaan fisik/profesionalisme/clinical judgment/konseling/organisasi/kompetensi keseluruhan) — skor JSONB per dimensi skala **1–9** (meniru skala Mini-CEX standar internasional), dimensi Profesionalisme & Komunikasi **wajib** (tidak boleh N/A), meniru aturan yang baru diterapkan JEJAK asli. Logika bersama di concern `DimensionScorable` (validasi rentang, rata-rata, dsb). Pundit: hanya dosen/admin bisa membuat, hanya penilai/admin bisa menyunting, mahasiswa hanya bisa melihat miliknya sendiri. Notifikasi otomatis ke mahasiswa saat evaluasi dibuat. Halaman ringkasan gabungan `/asesmen`. 21 test baru (94 total). Diverifikasi manual: dosen menilai (1 dimensi N/A) → rata-rata benar mengecualikan N/A → mahasiswa melihat & dapat notifikasi.
 
 ### ⬜ Fase 9 — Assessment Form Builder
 Infrastruktur formulir dinamis (jenis field, skala skor, dimensi penilaian) — dipakai Fase 10 (Formulir Evaluasi) dan berpotensi Fase 12 (Progress Test).
@@ -96,7 +96,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 | `clinical_cases` | 5 | ✅ |
 | `study_programs`, `academic_periods`, `clinical_rotations` | 6 | ✅ |
 | `reflection_entries` | 7 | ✅ |
-| `dops_evaluations`, `mini_cex_evaluations` | 8 | ⬜ |
+| `dops_evaluations`, `mini_cex_evaluations` | 8 | ✅ |
 | `assessment_form_templates`, `assessment_form_fields` | 9 | ⬜ |
 | `evaluation_submissions` (tutor/blok/tambahan) | 10 | ⬜ |
 | `final_projects`, `final_project_milestones`, `examiner_scores` | 11 | ⬜ |
@@ -108,7 +108,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 79 test lulus per Fase 7
+bin/rails test       # 94 test lulus per Fase 8
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

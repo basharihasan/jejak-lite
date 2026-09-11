@@ -1,0 +1,14 @@
+minicex_siti_demam:
+  student: siti
+  evaluator: budi
+  clinical_rotation: ongoing_rotation_siti
+  case_description: Anamnesis pasien demam berdarah
+  evaluated_at: <%= 2.days.ago.to_date %>
+  scores:
+    anamnesis: 7
+    pemeriksaan_fisik: 6
+    profesionalisme: 8
+    clinical_judgment: 7
+    konseling: 6
+    organisasi: 7
+    kompetensi_keseluruhan: 7
