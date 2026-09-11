@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_104159) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_110208) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,12 +50,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_104159) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "activity_log_competency_tags", force: :cascade do |t|
+    t.bigint "activity_log_id", null: false
+    t.bigint "competency_item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["activity_log_id", "competency_item_id"], name: "index_activity_log_competency_tags_uniq", unique: true
+    t.index ["activity_log_id"], name: "index_activity_log_competency_tags_on_activity_log_id"
+    t.index ["competency_item_id"], name: "index_activity_log_competency_tags_on_competency_item_id"
+  end
+
   create_table "activity_logs", force: :cascade do |t|
     t.date "activity_date", null: false
     t.string "activity_type"
     t.string "category", null: false
     t.datetime "created_at", null: false
+    t.string "delivery_mode"
     t.text "description"
+    t.string "location"
     t.integer "participant_count"
     t.string "patient_code"
     t.text "reflection"
@@ -122,19 +134,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_104159) do
     t.index ["created_by_id"], name: "index_assessment_form_templates_on_created_by_id"
   end
 
+  create_table "case_verification_comments", force: :cascade do |t|
+    t.string "action", null: false
+    t.text "body"
+    t.bigint "clinical_case_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["clinical_case_id"], name: "index_case_verification_comments_on_clinical_case_id"
+    t.index ["user_id"], name: "index_case_verification_comments_on_user_id"
+  end
+
   create_table "clinical_cases", force: :cascade do |t|
+    t.string "case_complexity"
     t.date "case_date", null: false
     t.string "chief_complaint", null: false
+    t.string "clinical_setting"
     t.datetime "created_at", null: false
     t.text "diagnosis"
+    t.string "entrustment_level"
     t.text "learning_points"
     t.text "management"
     t.string "patient_age_group"
     t.string "patient_gender"
+    t.boolean "recommend_remediation", default: false, null: false
     t.string "status", default: "draft", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.text "verification_comment"
     t.datetime "verified_at"
     t.bigint "verified_by_id"
     t.index ["status"], name: "index_clinical_cases_on_status"
@@ -387,6 +413,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_104159) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "activity_log_competency_tags", "activity_logs"
+  add_foreign_key "activity_log_competency_tags", "competency_items"
   add_foreign_key "activity_logs", "users"
   add_foreign_key "assessment_form_answers", "assessment_form_fields"
   add_foreign_key "assessment_form_answers", "assessment_form_submissions"
@@ -395,6 +423,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_104159) do
   add_foreign_key "assessment_form_submissions", "users", column: "respondent_id"
   add_foreign_key "assessment_form_submissions", "users", column: "subject_user_id"
   add_foreign_key "assessment_form_templates", "users", column: "created_by_id"
+  add_foreign_key "case_verification_comments", "clinical_cases"
+  add_foreign_key "case_verification_comments", "users"
   add_foreign_key "clinical_cases", "users"
   add_foreign_key "clinical_cases", "users", column: "verified_by_id"
   add_foreign_key "clinical_rotations", "academic_periods"

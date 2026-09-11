@@ -5,7 +5,18 @@
         <%= @activity_log.category_label %>
       </span>
       <h1 class="text-xl font-bold text-gray-900 mt-2"><%= @activity_log.title %></h1>
-      <p class="text-sm text-gray-400 mt-1"><%= l(@activity_log.activity_date, format: :long) %><%= " · #{@activity_log.activity_type}" if @activity_log.activity_type.present? %></p>
+      <p class="text-sm text-gray-400 mt-1">
+        <%= l(@activity_log.activity_date, format: :long) %><%= " · #{@activity_log.activity_type}" if @activity_log.activity_type.present? %>
+        <%= " · #{@activity_log.location}" if @activity_log.location.present? %>
+        <%= " · #{@activity_log.delivery_mode_label}" if @activity_log.delivery_mode.present? %>
+      </p>
+      <% if @activity_log.competency_items.any? %>
+        <div class="mt-2 flex flex-wrap gap-1">
+          <% @activity_log.competency_items.each do |item| %>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600"><%= item.title %></span>
+          <% end %>
+        </div>
+      <% end %>
     </div>
     <div class="flex items-center gap-2 shrink-0">
       <%= link_to "Sunting", edit_activity_log_path(@activity_log), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>

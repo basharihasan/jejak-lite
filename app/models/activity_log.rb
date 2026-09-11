@@ -2,8 +2,12 @@
 
 class ActivityLog < ApplicationRecord
   CATEGORIES = { "klinis" => "Klinis", "non_klinis" => "Non-Klinis" }.freeze
+  DELIVERY_MODES = { "luring" => "Luring", "daring" => "Daring" }.freeze
 
   belongs_to :user
+
+  has_many :activity_log_competency_tags, dependent: :destroy
+  has_many :competency_items, through: :activity_log_competency_tags
 
   has_many_attached :evidence_files
 
@@ -14,6 +18,11 @@ class ActivityLog < ApplicationRecord
   scope :klinis, -> { where(category: "klinis") }
   scope :non_klinis, -> { where(category: "non_klinis") }
   scope :in_month, ->(date) { where(activity_date: date.beginning_of_month..date.end_of_month) }
+  scope :tagged_with, ->(competency_item_id) { joins(:activity_log_competency_tags).where(activity_log_competency_tags: { competency_item_id: competency_item_id }) }
+
+  def delivery_mode_label
+    DELIVERY_MODES.fetch(delivery_mode, delivery_mode)
+  end
 
   def category_label
     CATEGORIES.fetch(category, category)

@@ -98,6 +98,18 @@ class ClinicalCasesControllerTest < ActionDispatch::IntegrationTest
     patch request_revision_clinical_case_path(kasus), params: { comment: "Tambahkan diagnosis banding." }
 
     assert_equal "needs_revision", kasus.reload.status
-    assert_equal "Tambahkan diagnosis banding.", kasus.verification_comment
+    assert_equal "Tambahkan diagnosis banding.", kasus.case_verification_comments.last.body
+  end
+
+  test "dosen memverifikasi dengan entrustment level dan flag remediasi" do
+    sign_in users(:budi)
+    kasus = clinical_cases(:submitted_case_siti)
+
+    patch verify_clinical_case_path(kasus), params: { entrustment_level: "mandiri", recommend_remediation: "1" }
+
+    kasus.reload
+    assert_equal "verified", kasus.status
+    assert_equal "mandiri", kasus.entrustment_level
+    assert kasus.recommend_remediation?
   end
 end

@@ -56,6 +56,21 @@ class ActivityLogsControllerTest < ActionDispatch::IntegrationTest
     assert log.reload.patient_code.present?
   end
 
+  test "mencatat kegiatan dengan tag kompetensi dan filter menampilkannya" do
+    post activity_logs_path, params: {
+      activity_log: {
+        title: "Visite Ruangan", category: "klinis", activity_type: "Visite",
+        activity_date: Date.current, competency_item_ids: [ competency_items(:domain_klinis).id ]
+      }
+    }
+    log = ActivityLog.order(:id).last
+    assert_equal [ competency_items(:domain_klinis) ], log.competency_items
+
+    get activity_logs_path(competency_item_id: competency_items(:domain_klinis).id)
+    assert_match log.title, response.body
+    assert_no_match activity_logs(:penyuluhan_stunting).title, response.body
+  end
+
   test "kalender mengelompokkan kegiatan per hari dalam bulan berjalan" do
     log = current_month_log
     get activity_logs_calendar_path

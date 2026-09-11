@@ -6,9 +6,12 @@ class ActivityLogsController < ApplicationController
 
   def index
     @category = params[:category] if ActivityLog::CATEGORIES.key?(params[:category])
+    @competency_item_id = params[:competency_item_id].presence
     scope = current_user.activity_logs.recent
     scope = scope.where(category: @category) if @category
-    @activity_logs = scope.page(params[:page])
+    scope = scope.tagged_with(@competency_item_id) if @competency_item_id
+    @activity_logs_by_date = scope.includes(:competency_items).group_by(&:activity_date)
+    @all_competency_items = CompetencyItem.order(:position)
   end
 
   def show
@@ -16,6 +19,7 @@ class ActivityLogsController < ApplicationController
 
   def new
     @activity_log = current_user.activity_logs.build(activity_date: Date.current)
+    load_form_collections
   end
 
   def create
@@ -24,17 +28,20 @@ class ActivityLogsController < ApplicationController
     if @activity_log.save
       redirect_to @activity_log, notice: "Kegiatan berhasil dicatat."
     else
+      load_form_collections
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
+    load_form_collections
   end
 
   def update
     if @activity_log.update(activity_log_params)
       redirect_to @activity_log, notice: "Kegiatan berhasil diperbarui."
     else
+      load_form_collections
       render :edit, status: :unprocessable_entity
     end
   end
@@ -53,7 +60,7 @@ class ActivityLogsController < ApplicationController
   # bulan lewat query param ?bulan=YYYY-MM.
   def calendar
     @month = parse_month(params[:bulan]) || Date.current.beginning_of_month
-    @logs_by_day = current_user.activity_logs.in_month(@month).group_by(&:activity_date)
+    @logs_by_day = current_user.activity_logs.in_month(@month).includes(:competency_items).group_by(&:activity_date)
   end
 
   # Feed iCal publik-tapi-rahasia: URL-nya sendiri yang jadi kredensial
@@ -79,10 +86,16 @@ class ActivityLogsController < ApplicationController
   end
 
   def activity_log_params
-    params.require(:activity_log).permit(
+    permitted = params.require(:activity_log).permit(
       :title, :category, :activity_type, :activity_date, :description, :reflection,
-      :participant_count, evidence_files: []
+      :participant_count, :location, :delivery_mode, evidence_files: [], competency_item_ids: []
     )
+    permitted[:competency_item_ids] = permitted[:competency_item_ids].reject(&:blank?) if permitted[:competency_item_ids]
+    permitted
+  end
+
+  def load_form_collections
+    @all_competency_items = CompetencyItem.order(:position)
   end
 
   def parse_month(value)

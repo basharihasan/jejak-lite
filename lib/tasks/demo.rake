@@ -60,17 +60,24 @@ namespace :demo do
       r.end_date = 13.days.from_now.to_date
     end
 
+    klinis_domain = CompetencyItem.find_by(title: "Keterampilan Klinis")
+
     [ mahasiswa1, mahasiswa2 ].each_with_index do |student, i|
-      ActivityLog.find_or_create_by!(user: student, title: "Kegiatan Logbook Demo #{i + 1}") do |log|
-        log.category = "klinis"
-        log.activity_type = "Observasi Tindakan"
-        log.activity_date = (i + 1).days.ago.to_date
-        log.description = "Contoh entri logbook untuk demo."
+      log = ActivityLog.find_or_create_by!(user: student, title: "Kegiatan Logbook Demo #{i + 1}") do |l|
+        l.category = "klinis"
+        l.activity_type = "Observasi Tindakan"
+        l.activity_date = (i + 1).days.ago.to_date
+        l.location = "RSUP Demo"
+        l.delivery_mode = "luring"
+        l.description = "Contoh entri logbook untuk demo."
       end
+      log.competency_items = [ klinis_domain ].compact if klinis_domain && log.competency_items.empty?
     end
 
     verified_case = ClinicalCase.find_or_create_by!(user: mahasiswa1, chief_complaint: "Demam 3 hari") do |c|
       c.case_date = 5.days.ago.to_date
+      c.clinical_setting = "rawat_jalan"
+      c.case_complexity = "sedang"
       c.patient_age_group = "Dewasa"
       c.patient_gender = "Perempuan"
       c.diagnosis = "Demam tifoid"
@@ -79,9 +86,16 @@ namespace :demo do
       c.status = "verified"
       c.verified_by = dosen
       c.verified_at = 4.days.ago
+      c.entrustment_level = "supervisi_tidak_langsung"
+    end
+    verified_case.case_verification_comments.find_or_create_by!(action: "verified") do |comment|
+      comment.user = dosen
+      comment.body = "Anamnesis lengkap, pertahankan."
     end
     ClinicalCase.find_or_create_by!(user: mahasiswa2, chief_complaint: "Nyeri perut akut") do |c|
       c.case_date = 1.day.ago.to_date
+      c.clinical_setting = "igd"
+      c.case_complexity = "rendah"
       c.patient_age_group = "Anak"
       c.patient_gender = "Laki-laki"
       c.diagnosis = "Gastroenteritis akut"

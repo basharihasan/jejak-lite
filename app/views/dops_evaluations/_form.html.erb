@@ -37,17 +37,17 @@
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
     <div>
       <%= f.label :clinical_setting, "Setting Klinis", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.select :clinical_setting, options_for_select(ClinicalContextOptions::CLINICAL_SETTINGS, dops_evaluation.clinical_setting), { include_blank: "-" },
+      <%= f.select :clinical_setting, options_for_select(ClinicalContextOptions::CLINICAL_SETTINGS.invert, dops_evaluation.clinical_setting), { include_blank: "-" },
             class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
     </div>
     <div>
       <%= f.label :patient_age_group, "Usia Pasien", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.select :patient_age_group, options_for_select(ClinicalContextOptions::AGE_GROUPS, dops_evaluation.patient_age_group), { include_blank: "-" },
+      <%= f.select :patient_age_group, options_for_select(ClinicalContextOptions::AGE_GROUPS.invert, dops_evaluation.patient_age_group), { include_blank: "-" },
             class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
     </div>
     <div>
       <%= f.label :case_complexity, "Kompleksitas", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.select :case_complexity, options_for_select(ClinicalContextOptions::CASE_COMPLEXITY, dops_evaluation.case_complexity), { include_blank: "-" },
+      <%= f.select :case_complexity, options_for_select(ClinicalContextOptions::CASE_COMPLEXITY.invert, dops_evaluation.case_complexity), { include_blank: "-" },
             class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
     </div>
     <div>

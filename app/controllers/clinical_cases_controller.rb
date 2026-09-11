@@ -6,11 +6,15 @@ class ClinicalCasesController < ApplicationController
 
   def index
     @scope = params[:scope] == "to_verify" && current_user.can_verify_clinical_cases? ? "to_verify" : "mine"
-    @clinical_cases = if @scope == "to_verify"
-      ClinicalCase.awaiting_verification.recent.page(params[:page])
-    else
-      current_user.clinical_cases.recent.page(params[:page])
-    end
+    base_scope = @scope == "to_verify" ? ClinicalCase.awaiting_verification : current_user.clinical_cases
+    @clinical_cases = base_scope.recent.page(params[:page])
+
+    stats_scope = @scope == "to_verify" ? ClinicalCase.all : current_user.clinical_cases
+    @stats = {
+      total: stats_scope.count,
+      by_status: stats_scope.group(:status).count,
+      top_diagnoses: stats_scope.where.not(diagnosis: [ nil, "" ]).group(:diagnosis).count.sort_by { |_, c| -c }.first(5).to_h
+    }
   end
 
   def show
@@ -58,7 +62,10 @@ class ClinicalCasesController < ApplicationController
 
   def verify
     authorize @clinical_case
-    @clinical_case.verify!(by: current_user)
+    @clinical_case.verify!(
+      by: current_user, entrustment_level: params[:entrustment_level],
+      recommend_remediation: ActiveModel::Type::Boolean.new.cast(params[:recommend_remediation]) || false, comment: params[:comment]
+    )
     redirect_to @clinical_case, notice: "Kasus klinis diverifikasi."
   end
 
@@ -77,6 +84,7 @@ class ClinicalCasesController < ApplicationController
   def clinical_case_params
     params.require(:clinical_case).permit(
       :case_date, :chief_complaint, :patient_age_group, :patient_gender,
+      :clinical_setting, :case_complexity,
       :diagnosis, :management, :learning_points, evidence_files: []
     )
   end

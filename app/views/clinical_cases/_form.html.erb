@@ -23,6 +23,19 @@
     </div>
   </div>
 
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :clinical_setting, "Setting Klinis", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.select :clinical_setting, options_for_select(ClinicalContextOptions::CLINICAL_SETTINGS.invert, clinical_case.clinical_setting), { include_blank: "-" },
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :case_complexity, "Kompleksitas Kasus", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.select :case_complexity, options_for_select(ClinicalContextOptions::CASE_COMPLEXITY.invert, clinical_case.case_complexity), { include_blank: "-" },
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+  </div>
+
   <div>
     <%= f.label :chief_complaint, "Keluhan Utama", class: "block text-sm font-semibold text-gray-700 mb-1" %>
     <%= f.text_field :chief_complaint, placeholder: "Contoh: Demam 3 hari, Nyeri perut kanan bawah",

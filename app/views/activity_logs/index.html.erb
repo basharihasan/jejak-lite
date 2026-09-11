@@ -1,12 +1,3 @@
-<style>
-  .pagination { display: flex; gap: 0.25rem; margin-top: 1.5rem; justify-content: center; }
-  .pagination span, .pagination a { padding: 0.4rem 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; }
-  .pagination a { color: #4f46e5; border: 1px solid #e5e7eb; }
-  .pagination a:hover { background: #eef2ff; }
-  .pagination .current { background: #4f46e5; color: white; font-weight: 600; }
-  .pagination .page.disabled { color: #d1d5db; }
-</style>
-
 <div class="flex items-center justify-between flex-wrap gap-3">
   <h1 class="text-xl font-bold text-gray-900">Logbook Kegiatan</h1>
   <div class="flex items-center gap-2">
@@ -17,19 +8,37 @@
   </div>
 </div>
 
-<div class="mt-4 flex items-center gap-2">
+<div class="mt-4 flex flex-wrap items-center gap-2">
   <%= link_to "Semua", activity_logs_path, class: "text-xs px-3 py-1.5 rounded-full font-medium #{@category.nil? ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
   <% ActivityLog::CATEGORIES.each do |code, label| %>
     <%= link_to label, activity_logs_path(category: code), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@category == code ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
   <% end %>
 </div>
 
-<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-  <% if @activity_logs.any? %>
-    <%= render partial: "activity_log_card", collection: @activity_logs, as: :activity_log %>
+<% if @all_competency_items.any? %>
+  <div class="mt-2 flex flex-wrap items-center gap-1.5">
+    <span class="text-xs text-gray-400">Kompetensi:</span>
+    <% @all_competency_items.each do |item| %>
+      <%= link_to item.title, activity_logs_path(category: @category, competency_item_id: item.id),
+            class: "text-[11px] px-2 py-1 rounded-full font-medium #{@competency_item_id == item.id.to_s ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}" %>
+    <% end %>
+    <% if @competency_item_id %>
+      <%= link_to "✕ Hapus filter", activity_logs_path(category: @category), class: "text-[11px] text-gray-400 hover:text-rose-600" %>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="mt-4 space-y-6">
+  <% if @activity_logs_by_date.any? %>
+    <% @activity_logs_by_date.each do |date, logs| %>
+      <div>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2"><%= l(date, format: :long) %></p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <%= render partial: "activity_log_card", collection: logs, as: :activity_log %>
+        </div>
+      </div>
+    <% end %>
   <% else %>
-    <p class="text-sm text-gray-400 col-span-2">Belum ada kegiatan tercatat.</p>
+    <p class="text-sm text-gray-400">Belum ada kegiatan tercatat.</p>
   <% end %>
 </div>
-
-<%= paginate @activity_logs %>

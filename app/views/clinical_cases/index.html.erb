@@ -19,6 +19,25 @@
   </div>
 <% end %>
 
+<% if @stats[:total].positive? %>
+  <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <p class="text-sm font-semibold text-gray-700 mb-3">Ringkasan Status (<%= @stats[:total] %> kasus)</p>
+      <div class="flex flex-wrap gap-2">
+        <% @stats[:by_status].each do |status, count| %>
+          <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-600"><%= ClinicalCase.new(status: status).status_label %>: <%= count %></span>
+        <% end %>
+      </div>
+    </div>
+    <% if @stats[:top_diagnoses].any? %>
+      <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+        <p class="text-sm font-semibold text-gray-700 mb-3">Diagnosis Terbanyak</p>
+        <%= bar_chart @stats[:top_diagnoses], colors: [ "#4f46e5" ], height: "160px" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
   <% if @clinical_cases.any? %>
     <%= render partial: "clinical_case_card", collection: @clinical_cases, as: :clinical_case %>

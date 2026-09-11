@@ -37,6 +37,39 @@
     </div>
   </div>
 
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :location, "Lokasi (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :location, placeholder: "Contoh: Puskesmas Sukamaju",
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+    <div>
+      <p class="block text-sm font-semibold text-gray-700 mb-1">Metode</p>
+      <div class="flex gap-3 mt-2.5">
+        <% ActivityLog::DELIVERY_MODES.each do |value, label| %>
+          <label class="flex items-center gap-1.5 text-sm text-gray-600">
+            <%= f.radio_button :delivery_mode, value, class: "text-indigo-600" %> <%= label %>
+          </label>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <% if @all_competency_items&.any? %>
+    <div>
+      <p class="block text-sm font-semibold text-gray-700 mb-1">Kompetensi yang Dilatih (opsional)</p>
+      <div class="flex flex-wrap gap-3 bg-gray-50 rounded-xl p-3">
+        <% @all_competency_items.each do |item| %>
+          <label class="flex items-center gap-1.5 text-xs text-gray-600">
+            <%= check_box_tag "activity_log[competency_item_ids][]", item.id, activity_log.competency_item_ids.include?(item.id),
+                  id: "competency_item_#{item.id}", class: "rounded border-gray-300 text-indigo-600" %>
+            <%= item.title %>
+          </label>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <div>
     <%= f.label :description, "Deskripsi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
     <%= f.text_area :description, rows: 3,

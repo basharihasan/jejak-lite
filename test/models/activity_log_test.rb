@@ -27,4 +27,19 @@ class ActivityLogTest < ActiveSupport::TestCase
     assert_includes ActivityLog.klinis, activity_logs(:jaga_igd)
     assert_not_includes ActivityLog.klinis, activity_logs(:penyuluhan_stunting)
   end
+
+  test "bisa ditautkan ke beberapa simpul kompetensi" do
+    log = activity_logs(:jaga_igd)
+    log.competency_item_ids = [ competency_items(:domain_klinis).id, competency_items(:sub_anamnesis).id ]
+
+    assert_equal 2, log.competency_items.count
+    assert_includes ActivityLog.tagged_with(competency_items(:domain_klinis).id), log
+    assert_not_includes ActivityLog.tagged_with(competency_items(:domain_komunikasi).id), log
+  end
+
+  test "delivery_mode_label menerjemahkan kode ke label" do
+    log = activity_logs(:jaga_igd)
+    log.delivery_mode = "daring"
+    assert_equal "Daring", log.delivery_mode_label
+  end
 end

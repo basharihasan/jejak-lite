@@ -1,19 +1,36 @@
 <%= link_to activity_log_path(activity_log), class: "block bg-white rounded-2xl ring-1 ring-gray-200 p-5 hover:ring-indigo-300 transition" do %>
   <div class="flex items-start justify-between gap-3">
     <div class="min-w-0">
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
         <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= activity_log.category == "klinis" ? "bg-sky-50 text-sky-700" : "bg-emerald-50 text-emerald-700" %>">
           <%= activity_log.category_label %>
         </span>
         <% if activity_log.activity_type.present? %>
           <span class="text-xs text-gray-400"><%= activity_log.activity_type %></span>
         <% end %>
+        <% if activity_log.delivery_mode.present? %>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500"><%= activity_log.delivery_mode_label %></span>
+        <% end %>
       </div>
       <p class="mt-1.5 font-semibold text-gray-800 truncate"><%= activity_log.title %></p>
-      <p class="text-xs text-gray-400 mt-1"><%= l(activity_log.activity_date, format: :long) %></p>
+      <p class="text-xs text-gray-400 mt-1">
+        <%= l(activity_log.activity_date, format: :long) %><% if activity_log.location.present? %> · <%= activity_log.location %><% end %>
+      </p>
+      <% if activity_log.competency_items.any? %>
+        <div class="mt-1.5 flex flex-wrap gap-1">
+          <% activity_log.competency_items.each do |item| %>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600"><%= item.title %></span>
+          <% end %>
+        </div>
+      <% end %>
     </div>
-    <% if activity_log.evidence_files.attached? %>
-      <span class="text-xs text-gray-400 shrink-0">📎 <%= activity_log.evidence_files.count %></span>
-    <% end %>
+    <div class="flex flex-col items-end gap-1 shrink-0 text-xs text-gray-400">
+      <% if activity_log.evidence_files.attached? %>
+        <span>📎 <%= activity_log.evidence_files.count %></span>
+      <% end %>
+      <% if activity_log.reflection.present? %>
+        <span>📝</span>
+      <% end %>
+    </div>
   </div>
 <% end %>

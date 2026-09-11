@@ -99,6 +99,17 @@ Field konteks baru di kedua model: `clinical_setting`, `patient_age_group`, `cas
 
 14 test baru (154 total). Diverifikasi manual via HTTP sungguhan: draf dibuat → notifikasi BELUM terkirim → radar chart tampil di show dengan 10 sumbu → submit → notifikasi terkirim & status berubah → panel "Menunggu Diselesaikan" menghilang dari `/asesmen`.
 
+**Bug ditemukan & diperbaiki saat verifikasi manual**: `options_for_select(HASH, selected)` dipanggil dengan hash `{kode => label}` di 9 tempat (field konteks klinis DOPS/Mini-CEX/Kasus Klinis) — Rails membaca Hash sebagai `{teks => value}`, jadi value & label KETUKAR (`<option value="Rawat Jalan">rawat_jalan</option>`, terbalik). Ketahuan justru karena field sudah ada dari awal, cuma isi opsinya salah arah — baru kelihatan waktu submit form sungguhan lewat curl (bukan test suite, yang cuma cek keberadaan label). Diperbaiki dengan `.invert` di semua pemanggilan; pola lama yang benar (`ActivityLog::CATEGORIES.invert` di form Logbook) dipakai sebagai rujukan konsistensi.
+
+### ✅ Fase 18 — Perkaya Logbook & Kasus Klinis
+Sadar penuh **tidak** membawa arsitektur JEJAK asli untuk kasus klinis (`ActivityLog`+`ActivityCaseDatum` 100+ kolom, PII terenkripsi, lab/radiologi/bedah/follow-up SOAP terpisah, token QR tamu) — `ClinicalCase` jejak-lite tetap satu model, cuma diperkaya, bukan dirombak arsitekturnya (lihat "Sengaja Tidak Dibawa").
+
+**Logbook (ActivityLog)**: field baru `location` & `delivery_mode` (Luring/Daring). Tabel baru `activity_log_competency_tags` menautkan tiap entri logbook ke simpul `CompetencyItem` (Kurikulum, Fase 13) — keterkaitan lintas-modul yang sebelumnya sama sekali tidak ada, multi-select checkbox di form. Index diubah dari daftar datar jadi **timeline dikelompokkan per tanggal** + filter chip kompetensi (menyusul filter kategori yang sudah ada); kartu logbook dapat badge kompetensi & ikon refleksi.
+
+**Kasus Klinis (ClinicalCase)**: field baru `clinical_setting`, `case_complexity` (dari `ClinicalContextOptions` bersama Fase 17), `entrustment_level` (skala 6 level meniru JEJAK: diobservasi→dibantu→supervisi langsung→supervisi tidak langsung→mandiri→mengajari junior, diisi verifier), `recommend_remediation` (flag verifier). **Kolom tunggal `verification_comment` (tertimpa tiap transisi) diganti tabel `case_verification_comments`** — riwayat audit trail lengkap satu baris per transisi (submitted/verified/revision_requested), data lama dimigrasikan otomatis sebelum kolom dihapus. `verify!`/`request_revision!`/`submit!` kini masing-masing mencatat baris riwayat. Index dapat panel statistik (breakdown status + `bar_chart` diagnosis terbanyak); show menampilkan riwayat verifikasi sebagai timeline, bukan satu blok teks.
+
+18 test baru (160 total). Diverifikasi manual via HTTP sungguhan: catat kegiatan bertag kompetensi → muncul di timeline & lolos filter kompetensi → verifikasi kasus dengan entrustment level + flag remediasi → riwayat verifikasi bertambah baris & badge remediasi tampil → panel statistik index berubah.
+
 ## Model Data (ringkas, akan detail per fase saat digarap)
 
 | Tabel | Fase | Status |
@@ -122,7 +133,7 @@ Field konteks baru di kedua model: `clinical_setting`, `patient_age_group`, `cas
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 154 test lulus per Fase 17
+bin/rails test       # 160 test lulus per Fase 18
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda
@@ -132,3 +143,9 @@ bin/rails test       # 154 test lulus per Fase 17
 - Pencarian global saat ini hanya mencakup `User` — diperluas ke Logbook/Kasus Klinis begitu ada (Fase 4-5).
 - "Analisis Capaian Pembelajaran" (Fase 13) dihitung langsung dari DOPS/Mini-CEX/ExamScore saat halaman dibuka, bukan tabel `academic_assessment_results` tersimpan — lebih sederhana & tak ada risiko data basi, tapi berarti tidak ada riwayat snapshot historis (kartu capaian versi tanggal X tidak bisa "dibekukan").
 - DOPS/Mini-CEX tetap form baku (bukan dibangun lewat Form Builder) — form builder khusus untuk evaluasi yang bentuknya bisa berubah-ubah (tutor/blok/tambahan).
+- `ActivityCaseDatum` 100+ kolom + PII terenkripsi + lab/radiologi/detail bedah/follow-up SOAP + token QR tamu (arsitektur kasus klinis JEJAK asli) — `ClinicalCase` jejak-lite tetap SATU model yang diperkaya (Fase 18), bukan dipecah jadi arsitektur `ActivityLog`+`ActivityCaseDatum`; butuh infrastruktur enkripsi yang bertentangan dengan single-tenant/ringan.
+- `CompetencyDomain`/`CompetencyGrowthTarget`/`CohortCompetencyBenchmark`/`CompetencyGrowthAlert`/`StudentCompetencyTrajectory` (mesin kurva pertumbuhan lintas-kohort JEJAK asli) — butuh data multi-tahun untuk bermakna dan bertentangan dengan pelajaran yang sudah didokumentasikan sendiri (tren capaian antar tahun selalu palsu karena jenis asesmen berganti).
+- Plotly.js — Chart.js yang sudah dimuat (via Chartkick) cukup untuk semua kebutuhan radar/line jejak-lite; tidak perlu 2 library charting.
+- Voice input + "Enhance ✨" AI pada narrative comment DOPS/Mini-CEX — butuh integrasi API AI, di luar cakupan (Gemfile sengaja tanpa gem AI sejak awal).
+- `tom-select` untuk dropdown evaluator/mahasiswa — disebut di rencana awal tapi belum pernah dipasang; ditunda, jumlah user jejak-lite masih kecil sehingga `<select>` polos cukup.
+- Dual verification queue architecture (namespace `Supervisor::...` terpisah) — aksi member `verify`/`request_revision` yang sudah ada di `ClinicalCasesController` sudah cukup untuk skala jejak-lite.

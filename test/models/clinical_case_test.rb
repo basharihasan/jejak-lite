@@ -25,7 +25,18 @@ class ClinicalCaseTest < ActiveSupport::TestCase
     assert_equal kasus, Notification.last.notifiable
   end
 
-  test "request_revision! menyimpan komentar dan mengirim notifikasi" do
+  test "verify! mencatat entrustment level dan flag remediasi" do
+    kasus = clinical_cases(:submitted_case_siti)
+    kasus.verify!(by: users(:budi), entrustment_level: "supervisi_langsung", recommend_remediation: true, comment: "Pertahankan.")
+
+    kasus.reload
+    assert_equal "supervisi_langsung", kasus.entrustment_level
+    assert kasus.recommend_remediation?
+    assert_equal "verified", kasus.case_verification_comments.last.action
+    assert_equal "Pertahankan.", kasus.case_verification_comments.last.body
+  end
+
+  test "request_revision! menyimpan riwayat komentar dan mengirim notifikasi" do
     kasus = clinical_cases(:submitted_case_siti)
 
     assert_difference "Notification.count", 1 do
@@ -33,6 +44,18 @@ class ClinicalCaseTest < ActiveSupport::TestCase
     end
 
     assert_equal "needs_revision", kasus.reload.status
-    assert_equal "Lengkapi tatalaksana.", kasus.verification_comment
+    comment = kasus.case_verification_comments.last
+    assert_equal "revision_requested", comment.action
+    assert_equal "Lengkapi tatalaksana.", comment.body
+    assert_equal users(:budi), comment.user
+  end
+
+  test "submit! mencatat riwayat pengiriman" do
+    kasus = clinical_cases(:draft_case_siti)
+    kasus.submit!
+
+    comment = kasus.case_verification_comments.last
+    assert_equal "submitted", comment.action
+    assert_equal kasus.user, comment.user
   end
 end
