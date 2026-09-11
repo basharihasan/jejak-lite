@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_012631) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_013617) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -177,6 +177,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_012631) do
     t.index ["student_id"], name: "index_dops_evaluations_on_student_id"
   end
 
+  create_table "exam_imports", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "imported_by_id", null: false
+    t.string "kind", null: false
+    t.string "name", null: false
+    t.integer "row_count", default: 0, null: false
+    t.integer "unmatched_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["imported_by_id"], name: "index_exam_imports_on_imported_by_id"
+  end
+
+  create_table "exam_scores", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "exam_date", null: false
+    t.bigint "exam_import_id", null: false
+    t.decimal "max_score", precision: 6, scale: 2, default: "100.0", null: false
+    t.decimal "score", precision: 6, scale: 2, null: false
+    t.bigint "student_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["exam_import_id"], name: "index_exam_scores_on_exam_import_id"
+    t.index ["student_id", "exam_date"], name: "index_exam_scores_on_student_id_and_exam_date"
+    t.index ["student_id"], name: "index_exam_scores_on_student_id"
+  end
+
   create_table "examiner_scores", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "examiner_id", null: false
@@ -337,6 +361,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_012631) do
   add_foreign_key "dops_evaluations", "clinical_rotations"
   add_foreign_key "dops_evaluations", "users", column: "evaluator_id"
   add_foreign_key "dops_evaluations", "users", column: "student_id"
+  add_foreign_key "exam_imports", "users", column: "imported_by_id"
+  add_foreign_key "exam_scores", "exam_imports"
+  add_foreign_key "exam_scores", "users", column: "student_id"
   add_foreign_key "examiner_scores", "final_projects"
   add_foreign_key "examiner_scores", "users", column: "examiner_id"
   add_foreign_key "final_project_milestones", "final_projects"

@@ -70,14 +70,11 @@ Tiga templat baku di-seed lewat `db/seeds.rb` memakai infrastruktur Fase 9 — b
 ### ✅ Fase 11 — Tugas Akhir
 `FinalProject` (mahasiswa, dosen pembimbing opsional, judul, deskripsi, status proposal/berjalan/selesai) + `FinalProjectMilestone` (checklist bertanggal, bisa ditandai selesai/dibuka lagi, deteksi terlambat) + `ExaminerScore` (skor 0–100 + umpan balik per sesi ujian, banyak penguji per proyek). Pundit (`FinalProjectPolicy`): mahasiswa mendaftarkan & mengelola miliknya sendiri, **dosen mana pun bisa melihat semua tugas akhir** (berpotensi jadi penguji, bukan cuma pembimbing), hanya instruktur yang bisa memberi skor. Notifikasi otomatis ke mahasiswa saat skor ujian baru masuk. 10 test baru (112 total). Diverifikasi manual: mahasiswa daftar TA + tambah milestone → dosen beri skor+umpan balik → rata-rata skor benar & notifikasi terkirim.
 
-### ⬜ Fase 12 — Progress Test
-Tes berkala lintas periode; skor lewat skema `exam_imports`/`exam_scores` (kolom `kind: "progress_test"`) — dibangun bareng Fase 14 (Import CBT/OSCE) untuk satu skema tiga jenis ujian.
+### ✅ Fase 12+14 — Progress Test & Import CBT/OSCE (digabung sekaligus)
+`ExamImport` (batch impor: kind cbt/osce/progress_test, nama, pengimpor, jumlah baris, jumlah email tak dikenali) + `ExamScore` (skor+max_score per mahasiswa+tanggal, `percentage` turunan). Satu `ExamScoreImporter` (parser CSV: `email,score,exam_date,max_score`) melayani ketiga jenis ujian sekaligus — bukan tiga pipeline seperti JEJAK, dan **bukan integrasi Glide** (Jejak Lite berdiri sendiri). Admin: halaman impor + riwayat batch + hapus batch (rollback). Mahasiswa: halaman "Nilai Ujian" per jenis dengan tren grafik (Chartkick, pola sama seperti Portfolio). 8 test baru (120 total). Diverifikasi manual via HTTP sungguhan (bukan cuma test suite): unggah CSV 2 baris (1 valid + 1 email tak dikenal) → hasil impor benar (1 sukses, 1 tak dikenal terdeteksi) → mahasiswa melihat skornya di grafik.
 
 ### ⬜ Fase 13 — Kurikulum Dasar
 Blueprinting (`AssessmentBlueprint`), Peta Kompetensi, Analisis Capaian Pembelajaran.
-
-### ⬜ Fase 14 — Import CBT/OSCE (+ Progress Test)
-Importer CSV generik → `exam_imports`/`exam_scores` terpadu (kolom `kind`: cbt/osce/progress_test).
 
 ### ⬜ Fase 15 — Dashboard Analitik (Dosen, Preseptor, Kaprodi)
 Butuh peran `preseptor`+`kaprodi` (ditambah di fase ini). Agregasi lintas mahasiswa: progres logbook, hasil DOPS/Mini-CEX, kehadiran rotasi, hasil evaluasi — per dosen (mahasiswa bimbingannya), per preseptor (mahasiswa di wahananya), per Kaprodi (satu program studi, via `study_programs` dari Fase 6).
@@ -100,14 +97,14 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 | `assessment_form_templates`, `assessment_form_fields`, `assessment_form_submissions`, `assessment_form_answers` | 9 | ✅ |
 | `final_projects`, `final_project_milestones`, `examiner_scores` | 11 | ✅ |
 | `assessment_blueprints`, `competency_frameworks`, `competency_items`, `academic_assessment_results` | 13 | ⬜ |
-| `exam_imports`, `exam_scores` (cbt/osce/progress_test) | 12, 14 | ⬜ |
+| `exam_imports`, `exam_scores` (cbt/osce/progress_test) | 12+14 | ✅ |
 
 ## Menjalankan & Menguji
 
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 112 test lulus per Fase 11
+bin/rails test       # 120 test lulus per Fase 12+14
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

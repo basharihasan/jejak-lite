@@ -15,10 +15,12 @@
             <%= link_to "Portfolio", portfolio_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <%= link_to "Formulir Evaluasi", assessment_form_templates_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <%= link_to "Tugas Akhir", final_projects_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
+            <%= link_to "Nilai Ujian", exam_scores_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <%= link_to "Cari", search_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <%= link_to "Panduan", panduan_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <% if current_user.has_role?("admin") %>
               <%= link_to "Periode Akademik", academic_periods_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
+              <%= link_to "Impor Skor Ujian", exam_imports_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <% end %>
           </div>
         </details>

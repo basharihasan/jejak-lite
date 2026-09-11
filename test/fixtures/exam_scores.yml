@@ -1,0 +1,6 @@
+skor_siti_cbt1:
+  exam_import: cbt_blok1
+  student: siti
+  score: 78
+  max_score: 100
+  exam_date: <%= 5.days.ago.to_date %>

@@ -1,0 +1,21 @@
+<h1 class="text-xl font-bold text-gray-900">Nilai Ujian</h1>
+
+<% ExamImport::KINDS.each do |kind, label| %>
+  <% scores = @scores_by_kind[kind] %>
+  <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <p class="text-sm font-semibold text-gray-700 mb-3"><%= label %></p>
+    <% if scores.any? %>
+      <%= line_chart scores.map { |s| [ s.exam_date, s.percentage ] }, colors: [ "#4f46e5" ], height: "180px", suffix: "%" %>
+      <div class="mt-3 space-y-1">
+        <% scores.reverse_each.first(5).each do |score| %>
+          <div class="flex items-center justify-between text-xs text-gray-500">
+            <span><%= l(score.exam_date, format: :long) %></span>
+            <span class="font-semibold text-gray-700"><%= score.score %>/<%= score.max_score %> (<%= score.percentage %>%)</span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-400">Belum ada skor <%= label %>.</p>
+    <% end %>
+  </div>
+<% end %>
