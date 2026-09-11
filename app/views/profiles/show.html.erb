@@ -16,6 +16,9 @@
   <p class="mt-4 text-sm text-gray-600">
     Peran: <%= @user.roles.map(&:name).join(", ").presence || "Belum ada" %>
   </p>
+  <% if @user.study_program.present? %>
+    <p class="mt-1 text-sm text-gray-600">Program Studi: <%= @user.study_program.name %></p>
+  <% end %>
 
   <%= link_to "Sunting Profil", edit_profile_path,
         class: "mt-6 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>

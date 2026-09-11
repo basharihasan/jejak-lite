@@ -10,9 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_002204) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_003912) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "academic_periods", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "end_date", null: false
+    t.string "name", null: false
+    t.date "start_date", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
@@ -80,6 +88,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_002204) do
     t.index ["verified_by_id"], name: "index_clinical_cases_on_verified_by_id"
   end
 
+  create_table "clinical_rotations", force: :cascade do |t|
+    t.bigint "academic_period_id", null: false
+    t.datetime "created_at", null: false
+    t.date "end_date", null: false
+    t.string "institution_name"
+    t.bigint "preceptor_id"
+    t.date "start_date", null: false
+    t.string "station_name", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["academic_period_id"], name: "index_clinical_rotations_on_academic_period_id"
+    t.index ["preceptor_id"], name: "index_clinical_rotations_on_preceptor_id"
+    t.index ["user_id", "start_date"], name: "index_clinical_rotations_on_user_id_and_start_date"
+    t.index ["user_id"], name: "index_clinical_rotations_on_user_id"
+  end
+
   create_table "device_push_tokens", force: :cascade do |t|
     t.string "auth_key", null: false
     t.datetime "created_at", null: false
@@ -118,6 +142,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_002204) do
     t.index ["code"], name: "index_roles_on_code", unique: true
   end
 
+  create_table "study_programs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_study_programs_on_name", unique: true
+  end
+
   create_table "user_roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "role_id", null: false
@@ -147,6 +178,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_002204) do
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.integer "sign_in_count", default: 0, null: false
+    t.bigint "study_program_id"
     t.string "uid"
     t.string "unconfirmed_email"
     t.datetime "updated_at", null: false
@@ -156,6 +188,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_002204) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["study_program_id"], name: "index_users_on_study_program_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -163,10 +196,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_002204) do
   add_foreign_key "activity_logs", "users"
   add_foreign_key "clinical_cases", "users"
   add_foreign_key "clinical_cases", "users", column: "verified_by_id"
+  add_foreign_key "clinical_rotations", "academic_periods"
+  add_foreign_key "clinical_rotations", "users"
+  add_foreign_key "clinical_rotations", "users", column: "preceptor_id"
   add_foreign_key "device_push_tokens", "users"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "notifications", "users", column: "sender_id"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
   add_foreign_key "users", "roles", column: "active_role_id"
+  add_foreign_key "users", "study_programs"
 end

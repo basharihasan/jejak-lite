@@ -26,6 +26,24 @@
   </div>
 </div>
 
+<% if @ongoing_rotation || @upcoming_rotation %>
+  <div class="mt-4 bg-emerald-50/60 ring-1 ring-emerald-100 rounded-2xl p-5">
+    <% if @ongoing_rotation %>
+      <p class="text-xs font-semibold text-emerald-600 uppercase mb-1">Rotasi Sedang Berlangsung</p>
+      <p class="text-sm font-semibold text-gray-800"><%= @ongoing_rotation.station_name %></p>
+      <p class="text-xs text-gray-500 mt-0.5">
+        s.d. <%= l(@ongoing_rotation.end_date, format: :long) %>
+        <% if @ongoing_rotation.institution_name.present? %> · <%= @ongoing_rotation.institution_name %><% end %>
+      </p>
+    <% elsif @upcoming_rotation %>
+      <p class="text-xs font-semibold text-emerald-600 uppercase mb-1">Rotasi Berikutnya</p>
+      <p class="text-sm font-semibold text-gray-800"><%= @upcoming_rotation.station_name %></p>
+      <p class="text-xs text-gray-500 mt-0.5">Mulai <%= l(@upcoming_rotation.start_date, format: :long) %></p>
+    <% end %>
+    <%= link_to "Lihat Jadwal Rotasi →", clinical_rotations_path, class: "text-xs text-emerald-700 font-medium mt-2 inline-block" %>
+  </div>
+<% end %>
+
 <% if @unread_notifications.any? %>
   <div class="mt-4 bg-indigo-50/60 ring-1 ring-indigo-100 rounded-2xl p-5">
     <p class="text-xs font-semibold text-indigo-600 uppercase mb-2">Notifikasi Belum Dibaca</p>

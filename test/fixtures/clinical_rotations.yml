@@ -1,0 +1,15 @@
+ongoing_rotation_siti:
+  user: siti
+  academic_period: current_period
+  preceptor: budi
+  station_name: Ilmu Penyakit Dalam
+  institution_name: RSUP Dr. Hasan Sadikin
+  start_date: <%= 3.days.ago.to_date %>
+  end_date: <%= 11.days.from_now.to_date %>
+
+upcoming_rotation_siti:
+  user: siti
+  academic_period: current_period
+  station_name: Bedah
+  start_date: <%= 20.days.from_now.to_date %>
+  end_date: <%= 40.days.from_now.to_date %>

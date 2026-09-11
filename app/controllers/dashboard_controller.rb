@@ -29,5 +29,8 @@ class DashboardController < ApplicationController
     @recent_activity_logs = current_user.activity_logs.recent.limit(3)
     @this_month_count = current_user.activity_logs.in_month(Date.current).count
     @unread_notifications = current_user.notifications.unread.active.recent.limit(3)
+
+    @ongoing_rotation = current_user.clinical_rotations.ongoing.first
+    @upcoming_rotation = current_user.clinical_rotations.upcoming.first
   end
 end

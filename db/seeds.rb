@@ -9,3 +9,9 @@
 }.each do |code, name|
   Role.find_or_create_by!(code: code) { |role| role.name = name }
 end
+
+# Persis 2 prodi tetap — bukan hierarki Faculty/University (lihat
+# IMPLEMENTATION_PLAN.md § Keputusan Arsitektur Kunci).
+[ "Sarjana Kedokteran", "Profesi Dokter" ].each do |name|
+  StudyProgram.find_or_create_by!(name: name)
+end
