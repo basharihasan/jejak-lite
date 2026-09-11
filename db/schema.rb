@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_003912) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_005349) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -134,6 +134,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_003912) do
     t.index ["sender_id"], name: "index_notifications_on_sender_id"
   end
 
+  create_table "reflection_entries", force: :cascade do |t|
+    t.bigint "activity_log_id"
+    t.bigint "clinical_case_id"
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.date "entry_date", null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["activity_log_id"], name: "index_reflection_entries_on_activity_log_id"
+    t.index ["clinical_case_id"], name: "index_reflection_entries_on_clinical_case_id"
+    t.index ["user_id", "entry_date"], name: "index_reflection_entries_on_user_id_and_entry_date"
+    t.index ["user_id"], name: "index_reflection_entries_on_user_id"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -202,6 +217,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_003912) do
   add_foreign_key "device_push_tokens", "users"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "notifications", "users", column: "sender_id"
+  add_foreign_key "reflection_entries", "activity_logs"
+  add_foreign_key "reflection_entries", "clinical_cases"
+  add_foreign_key "reflection_entries", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
   add_foreign_key "users", "roles", column: "active_role_id"

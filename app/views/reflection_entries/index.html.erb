@@ -1,0 +1,28 @@
+<style>
+  .pagination { display: flex; gap: 0.25rem; margin-top: 1.5rem; justify-content: center; }
+  .pagination span, .pagination a { padding: 0.4rem 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; }
+  .pagination a { color: #4f46e5; border: 1px solid #e5e7eb; }
+  .pagination a:hover { background: #eef2ff; }
+  .pagination .current { background: #4f46e5; color: white; font-weight: 600; }
+</style>
+
+<div class="flex items-center justify-between">
+  <h1 class="text-xl font-bold text-gray-900">Jurnal Refleksi</h1>
+  <%= link_to "+ Tulis Refleksi", new_reflection_entry_path,
+        class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>
+
+<div class="mt-4 space-y-2">
+  <% @reflection_entries.each do |entry| %>
+    <%= link_to reflection_entry_path(entry), class: "block bg-white rounded-2xl ring-1 ring-gray-200 p-5 hover:ring-indigo-300 transition" do %>
+      <p class="text-xs text-gray-400"><%= l(entry.entry_date, format: :long) %></p>
+      <p class="mt-1 font-semibold text-gray-800"><%= entry.title.presence || "Refleksi" %></p>
+      <p class="mt-1 text-sm text-gray-500 line-clamp-2"><%= truncate(entry.content, length: 140) %></p>
+    <% end %>
+  <% end %>
+  <% if @reflection_entries.empty? %>
+    <p class="text-sm text-gray-400">Belum ada refleksi. Mulai menulis untuk mendukung pembelajaran reflektif Anda.</p>
+  <% end %>
+</div>
+
+<%= paginate @reflection_entries %>

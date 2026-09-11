@@ -55,8 +55,8 @@ Kartu "Kegiatan Bulan Ini" (hitung nyata), "Kegiatan Terbaru" (3 log terakhir), 
 ### ✅ Fase 6 — Jadwal Rotasi & Periode Akademik
 `StudyProgram` (2 baris tetap: Sarjana Kedokteran, Profesi Dokter — dipilih mahasiswa di Profil), `AcademicPeriod` (dikelola admin), `ClinicalRotation` (mahasiswa+preseptor opsional+periode+bagian/departemen+wahana+tanggal, status akan_datang/berlangsung/selesai dihitung dari tanggal). Pundit (`ClinicalRotationPolicy`, `AcademicPeriodPolicy`): hanya admin yang bisa menjadwalkan; mahasiswa & preseptor hanya melihat rotasi milik/dibimbingnya sendiri lewat `policy_scope`. Dashboard menampilkan widget "Rotasi Sedang Berlangsung/Berikutnya" (agenda, melengkapi janji Fase 2b). Fondasi bagi DOPS/Mini-CEX (Fase 8) dan Dashboard Analitik (Fase 15). 10 test baru (73 total). Diverifikasi manual 3 akun: admin membuat periode+rotasi → mahasiswa melihatnya di dashboard & jadwal & profil.
 
-### ⬜ Fase 7 — Modul Refleksi (Jurnal Digital)
-Entri jurnal reflektif tersendiri (bukan field di ActivityLog) — mendukung pembelajaran reflektif berkelanjutan, bisa ditautkan ke kegiatan/kasus tertentu atau berdiri sendiri.
+### ✅ Fase 7 — Modul Refleksi (Jurnal Digital)
+`ReflectionEntry` (tanggal, judul opsional, isi bebas, tertaut opsional ke `ActivityLog`/`ClinicalCase`) — jurnal tersendiri, terpisah dari field `reflection` ringkas di Logbook/Kasus Klinis. CRUD kepemilikan sederhana (bukan Pundit — pola `current_user.reflection_entries.find` seperti ActivityLog/Portfolio). Topbar dirapikan dengan dropdown "Lainnya" untuk tautan yang lebih jarang dipakai (Cari, Panduan, Periode Akademik). 6 test baru (79 total). Diverifikasi manual: tulis refleksi tertaut ke kegiatan → tautannya tampil & bisa diklik balik ke kegiatan asal.
 
 ### ⬜ Fase 8 — DOPS & Mini-CEX
 Form skor tetap (rubrik baku, bukan builder), pakai `ClinicalRotation`+`AcademicPeriod` dari Fase 6.
@@ -95,7 +95,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 | `activity_logs` | 4 | ✅ |
 | `clinical_cases` | 5 | ✅ |
 | `study_programs`, `academic_periods`, `clinical_rotations` | 6 | ✅ |
-| `reflection_entries` | 7 | ⬜ |
+| `reflection_entries` | 7 | ✅ |
 | `dops_evaluations`, `mini_cex_evaluations` | 8 | ⬜ |
 | `assessment_form_templates`, `assessment_form_fields` | 9 | ⬜ |
 | `evaluation_submissions` (tutor/blok/tambahan) | 10 | ⬜ |
@@ -108,7 +108,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 73 test lulus per Fase 6
+bin/rails test       # 79 test lulus per Fase 7
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

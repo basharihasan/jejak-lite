@@ -19,6 +19,7 @@ class User < ApplicationRecord
   has_many :clinical_rotations, dependent: :destroy # sebagai mahasiswa
   has_many :precepted_rotations, class_name: "ClinicalRotation", foreign_key: :preceptor_id, inverse_of: :preceptor, dependent: :nullify
   belongs_to :study_program, optional: true
+  has_many :reflection_entries, dependent: :destroy
 
   # Peran yang boleh memverifikasi kasus klinis mahasiswa. Belum ada peran
   # `preseptor` (menyusul Fase Dashboard Analitik) — untuk sekarang dosen

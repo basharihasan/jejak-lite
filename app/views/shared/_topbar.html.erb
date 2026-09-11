@@ -6,9 +6,19 @@
         <%= link_to "Logbook", activity_logs_path, class: "hover:text-indigo-600" %>
         <%= link_to "Kasus Klinis", clinical_cases_path, class: "hover:text-indigo-600" %>
         <%= link_to "Jadwal Rotasi", clinical_rotations_path, class: "hover:text-indigo-600" %>
+        <%= link_to "Refleksi", reflection_entries_path, class: "hover:text-indigo-600" %>
         <%= link_to "Portfolio", portfolio_path, class: "hover:text-indigo-600" %>
-        <%= link_to "Cari", search_path, class: "hover:text-indigo-600" %>
-        <%= link_to "Panduan", panduan_path, class: "hover:text-indigo-600" %>
+
+        <details class="relative">
+          <summary class="cursor-pointer list-none hover:text-indigo-600 list-image-none">Lainnya</summary>
+          <div class="absolute left-0 mt-2 w-44 bg-white rounded-xl shadow-lg ring-1 ring-gray-200 py-1 z-10">
+            <%= link_to "Cari", search_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
+            <%= link_to "Panduan", panduan_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
+            <% if current_user.has_role?("admin") %>
+              <%= link_to "Periode Akademik", academic_periods_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
+            <% end %>
+          </div>
+        </details>
       </nav>
     </div>
 

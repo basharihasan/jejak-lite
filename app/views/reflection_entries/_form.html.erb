@@ -1,0 +1,42 @@
+<%= form_with model: reflection_entry, class: "space-y-4" do |f| %>
+  <% if reflection_entry.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
+      <%= reflection_entry.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :entry_date, "Tanggal", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.date_field :entry_date,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :title, "Judul (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :title,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :content, "Tulisan Refleksi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <p class="text-xs text-gray-400 mb-1">Apa yang terjadi, apa yang Anda rasakan, apa yang Anda pelajari, dan apa yang akan dilakukan berbeda?</p>
+    <%= f.text_area :content, rows: 6,
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :activity_log_id, "Tautkan ke Kegiatan (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.collection_select :activity_log_id, @activity_logs, :id, :title, { include_blank: "-" },
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :clinical_case_id, "Tautkan ke Kasus Klinis (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.collection_select :clinical_case_id, @clinical_cases, :id, :chief_complaint, { include_blank: "-" },
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+  </div>
+
+  <%= f.submit "Simpan Refleksi", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+<% end %>

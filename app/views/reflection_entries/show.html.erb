@@ -1,0 +1,31 @@
+<div class="max-w-2xl">
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-xl font-bold text-gray-900"><%= @reflection_entry.title.presence || "Refleksi" %></h1>
+      <p class="text-sm text-gray-400 mt-1"><%= l(@reflection_entry.entry_date, format: :long) %></p>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <%= link_to "Sunting", edit_reflection_entry_path(@reflection_entry), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
+      <%= button_to "Hapus", reflection_entry_path(@reflection_entry), method: :delete,
+            class: "text-sm text-rose-600 hover:underline",
+            form: { data: { turbo_confirm: "Hapus refleksi ini?" } } %>
+    </div>
+  </div>
+
+  <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <p class="text-sm text-gray-700 whitespace-pre-line"><%= @reflection_entry.content %></p>
+  </div>
+
+  <% if @reflection_entry.activity_log.present? %>
+    <p class="mt-3 text-xs text-gray-400">
+      Tertaut kegiatan: <%= link_to @reflection_entry.activity_log.title, @reflection_entry.activity_log, class: "text-indigo-600 hover:underline" %>
+    </p>
+  <% end %>
+  <% if @reflection_entry.clinical_case.present? %>
+    <p class="mt-1 text-xs text-gray-400">
+      Tertaut kasus klinis: <%= link_to @reflection_entry.clinical_case.chief_complaint, @reflection_entry.clinical_case, class: "text-indigo-600 hover:underline" %>
+    </p>
+  <% end %>
+
+  <%= link_to "← Kembali ke Refleksi", reflection_entries_path, class: "mt-6 inline-block text-sm text-gray-500 hover:text-indigo-600" %>
+</div>

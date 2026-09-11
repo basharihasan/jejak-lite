@@ -50,6 +50,8 @@ Rails.application.routes.draw do
   resources :clinical_rotations, except: %i[show]
   resources :academic_periods, except: %i[show]
 
+  resources :reflection_entries
+
   # Service worker perlu di-root (bukan /assets) supaya scope-nya mencakup
   # seluruh situs — syarat Push API.
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

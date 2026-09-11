@@ -1,0 +1,5 @@
+refleksi_siti:
+  user: siti
+  entry_date: <%= 2.days.ago.to_date %>
+  title: Pengalaman pertama jaga malam
+  content: Hari ini saya belajar banyak tentang triase pasien gawat darurat.
