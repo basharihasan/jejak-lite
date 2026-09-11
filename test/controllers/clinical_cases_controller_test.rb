@@ -47,6 +47,37 @@ class ClinicalCasesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "draft", ClinicalCase.order(:id).last.status
   end
 
+  test "mahasiswa mengisi dokumentasi klinis lengkap termasuk tanda vital" do
+    sign_in users(:siti)
+
+    assert_difference "ClinicalCase.count", 1 do
+      post clinical_cases_path, params: {
+        clinical_case: {
+          case_date: Date.current, chief_complaint: "Demam 3 hari",
+          anamnesis: "Demam sejak 3 hari, disertai nyeri kepala.",
+          general_condition: "Tampak sakit sedang, kompos mentis.",
+          physical_examination: "Faring hiperemis, tonsil T1-T1.",
+          family_history: "Tidak ada riwayat penyakit serupa di keluarga.",
+          vital_signs: { temperature: "38.5", pulse: "92", weight_kg: "60", height_cm: "165" }
+        }
+      }
+    end
+
+    kasus = ClinicalCase.order(:id).last
+    assert_equal "Demam sejak 3 hari, disertai nyeri kepala.", kasus.anamnesis
+    assert_equal "38.5", kasus.vital_sign("temperature")
+    assert_in_delta 22.0, kasus.bmi, 0.1
+  end
+
+  test "halaman form kasus klinis menampilkan wizard 4 langkah" do
+    sign_in users(:siti)
+    get new_clinical_case_path
+
+    assert_response :success
+    assert_select "[data-controller='wizard']"
+    assert_select "[data-wizard-target='step']", count: 4
+  end
+
   test "mahasiswa mengirim draf untuk verifikasi" do
     sign_in users(:siti)
     kasus = clinical_cases(:draft_case_siti)

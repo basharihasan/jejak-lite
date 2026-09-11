@@ -19,6 +19,19 @@ class ClinicalCase < ApplicationRecord
     "mengajari_junior" => "Mengajari Junior"
   }.freeze
 
+  # Tanda vital sengaja JSONB longgar (bukan kolom per-tanda) — meniru
+  # struktur data JEJAK asli tanpa membangun modul antropometri penuh
+  # (lingkar kepala/LiLA dsb yang JEJAK punya sebagai "tambahan" opsional).
+  VITAL_SIGN_FIELDS = {
+    "temperature" => "Suhu (°C)",
+    "bp_systolic" => "TD Sistol",
+    "bp_diastolic" => "TD Diastol",
+    "pulse" => "Nadi (bpm)",
+    "respiratory_rate" => "Respirasi (x/mnt)",
+    "weight_kg" => "BB (kg)",
+    "height_cm" => "TB (cm)"
+  }.freeze
+
   belongs_to :user
   belongs_to :verified_by, class_name: "User", optional: true
 
@@ -41,6 +54,18 @@ class ClinicalCase < ApplicationRecord
 
   def entrustment_level_label
     ENTRUSTMENT_LEVELS.fetch(entrustment_level, entrustment_level)
+  end
+
+  def vital_sign(key)
+    vital_signs&.dig(key.to_s)
+  end
+
+  def bmi
+    weight = vital_sign("weight_kg").to_f
+    height_m = vital_sign("height_cm").to_f / 100.0
+    return nil if weight.zero? || height_m.zero?
+
+    (weight / (height_m**2)).round(1)
   end
 
   def editable_by_owner?

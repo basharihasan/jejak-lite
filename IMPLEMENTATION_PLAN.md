@@ -132,6 +132,15 @@ Sadar penuh **tidak** membawa arsitektur JEJAK asli untuk kasus klinis (`Activit
 
 **Jejak Lite selesai Fase 0-20** — seluruh siklus "Perkaya Kesenjangan dengan JEJAK Asli" (Fase 17-20) tuntas. 172 test hijau.
 
+### ✅ Fase 21 — Wizard Kasus Klinis & Dokumentasi Klinis Lengkap
+Ditambahkan setelah pengguna membandingkan langsung `localhost:3000/clinical_cases/new` dengan `jejak.pro/clinical_logbook/cases/new` sungguhan lewat screenshot — bukan dari riset source code lagi, tapi perbandingan visual nyata.
+
+**Yang diambil dari JEJAK asli** (murni UX + data, tanpa AI): form Kasus Klinis diubah dari satu form datar panjang menjadi **wizard 4 langkah** ("Informasi Dasar" → "Anamnesis & Pemeriksaan Fisik" → "Diagnosis & Tatalaksana" → "Pembelajaran & Bukti") dengan indikator progres ala JEJAK ("Langkah X dari Y" + dot progress) — Stimulus controller baru `wizard_controller.js`, murni sisi klien (semua field tetap satu `<form>`, cuma disembunyikan pakai `[hidden]`, jadi submit akhir tetap satu POST/PATCH normal, TANPA perubahan di controller). Field klinis baru pada `ClinicalCase`: `anamnesis`, `general_condition`, `physical_examination`, `family_history` (teks bebas, meniru pemisahan dokumentasi klinis JEJAK asli — jauh lebih rinci dari sekadar `diagnosis`/`management`), dan `vital_signs` (JSONB: suhu, tekanan darah sistol/diastol, nadi, respirasi, berat, tinggi) dengan `bmi` dihitung otomatis dari berat/tinggi (method model, bukan tersimpan).
+
+**Yang SENGAJA tidak dibawa** — semua elemen di layar JEJAK yang **berbasis AI**: dikte suara ("Voice"), "✨ Enhance" (penghalusan teks AI), "Smart PE Builder" (generator template pemeriksaan fisik AI), dan "Clinical Assistant" (chatbot mengambang) — konsisten dengan keputusan Gemfile sejak awal proyek (tanpa gem AI). Pola upload foto via paste-URL Google Drive JEJAK juga tidak ditiru — upload file langsung (`evidence_files`, sudah ada) teknisnya lebih baik (bukan tautan yang bisa kedaluwarsa).
+
+6 test baru (176 total, semua hijau). Diverifikasi manual via HTTP sungguhan: wizard 4 langkah tampil dengan benar (`data-controller="wizard"`, 4 `[data-wizard-target="step"]`), submit satu kali membawa semua field termasuk tanda vital nested, BMI terhitung otomatis dan tampil di halaman show.
+
 ## Model Data (ringkas, akan detail per fase saat digarap)
 
 | Tabel | Fase | Status |
@@ -153,13 +162,14 @@ Sadar penuh **tidak** membawa arsitektur JEJAK asli untuk kasus klinis (`Activit
 | `case_verification_comments`, `activity_log_competency_tags` (+ kolom baru activity_logs/clinical_cases) | 18 | ✅ |
 | _(tanpa tabel baru — agregasi lintas model yang sudah ada)_ | 19 | ✅ |
 | `assessment_blueprint_mappings`, `competency_milestones` | 20 | ✅ |
+| _(kolom baru pada clinical_cases: anamnesis dkk + vital_signs)_ | 21 | ✅ |
 
 ## Menjalankan & Menguji
 
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 172 test lulus per Fase 20
+bin/rails test       # 176 test lulus per Fase 21
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

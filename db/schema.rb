@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_112713) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_121319) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -156,6 +156,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_112713) do
   end
 
   create_table "clinical_cases", force: :cascade do |t|
+    t.text "anamnesis"
     t.string "case_complexity"
     t.date "case_date", null: false
     t.string "chief_complaint", null: false
@@ -163,16 +164,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_112713) do
     t.datetime "created_at", null: false
     t.text "diagnosis"
     t.string "entrustment_level"
+    t.text "family_history"
+    t.text "general_condition"
     t.text "learning_points"
     t.text "management"
     t.string "patient_age_group"
     t.string "patient_gender"
+    t.text "physical_examination"
     t.boolean "recommend_remediation", default: false, null: false
     t.string "status", default: "draft", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.datetime "verified_at"
     t.bigint "verified_by_id"
+    t.jsonb "vital_signs", default: {}, null: false
     t.index ["status"], name: "index_clinical_cases_on_status"
     t.index ["user_id", "status"], name: "index_clinical_cases_on_user_id_and_status"
     t.index ["user_id"], name: "index_clinical_cases_on_user_id"

@@ -80,6 +80,11 @@ namespace :demo do
       c.case_complexity = "sedang"
       c.patient_age_group = "Dewasa"
       c.patient_gender = "Perempuan"
+      c.anamnesis = "Demam naik-turun sejak 3 hari, disertai nyeri kepala dan mual. Riwayat bepergian ke luar kota 1 minggu lalu."
+      c.general_condition = "Tampak sakit sedang, kompos mentis, tidak sesak."
+      c.physical_examination = "Lidah kotor tepi hiperemis, nyeri tekan epigastrium ringan, hepar/lien tidak teraba membesar."
+      c.family_history = "Tidak ada riwayat penyakit serupa di keluarga."
+      c.vital_signs = { "temperature" => 38.6, "bp_systolic" => 110, "bp_diastolic" => 70, "pulse" => 88, "respiratory_rate" => 20, "weight_kg" => 58, "height_cm" => 160 }
       c.diagnosis = "Demam tifoid"
       c.management = "Antibiotik lini pertama + edukasi"
       c.learning_points = "Pentingnya anamnesis riwayat bepergian."

@@ -58,4 +58,16 @@ class ClinicalCaseTest < ActiveSupport::TestCase
     assert_equal "submitted", comment.action
     assert_equal kasus.user, comment.user
   end
+
+  test "bmi menghitung dari berat dan tinggi badan" do
+    kasus = clinical_cases(:submitted_case_siti)
+    kasus.vital_signs = { "weight_kg" => 70, "height_cm" => 175 }
+
+    assert_equal 22.9, kasus.bmi
+  end
+
+  test "bmi nil kalau berat atau tinggi belum diisi" do
+    kasus = clinical_cases(:draft_case_siti)
+    assert_nil kasus.bmi
+  end
 end
