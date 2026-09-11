@@ -17,6 +17,10 @@
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%# Chartkick (Portfolio, Dashboard Analitik) — dimuat lewat CDN, bukan
+        importmap, karena Chartkick tidak menyediakan build ESM resmi. %>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartkick@5/dist/chartkick.js"></script>
     <%= javascript_importmap_tags %>
   </head>
 

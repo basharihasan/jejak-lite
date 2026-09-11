@@ -3,6 +3,8 @@
     <div class="flex items-center gap-6">
       <%= link_to "Jejak Lite", dashboard_path, class: "font-bold text-lg text-indigo-600" %>
       <nav class="hidden sm:flex items-center gap-4 text-sm text-gray-600">
+        <%= link_to "Logbook", activity_logs_path, class: "hover:text-indigo-600" %>
+        <%= link_to "Portfolio", portfolio_path, class: "hover:text-indigo-600" %>
         <%= link_to "Cari", search_path, class: "hover:text-indigo-600" %>
         <%= link_to "Panduan", panduan_path, class: "hover:text-indigo-600" %>
       </nav>

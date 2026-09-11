@@ -25,5 +25,9 @@ class DashboardController < ApplicationController
   def show
     @active_role = current_user.active_role
     @next_steps = ROLE_NEXT_STEPS.fetch(@active_role&.code, ROLE_NEXT_STEPS["mahasiswa"])
+
+    @recent_activity_logs = current_user.activity_logs.recent.limit(3)
+    @this_month_count = current_user.activity_logs.in_month(Date.current).count
+    @unread_notifications = current_user.notifications.unread.active.recent.limit(3)
   end
 end

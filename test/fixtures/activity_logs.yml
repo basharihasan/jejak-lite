@@ -1,0 +1,22 @@
+jaga_igd:
+  user: budi
+  title: Jaga IGD
+  category: klinis
+  activity_type: Rawat Jalan
+  activity_date: <%= 3.days.ago.to_date %>
+  description: Menangani pasien gawat darurat.
+
+penyuluhan_stunting:
+  user: budi
+  title: Penyuluhan Stunting
+  category: non_klinis
+  activity_type: Penyuluhan
+  activity_date: <%= 10.days.ago.to_date %>
+  description: Penyuluhan ke kader posyandu.
+
+kegiatan_siti:
+  user: siti
+  title: Kunjungan Rumah
+  category: klinis
+  activity_type: Kunjungan Rumah
+  activity_date: <%= 1.day.ago.to_date %>

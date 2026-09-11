@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_10_234952) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_000701) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_234952) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "activity_logs", force: :cascade do |t|
+    t.date "activity_date", null: false
+    t.string "activity_type"
+    t.string "category", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "participant_count"
+    t.string "patient_code"
+    t.text "reflection"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["category"], name: "index_activity_logs_on_category"
+    t.index ["user_id", "activity_date"], name: "index_activity_logs_on_user_id_and_activity_date"
+    t.index ["user_id"], name: "index_activity_logs_on_user_id"
   end
 
   create_table "device_push_tokens", force: :cascade do |t|
@@ -92,6 +109,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_234952) do
 
   create_table "users", force: :cascade do |t|
     t.bigint "active_role_id"
+    t.string "calendar_feed_token"
     t.datetime "confirmation_sent_at"
     t.string "confirmation_token"
     t.datetime "confirmed_at"
@@ -112,6 +130,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_234952) do
     t.string "unconfirmed_email"
     t.datetime "updated_at", null: false
     t.index ["active_role_id"], name: "index_users_on_active_role_id"
+    t.index ["calendar_feed_token"], name: "index_users_on_calendar_feed_token", unique: true
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
@@ -120,6 +139,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_234952) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "activity_logs", "users"
   add_foreign_key "device_push_tokens", "users"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "notifications", "users", column: "sender_id"

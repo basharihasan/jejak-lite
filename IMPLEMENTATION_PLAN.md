@@ -38,14 +38,14 @@ Devise, Google OAuth opsional, `Role`/`UserRole`, Ganti Peran, Profil+avatar. *(
 ### ✅ Fase 2 — Dashboard & Navigasi Dasar (commit `479cdf6`)
 Kerangka dashboard per peran, Pencarian pengguna, Panduan, `/brand`.
 
-### ⬜ Fase 2b — Dashboard Mahasiswa Berisi Data (revisit setelah Fase 3, 4, 6)
-Ringkasan progres (dari Logbook+Rotasi), agenda (dari Jadwal Rotasi+kalender kegiatan), widget notifikasi terbaru — menggantikan kartu "Langkah Berikutnya" generik begitu datanya nyata ada.
+### ✅ Fase 2b — Dashboard Mahasiswa Berisi Data (sebagian, commit `<pending>`)
+Kartu "Kegiatan Bulan Ini" (hitung nyata), "Kegiatan Terbaru" (3 log terakhir), dan "Notifikasi Belum Dibaca" — semua dari data sungguhan. Agenda dari Jadwal Rotasi menyusul setelah Fase 6.
 
 ### ✅ Fase 3 — Notifikasi
 `Notification` (in-app: tandai dibaca/arsipkan/tandai semua via Turbo Stream, tanpa reload halaman) + `DevicePushToken` (Web Push: kunci VAPID, service worker, tombol aktifkan/matikan) + `NotificationDeliveryJob`. Lonceng notifikasi di topbar (badge unread + pratinjau 5 terbaru) tampil di semua halaman. Locale Indonesia (`rails-i18n`) dipasang supaya `time_ago_in_words` & pesan validasi ikut berbahasa Indonesia, bukan cuma teks yang saya tulis manual. 33 test lulus.
 
-### ⬜ Fase 4 — Logbook Aktivitas Klinis & Non-Klinis + Portfolio
-`ActivityLog` (klinis & non-klinis, refleksi ringkas, skor, evidence/attachment), kalender + feed iCal, QR pasien. **Portfolio** = tampilan kumulatif/rekap seluruh aktivitas tersimpan seorang mahasiswa (bisa diekspor).
+### ✅ Fase 4 — Logbook Aktivitas Klinis & Non-Klinis + Portfolio
+`ActivityLog` (klinis/non-klinis, deskripsi, refleksi, evidence files, kode pasien anonim + QR via `rqrcode`), kalender bulanan (grid HTML tanpa JS lib) + feed iCal pribadi (token, bisa di-reset). **Portfolio**: ringkasan (total, per kategori, tren 6 bulan via Chartkick, jenis kegiatan terbanyak) + ekspor CSV. 16 test baru (49 total).
 
 ### ⬜ Fase 5 — Kasus Klinis Dasar
 Kasus klinis + verifikasi supervisor. Portal pasien token publik (consent/feedback/survei tanpa login) **tidak diperlukan** — dihapus dari cakupan. Household/family graph ditunda.

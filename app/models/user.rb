@@ -13,6 +13,7 @@ class User < ApplicationRecord
 
   has_many :notifications, foreign_key: :recipient_id, inverse_of: :recipient, dependent: :destroy
   has_many :device_push_tokens, dependent: :destroy
+  has_many :activity_logs, dependent: :destroy
 
   validates :full_name, presence: true
 
@@ -46,5 +47,16 @@ class User < ApplicationRecord
     return false unless role
 
     update(active_role: role)
+  end
+
+  # Token acak untuk URL feed iCal pribadi (/activity_logs/feed/:token.ics).
+  # Dibuat lazy saat pertama diminta, bukan saat akun dibuat, supaya akun
+  # yang tak pernah membuka fitur kalender tak menyimpan token yang tak
+  # terpakai.
+  def calendar_feed_token!
+    return calendar_feed_token if calendar_feed_token.present?
+
+    update!(calendar_feed_token: SecureRandom.urlsafe_base64(24))
+    calendar_feed_token
   end
 end

@@ -1,0 +1,60 @@
+<%= form_with model: activity_log, class: "space-y-4" do |f| %>
+  <% if activity_log.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
+      <%= activity_log.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :category, "Kategori", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.select :category, ActivityLog::CATEGORIES.invert, { include_blank: "Pilih..." },
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :activity_type, "Jenis Kegiatan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :activity_type, placeholder: "Rawat Jalan, Penyuluhan, dll",
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :title, "Judul Kegiatan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_field :title, placeholder: "Contoh: Jaga IGD, Penyuluhan Stunting",
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :activity_date, "Tanggal", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.date_field :activity_date,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+    <div>
+      <%= f.label :participant_count, "Jumlah Peserta/Pasien (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.number_field :participant_count, min: 1,
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :description, "Deskripsi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_area :description, rows: 3,
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+  </div>
+
+  <div>
+    <%= f.label :reflection, "Refleksi Singkat (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <p class="text-xs text-gray-400 mb-1">Apa yang Anda pelajari dari kegiatan ini?</p>
+    <%= f.text_area :reflection, rows: 2,
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+  </div>
+
+  <div>
+    <%= f.label :evidence_files, "Bukti Pendukung (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.file_field :evidence_files, multiple: true, class: "text-sm" %>
+  </div>
+
+  <%= f.submit activity_log.persisted? ? "Simpan Perubahan" : "Catat Kegiatan",
+        class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+<% end %>

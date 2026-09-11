@@ -27,6 +27,18 @@ Rails.application.routes.draw do
   resource :device_push_token, only: %i[create destroy]
   get "vapid_public_key", to: "device_push_tokens#public_key"
 
+  resources :activity_logs do
+    member do
+      post :generate_patient_code
+    end
+  end
+  get "kalender", to: "activity_logs#calendar", as: :activity_logs_calendar
+  get "kalender/feed/:token", to: "activity_logs#feed", as: :activity_logs_feed
+  post "kalender/token/reset", to: "activity_logs#reset_feed_token", as: :reset_calendar_feed_token
+
+  resource :portfolio, only: %i[show]
+  get "portfolio/export", to: "portfolios#export", as: :export_portfolio
+
   # Service worker perlu di-root (bukan /assets) supaya scope-nya mencakup
   # seluruh situs — syarat Push API.
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
