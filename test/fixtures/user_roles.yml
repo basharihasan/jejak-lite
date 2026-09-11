@@ -5,3 +5,11 @@ budi_dosen:
 siti_mahasiswa:
   user: siti
   role: mahasiswa
+
+wati_preseptor:
+  user: wati
+  role: preseptor
+
+dedi_kaprodi:
+  user: dedi
+  role: kaprodi

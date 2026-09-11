@@ -14,7 +14,15 @@ class DashboardController < ApplicationController
     ],
     "dosen" => [
       { title: "Lengkapi profil", path: :profile_path },
-      { title: "Baca Panduan Pengguna", path: :panduan_path }
+      { title: "Dashboard Analitik mahasiswa bimbingan", path: :analytics_path }
+    ],
+    "preseptor" => [
+      { title: "Lengkapi profil", path: :profile_path },
+      { title: "Dashboard Analitik mahasiswa di wahana", path: :analytics_path }
+    ],
+    "kaprodi" => [
+      { title: "Lengkapi profil", path: :profile_path },
+      { title: "Dashboard Analitik program studi", path: :analytics_path }
     ],
     "admin" => [
       { title: "Lengkapi profil", path: :profile_path },

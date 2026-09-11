@@ -6,6 +6,14 @@ dosen:
   code: dosen
   name: Dosen
 
+preseptor:
+  code: preseptor
+  name: Preseptor
+
+kaprodi:
+  code: kaprodi
+  name: Kaprodi
+
 admin:
   code: admin
   name: Admin

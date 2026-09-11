@@ -11,3 +11,19 @@ siti:
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
   confirmed_at: <%= Time.current %>
   active_role: mahasiswa
+  study_program: sarjana_kedokteran
+
+wati:
+  full_name: Wati Preseptor
+  email: wati@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  confirmed_at: <%= Time.current %>
+  active_role: preseptor
+
+dedi:
+  full_name: Dedi Kaprodi
+  email: dedi@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
+  confirmed_at: <%= Time.current %>
+  active_role: kaprodi
+  study_program: sarjana_kedokteran

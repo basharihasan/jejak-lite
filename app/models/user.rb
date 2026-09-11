@@ -30,10 +30,9 @@ class User < ApplicationRecord
   has_many :examiner_scores_given, class_name: "ExaminerScore", foreign_key: :examiner_id, inverse_of: :examiner, dependent: :destroy
 
   # Peran yang boleh menilai/memverifikasi mahasiswa (DOPS, Mini-CEX, Kasus
-  # Klinis). Belum ada peran `preseptor` (menyusul Fase Dashboard Analitik)
-  # — untuk sekarang dosen dan admin yang berwenang.
+  # Klinis) — dosen, preseptor (pembimbing klinis di wahana), dan admin.
   def instructor?
-    has_role?("dosen") || has_role?("admin")
+    has_role?("dosen") || has_role?("preseptor") || has_role?("admin")
   end
   alias can_verify_clinical_cases? instructor?
 

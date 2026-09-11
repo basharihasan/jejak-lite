@@ -76,8 +76,8 @@ Tiga templat baku di-seed lewat `db/seeds.rb` memakai infrastruktur Fase 9 — b
 ### ✅ Fase 13 — Kurikulum Dasar
 `AssessmentBlueprint` (berdiri sendiri, JSONB `competency_mapping` ranah→bobot tervalidasi harus berjumlah 100%, `learning_outcomes` array — ditulis lewat textarea "Ranah: Bobot"/satu-capaian-per-baris di UI, bukan form dinamis JS, karena tanpa FK ke CompetencyFramework meniru desain JEJAK asli). `CompetencyFramework`+`CompetencyItem` (pohon self-referential 2 level: ranah/domain lalu sub-kompetensi, posisi otomatis mengikuti urutan pembuatan). Pundit: `AssessmentBlueprintPolicy` admin-only penuh; `CompetencyFrameworkPolicy`/`CompetencyItemPolicy` — index/show terbuka untuk semua yang login (referensi bersama), kelola (tambah/hapus ranah & sub-kompetensi lewat form inline di halaman detail) admin-only. Halaman baru "Analisis Capaian Pembelajaran" (`/capaian-belajar`, `AcademicAssessmentsController`) — potret pribadi **satu periode akademik terpilih** (dropdown), menggabungkan DOPS+Mini-CEX (rata-rata skor & daftar per rotasi periode itu) dan skor ujian (dari `ExamScore`, difilter tanggal ujian dalam rentang periode) milik mahasiswa yang login saja; sengaja **tanpa tabel `academic_assessment_results` terpisah dan tanpa grafik tren antar periode** — agregasi langsung dari data yang sudah ada (DopsEvaluation/MiniCexEvaluation/ExamScore) supaya tidak ada data ganda yang bisa basi, dan tren rata-rata antar periode akademik JEJAK asli terbukti selalu menyesatkan karena jenis/bobot asesmen berganti tiap periode. 20 test baru (140 total). Diverifikasi manual via HTTP sungguhan: admin membuat peta kompetensi + tambah ranah & sub-kompetensi inline → blueprint dengan bobot 100% tampil dengan pie chart → mahasiswa (non-admin) bisa melihat peta kompetensi (read-only, ditolak saat mencoba menambah ranah — dikonfirmasi 0 baris tersimpan) → mahasiswa melihat capaian pribadinya sendiri di `/capaian-belajar`, mahasiswa lain tidak melihat data yang bukan miliknya.
 
-### ⬜ Fase 15 — Dashboard Analitik (Dosen, Preseptor, Kaprodi)
-Butuh peran `preseptor`+`kaprodi` (ditambah di fase ini). Agregasi lintas mahasiswa: progres logbook, hasil DOPS/Mini-CEX, kehadiran rotasi, hasil evaluasi — per dosen (mahasiswa bimbingannya), per preseptor (mahasiswa di wahananya), per Kaprodi (satu program studi, via `study_programs` dari Fase 6).
+### ✅ Fase 15 — Dashboard Analitik (Dosen, Preseptor, Kaprodi)
+Peran `preseptor` & `kaprodi` ditambahkan ke seed (`instructor?` diperluas mencakup preseptor — kini boleh menilai DOPS/Mini-CEX/verifikasi kasus klinis, setara dosen). **Satu halaman `/analitik` (`AnalyticsController`) dengan tiga bagian kondisional**, bukan tiga controller/halaman terpisah — konsisten dengan pilar multi-peran per akun jejak-lite (satu akun bisa punya kombinasi peran apa pun, halaman menyesuaikan bagian mana yang tampil): (1) **Mahasiswa Bimbingan** untuk dosen/admin — mahasiswa yang tugas akhirnya dibimbing ATAU pernah dinilai DOPS/Mini-CEX oleh dosen ybs; (2) **Mahasiswa di Wahana Anda** untuk preseptor/admin — daftar `ClinicalRotation.for_preceptor`, dengan hitungan kegiatan logbook & DOPS/Mini-CEX selama rentang tanggal rotasi; (3) **Program Studi** untuk kaprodi/admin — seluruh mahasiswa satu `study_program` (kaprodi dikunci ke `study_program_id` miliknya sendiri via kolom yang sama dipakai mahasiswa, tanpa kolom baru; admin bebas pilih prodi mana pun lewat dropdown). Tiap baris mahasiswa menampilkan: kegiatan bulan ini, rata-rata DOPS, rata-rata Mini-CEX, rasio kasus klinis terverifikasi. Akses dijaga guard peran sederhana (bukan Pundit — halaman ini bukan milik satu model, mengikuti pola `AssessmentsController`/`AcademicAssessmentsController` yang juga tanpa Pundit untuk data lintas-model/personal). 5 test baru (145 total). Diverifikasi manual via HTTP sungguhan dengan akun dev multi-peran (dosen+preseptor+kaprodi sekaligus): ketiga bagian tampil bersamaan tanpa galat, mahasiswa yang sama muncul konsisten di ketiganya sesuai relasi aslinya; mahasiswa murni ditolak akses (dikonfirmasi lewat test otomatis).
 
 ### ⬜ Fase 16 — Deploy & Poles
 Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README final.
@@ -98,13 +98,14 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 | `final_projects`, `final_project_milestones`, `examiner_scores` | 11 | ✅ |
 | `assessment_blueprints`, `competency_frameworks`, `competency_items` | 13 | ✅ |
 | `exam_imports`, `exam_scores` (cbt/osce/progress_test) | 12+14 | ✅ |
+| _(tanpa tabel baru — agregasi lintas model yang sudah ada)_ | 15 | ✅ |
 
 ## Menjalankan & Menguji
 
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 140 test lulus per Fase 13
+bin/rails test       # 145 test lulus per Fase 15
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

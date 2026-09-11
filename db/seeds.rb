@@ -5,6 +5,8 @@
 {
   "mahasiswa" => "Mahasiswa",
   "dosen"     => "Dosen",
+  "preseptor" => "Preseptor",
+  "kaprodi"   => "Kaprodi",
   "admin"     => "Admin"
 }.each do |code, name|
   Role.find_or_create_by!(code: code) { |role| role.name = name }

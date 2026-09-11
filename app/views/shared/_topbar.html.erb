@@ -7,6 +7,9 @@
         <%= link_to "Kasus Klinis", clinical_cases_path, class: "hover:text-indigo-600" %>
         <%= link_to "Jadwal Rotasi", clinical_rotations_path, class: "hover:text-indigo-600" %>
         <%= link_to "Asesmen", assessments_path, class: "hover:text-indigo-600" %>
+        <% if current_user.has_role?("dosen") || current_user.has_role?("preseptor") || current_user.has_role?("kaprodi") || current_user.has_role?("admin") %>
+          <%= link_to "Dashboard Analitik", analytics_path, class: "hover:text-indigo-600" %>
+        <% end %>
 
         <details class="relative">
           <summary class="cursor-pointer list-none hover:text-indigo-600 list-image-none">Lainnya</summary>
