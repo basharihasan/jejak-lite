@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_013617) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_014521) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -65,6 +65,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_013617) do
     t.index ["category"], name: "index_activity_logs_on_category"
     t.index ["user_id", "activity_date"], name: "index_activity_logs_on_user_id_and_activity_date"
     t.index ["user_id"], name: "index_activity_logs_on_user_id"
+  end
+
+  create_table "assessment_blueprints", force: :cascade do |t|
+    t.jsonb "competency_mapping", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.jsonb "learning_outcomes", default: [], null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "assessment_form_answers", force: :cascade do |t|
@@ -148,6 +157,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_013617) do
     t.index ["preceptor_id"], name: "index_clinical_rotations_on_preceptor_id"
     t.index ["user_id", "start_date"], name: "index_clinical_rotations_on_user_id_and_start_date"
     t.index ["user_id"], name: "index_clinical_rotations_on_user_id"
+  end
+
+  create_table "competency_frameworks", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "competency_items", force: :cascade do |t|
+    t.bigint "competency_framework_id", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "parent_id"
+    t.integer "position", default: 0, null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["competency_framework_id"], name: "index_competency_items_on_competency_framework_id"
+    t.index ["parent_id"], name: "index_competency_items_on_parent_id"
   end
 
   create_table "device_push_tokens", force: :cascade do |t|
@@ -357,6 +385,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_013617) do
   add_foreign_key "clinical_rotations", "academic_periods"
   add_foreign_key "clinical_rotations", "users"
   add_foreign_key "clinical_rotations", "users", column: "preceptor_id"
+  add_foreign_key "competency_items", "competency_frameworks"
+  add_foreign_key "competency_items", "competency_items", column: "parent_id"
   add_foreign_key "device_push_tokens", "users"
   add_foreign_key "dops_evaluations", "clinical_rotations"
   add_foreign_key "dops_evaluations", "users", column: "evaluator_id"

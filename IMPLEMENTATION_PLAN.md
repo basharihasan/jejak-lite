@@ -73,8 +73,8 @@ Tiga templat baku di-seed lewat `db/seeds.rb` memakai infrastruktur Fase 9 — b
 ### ✅ Fase 12+14 — Progress Test & Import CBT/OSCE (digabung sekaligus)
 `ExamImport` (batch impor: kind cbt/osce/progress_test, nama, pengimpor, jumlah baris, jumlah email tak dikenali) + `ExamScore` (skor+max_score per mahasiswa+tanggal, `percentage` turunan). Satu `ExamScoreImporter` (parser CSV: `email,score,exam_date,max_score`) melayani ketiga jenis ujian sekaligus — bukan tiga pipeline seperti JEJAK, dan **bukan integrasi Glide** (Jejak Lite berdiri sendiri). Admin: halaman impor + riwayat batch + hapus batch (rollback). Mahasiswa: halaman "Nilai Ujian" per jenis dengan tren grafik (Chartkick, pola sama seperti Portfolio). 8 test baru (120 total). Diverifikasi manual via HTTP sungguhan (bukan cuma test suite): unggah CSV 2 baris (1 valid + 1 email tak dikenal) → hasil impor benar (1 sukses, 1 tak dikenal terdeteksi) → mahasiswa melihat skornya di grafik.
 
-### ⬜ Fase 13 — Kurikulum Dasar
-Blueprinting (`AssessmentBlueprint`), Peta Kompetensi, Analisis Capaian Pembelajaran.
+### ✅ Fase 13 — Kurikulum Dasar
+`AssessmentBlueprint` (berdiri sendiri, JSONB `competency_mapping` ranah→bobot tervalidasi harus berjumlah 100%, `learning_outcomes` array — ditulis lewat textarea "Ranah: Bobot"/satu-capaian-per-baris di UI, bukan form dinamis JS, karena tanpa FK ke CompetencyFramework meniru desain JEJAK asli). `CompetencyFramework`+`CompetencyItem` (pohon self-referential 2 level: ranah/domain lalu sub-kompetensi, posisi otomatis mengikuti urutan pembuatan). Pundit: `AssessmentBlueprintPolicy` admin-only penuh; `CompetencyFrameworkPolicy`/`CompetencyItemPolicy` — index/show terbuka untuk semua yang login (referensi bersama), kelola (tambah/hapus ranah & sub-kompetensi lewat form inline di halaman detail) admin-only. Halaman baru "Analisis Capaian Pembelajaran" (`/capaian-belajar`, `AcademicAssessmentsController`) — potret pribadi **satu periode akademik terpilih** (dropdown), menggabungkan DOPS+Mini-CEX (rata-rata skor & daftar per rotasi periode itu) dan skor ujian (dari `ExamScore`, difilter tanggal ujian dalam rentang periode) milik mahasiswa yang login saja; sengaja **tanpa tabel `academic_assessment_results` terpisah dan tanpa grafik tren antar periode** — agregasi langsung dari data yang sudah ada (DopsEvaluation/MiniCexEvaluation/ExamScore) supaya tidak ada data ganda yang bisa basi, dan tren rata-rata antar periode akademik JEJAK asli terbukti selalu menyesatkan karena jenis/bobot asesmen berganti tiap periode. 20 test baru (140 total). Diverifikasi manual via HTTP sungguhan: admin membuat peta kompetensi + tambah ranah & sub-kompetensi inline → blueprint dengan bobot 100% tampil dengan pie chart → mahasiswa (non-admin) bisa melihat peta kompetensi (read-only, ditolak saat mencoba menambah ranah — dikonfirmasi 0 baris tersimpan) → mahasiswa melihat capaian pribadinya sendiri di `/capaian-belajar`, mahasiswa lain tidak melihat data yang bukan miliknya.
 
 ### ⬜ Fase 15 — Dashboard Analitik (Dosen, Preseptor, Kaprodi)
 Butuh peran `preseptor`+`kaprodi` (ditambah di fase ini). Agregasi lintas mahasiswa: progres logbook, hasil DOPS/Mini-CEX, kehadiran rotasi, hasil evaluasi — per dosen (mahasiswa bimbingannya), per preseptor (mahasiswa di wahananya), per Kaprodi (satu program studi, via `study_programs` dari Fase 6).
@@ -96,7 +96,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 | `dops_evaluations`, `mini_cex_evaluations` | 8 | ✅ |
 | `assessment_form_templates`, `assessment_form_fields`, `assessment_form_submissions`, `assessment_form_answers` | 9 | ✅ |
 | `final_projects`, `final_project_milestones`, `examiner_scores` | 11 | ✅ |
-| `assessment_blueprints`, `competency_frameworks`, `competency_items`, `academic_assessment_results` | 13 | ⬜ |
+| `assessment_blueprints`, `competency_frameworks`, `competency_items` | 13 | ✅ |
 | `exam_imports`, `exam_scores` (cbt/osce/progress_test) | 12+14 | ✅ |
 
 ## Menjalankan & Menguji
@@ -104,7 +104,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 120 test lulus per Fase 12+14
+bin/rails test       # 140 test lulus per Fase 13
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda
@@ -112,4 +112,5 @@ bin/rails test       # 120 test lulus per Fase 12+14
 - Community Feed (media sosial internal) — diputuskan tidak diperlukan sama sekali.
 - Household/family graph continuity of care → iterasi berikutnya.
 - Pencarian global saat ini hanya mencakup `User` — diperluas ke Logbook/Kasus Klinis begitu ada (Fase 4-5).
+- "Analisis Capaian Pembelajaran" (Fase 13) dihitung langsung dari DOPS/Mini-CEX/ExamScore saat halaman dibuka, bukan tabel `academic_assessment_results` tersimpan — lebih sederhana & tak ada risiko data basi, tapi berarti tidak ada riwayat snapshot historis (kartu capaian versi tanggal X tidak bisa "dibekukan").
 - DOPS/Mini-CEX tetap form baku (bukan dibangun lewat Form Builder) — form builder khusus untuk evaluasi yang bentuknya bisa berubah-ubah (tutor/blok/tambahan).

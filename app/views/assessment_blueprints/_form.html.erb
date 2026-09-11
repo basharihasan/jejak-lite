@@ -1,0 +1,39 @@
+<%= form_with model: assessment_blueprint, class: "space-y-4" do |f| %>
+  <% if assessment_blueprint.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
+      <%= assessment_blueprint.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Nama Blueprint", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_field :name, placeholder: "Contoh: Blueprint OSCE Semester 5",
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+  </div>
+
+  <div>
+    <%= f.label :description, "Deskripsi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_area :description, rows: 2,
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+  </div>
+
+  <div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Peta Bobot Kompetensi</label>
+    <p class="text-xs text-gray-400 mb-1">Satu baris satu ranah, format <code class="bg-gray-100 px-1 rounded">Ranah: Bobot</code>. Total bobot harus 100.</p>
+    <%= text_area_tag "assessment_blueprint[competency_mapping_text]",
+          assessment_blueprint.competency_mapping.map { |k, v| "#{k}: #{v}" }.join("\n"),
+          rows: 5, placeholder: "Kardiovaskular: 30\nRespirasi: 25\nGastrointestinal: 25\nEndokrin: 20",
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm font-mono" %>
+  </div>
+
+  <div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Capaian Pembelajaran</label>
+    <p class="text-xs text-gray-400 mb-1">Satu baris satu capaian.</p>
+    <%= text_area_tag "assessment_blueprint[learning_outcomes_text]",
+          assessment_blueprint.learning_outcomes.join("\n"),
+          rows: 4, placeholder: "Mampu mendiagnosis nyeri dada akut\nMampu menginterpretasi EKG dasar",
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+  </div>
+
+  <%= f.submit "Simpan", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+<% end %>

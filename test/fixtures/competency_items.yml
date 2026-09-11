@@ -1,0 +1,15 @@
+domain_klinis:
+  competency_framework: skdi_ringkas
+  title: Keterampilan Klinis
+  position: 1
+
+sub_anamnesis:
+  competency_framework: skdi_ringkas
+  parent: domain_klinis
+  title: Anamnesis & Pemeriksaan Fisik
+  position: 1
+
+domain_komunikasi:
+  competency_framework: skdi_ringkas
+  title: Komunikasi Efektif
+  position: 2

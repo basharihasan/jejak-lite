@@ -1,0 +1,75 @@
+<div class="max-w-2xl">
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-xl font-bold text-gray-900"><%= @competency_framework.name %></h1>
+      <p class="text-sm text-gray-400 mt-1"><%= @competency_framework.description %></p>
+    </div>
+    <% if policy(@competency_framework).update? %>
+      <div class="flex items-center gap-2 shrink-0">
+        <%= link_to "Sunting", edit_competency_framework_path(@competency_framework), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
+        <%= button_to "Hapus", competency_framework_path(@competency_framework), method: :delete,
+              class: "text-sm text-rose-600 hover:underline",
+              form: { data: { turbo_confirm: "Hapus peta kompetensi ini beserta seluruh isinya?" } } %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-4 space-y-3">
+    <% @domains.each do |domain| %>
+      <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-4">
+        <div class="flex items-center justify-between">
+          <p class="font-semibold text-gray-800"><%= domain.title %></p>
+          <% if policy(domain).destroy? %>
+            <%= button_to "Hapus", competency_framework_competency_item_path(@competency_framework, domain), method: :delete,
+                  class: "text-xs text-rose-600 hover:underline",
+                  form: { data: { turbo_confirm: "Hapus ranah ini beserta sub-kompetensinya?" } } %>
+          <% end %>
+        </div>
+        <% if domain.description.present? %>
+          <p class="text-xs text-gray-400 mt-1"><%= domain.description %></p>
+        <% end %>
+
+        <% if domain.children.any? %>
+          <ul class="mt-3 space-y-1.5 pl-4 border-l-2 border-indigo-100">
+            <% domain.children.each do |sub| %>
+              <li class="flex items-center justify-between text-sm text-gray-600">
+                <span><%= sub.title %></span>
+                <% if policy(sub).destroy? %>
+                  <%= button_to "Hapus", competency_framework_competency_item_path(@competency_framework, sub), method: :delete,
+                        class: "text-xs text-gray-400 hover:text-rose-600 hover:underline",
+                        form: { data: { turbo_confirm: "Hapus sub-kompetensi ini?" } } %>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+
+        <% if policy(CompetencyItem.new(competency_framework: @competency_framework)).create? %>
+          <%= form_with url: competency_framework_competency_items_path(@competency_framework), class: "mt-3 flex gap-2" do |f| %>
+            <%= f.hidden_field :parent_id, value: domain.id, name: "competency_item[parent_id]" %>
+            <%= f.text_field :title, name: "competency_item[title]", placeholder: "Tambah sub-kompetensi…",
+                  class: "flex-1 rounded-lg border-0 py-1.5 px-3 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+            <%= f.submit "+", class: "px-3 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold cursor-pointer" %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @domains.empty? %>
+      <p class="text-sm text-gray-400">Belum ada ranah kompetensi.</p>
+    <% end %>
+
+    <% if policy(CompetencyItem.new(competency_framework: @competency_framework)).create? %>
+      <div class="bg-indigo-50/50 rounded-2xl ring-1 ring-indigo-100 p-4">
+        <p class="text-xs font-semibold text-indigo-500 uppercase mb-2">Tambah Ranah Baru</p>
+        <%= form_with url: competency_framework_competency_items_path(@competency_framework), class: "flex gap-2" do |f| %>
+          <%= f.text_field :title, name: "competency_item[title]", placeholder: "Nama ranah kompetensi…",
+                class: "flex-1 rounded-lg border-0 py-2 px-3 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+          <%= f.submit "Tambah", class: "px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold cursor-pointer" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= link_to "← Kembali ke Daftar Peta Kompetensi", competency_frameworks_path, class: "mt-6 inline-block text-sm text-gray-500 hover:text-indigo-600" %>
+</div>

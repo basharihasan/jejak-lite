@@ -1,0 +1,79 @@
+<h1 class="text-xl font-bold text-gray-900">Analisis Capaian Pembelajaran</h1>
+<p class="text-sm text-gray-400 mt-1">Potret satu periode akademik — bukan tren antar tahun, karena jenis & bobot asesmen berbeda tiap periode.</p>
+
+<% if @academic_periods.any? %>
+  <%= form_with url: academic_assessments_path, method: :get, class: "mt-4" do %>
+    <select name="academic_period_id" onchange="this.form.requestSubmit()"
+          class="rounded-xl border-0 py-2 px-3.5 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500">
+      <% @academic_periods.each do |period| %>
+        <option value="<%= period.id %>" <%= "selected" if @selected_period == period %>><%= period.name %></option>
+      <% end %>
+    </select>
+  <% end %>
+<% end %>
+
+<% if @selected_period.nil? %>
+  <p class="mt-6 text-sm text-gray-400">Belum ada periode akademik.</p>
+<% else %>
+  <div class="mt-4 grid sm:grid-cols-2 gap-4">
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm font-semibold text-gray-700">DOPS</p>
+        <span class="text-xs text-gray-400"><%= pluralize(@dops_evaluations.size, "evaluasi") %></span>
+      </div>
+      <% if @dops_evaluations.any? %>
+        <p class="text-2xl font-bold text-indigo-600">
+          <%= (@dops_evaluations.filter_map(&:average_score).sum / @dops_evaluations.size).round(1) %><span class="text-sm text-gray-400 font-normal">/9 rata-rata</span>
+        </p>
+        <ul class="mt-3 space-y-1.5">
+          <% @dops_evaluations.each do |dops| %>
+            <li class="text-xs text-gray-500 flex items-center justify-between">
+              <%= link_to dops.procedure_name, dops_evaluation_path(dops), class: "hover:text-indigo-600" %>
+              <span class="font-semibold text-gray-700"><%= dops.average_score || "-" %>/9</span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-sm text-gray-400">Belum ada evaluasi DOPS periode ini.</p>
+      <% end %>
+    </div>
+
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm font-semibold text-gray-700">Mini-CEX</p>
+        <span class="text-xs text-gray-400"><%= pluralize(@mini_cex_evaluations.size, "evaluasi") %></span>
+      </div>
+      <% if @mini_cex_evaluations.any? %>
+        <p class="text-2xl font-bold text-indigo-600">
+          <%= (@mini_cex_evaluations.filter_map(&:average_score).sum / @mini_cex_evaluations.size).round(1) %><span class="text-sm text-gray-400 font-normal">/9 rata-rata</span>
+        </p>
+        <ul class="mt-3 space-y-1.5">
+          <% @mini_cex_evaluations.each do |mini_cex| %>
+            <li class="text-xs text-gray-500 flex items-center justify-between">
+              <%= link_to mini_cex.case_description, mini_cex_evaluation_path(mini_cex), class: "hover:text-indigo-600" %>
+              <span class="font-semibold text-gray-700"><%= mini_cex.average_score || "-" %>/9</span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-sm text-gray-400">Belum ada evaluasi Mini-CEX periode ini.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <p class="text-sm font-semibold text-gray-700 mb-3">Skor Ujian</p>
+    <% if @exam_scores.any? %>
+      <div class="space-y-1.5">
+        <% @exam_scores.each do |score| %>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600"><%= score.exam_import.kind_label %> · <%= l(score.exam_date, format: :long) %></span>
+            <span class="font-semibold text-gray-800"><%= score.score %>/<%= score.max_score %> (<%= score.percentage %>%)</span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-400">Belum ada skor ujian periode ini.</p>
+    <% end %>
+  </div>
+<% end %>

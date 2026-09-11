@@ -69,3 +69,41 @@ end
     )
   end
 end
+
+# Fase 13 — Kurikulum Dasar: satu peta kompetensi contoh (Standar Kompetensi
+# Dokter Indonesia versi ringkas) dan satu blueprint yang mengacunya lewat
+# nama ranah, bukan FK.
+framework = CompetencyFramework.find_or_create_by!(name: "Standar Kompetensi Dokter Indonesia (Ringkas)") do |f|
+  f.description = "Tujuh area kompetensi inti dokter layanan primer."
+end
+
+if framework.domains.none?
+  {
+    "Profesionalitas yang Luhur" => %w[Etika Disiplin],
+    "Mawas Diri & Pengembangan Diri" => [ "Refleksi Praktik", "Belajar Sepanjang Hayat" ],
+    "Komunikasi Efektif" => [ "Komunikasi Pasien", "Komunikasi Sejawat" ],
+    "Pengelolaan Informasi" => [ "Rekam Medis", "Telaah Kritis" ],
+    "Landasan Ilmiah Kedokteran" => [],
+    "Keterampilan Klinis" => [ "Anamnesis & Pemeriksaan Fisik", "Prosedur Klinis Dasar" ],
+    "Pengelolaan Masalah Kesehatan" => [ "Diagnosis", "Tata Laksana" ]
+  }.each do |domain_name, sub_names|
+    domain = framework.competency_items.create!(title: domain_name)
+    sub_names.each { |sub_name| framework.competency_items.create!(title: sub_name, parent: domain) }
+  end
+end
+
+AssessmentBlueprint.find_or_create_by!(name: "Blueprint OSCE Komprehensif") do |b|
+  b.description = "Distribusi bobot stasiun OSCE akhir tahap profesi."
+  b.competency_mapping = {
+    "Keterampilan Klinis" => 35,
+    "Komunikasi Efektif" => 20,
+    "Pengelolaan Masalah Kesehatan" => 30,
+    "Profesionalitas yang Luhur" => 15
+  }
+  b.learning_outcomes = [
+    "Mampu melakukan anamnesis & pemeriksaan fisik sistematis",
+    "Mampu menegakkan diagnosis banding yang rasional",
+    "Mampu berkomunikasi secara empatik dengan pasien simulasi",
+    "Menunjukkan perilaku profesional selama ujian"
+  ]
+end

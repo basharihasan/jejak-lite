@@ -1,0 +1,17 @@
+<div class="flex items-center justify-between">
+  <h1 class="text-xl font-bold text-gray-900">Peta Kompetensi</h1>
+  <%= link_to "+ Peta Baru", new_competency_framework_path,
+        class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>
+
+<div class="mt-4 space-y-2">
+  <% @competency_frameworks.each do |framework| %>
+    <%= link_to competency_framework_path(framework), class: "block bg-white rounded-2xl ring-1 ring-gray-200 p-4 hover:ring-indigo-300" do %>
+      <p class="font-semibold text-gray-800"><%= framework.name %></p>
+      <p class="text-xs text-gray-400 mt-1"><%= pluralize(framework.domains.count, "ranah") %> · <%= framework.description %></p>
+    <% end %>
+  <% end %>
+  <% if @competency_frameworks.empty? %>
+    <p class="text-sm text-gray-400">Belum ada peta kompetensi.</p>
+  <% end %>
+</div>

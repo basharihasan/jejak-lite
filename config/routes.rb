@@ -72,6 +72,12 @@ Rails.application.routes.draw do
   resources :exam_imports, only: %i[index new create show destroy]
   get "nilai-ujian", to: "exam_scores#index", as: :exam_scores
 
+  resources :assessment_blueprints
+  resources :competency_frameworks do
+    resources :competency_items, only: %i[create destroy]
+  end
+  get "capaian-belajar", to: "academic_assessments#index", as: :academic_assessments
+
   # Service worker perlu di-root (bukan /assets) supaya scope-nya mencakup
   # seluruh situs — syarat Push API.
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
