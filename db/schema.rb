@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_010023) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_011232) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -65,6 +65,52 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_010023) do
     t.index ["category"], name: "index_activity_logs_on_category"
     t.index ["user_id", "activity_date"], name: "index_activity_logs_on_user_id_and_activity_date"
     t.index ["user_id"], name: "index_activity_logs_on_user_id"
+  end
+
+  create_table "assessment_form_answers", force: :cascade do |t|
+    t.bigint "assessment_form_field_id", null: false
+    t.bigint "assessment_form_submission_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "value"
+    t.index ["assessment_form_field_id"], name: "index_assessment_form_answers_on_assessment_form_field_id"
+    t.index ["assessment_form_submission_id"], name: "index_assessment_form_answers_on_assessment_form_submission_id"
+  end
+
+  create_table "assessment_form_fields", force: :cascade do |t|
+    t.bigint "assessment_form_template_id", null: false
+    t.datetime "created_at", null: false
+    t.string "field_type", null: false
+    t.string "label", null: false
+    t.integer "position", default: 0, null: false
+    t.boolean "required", default: true, null: false
+    t.datetime "updated_at", null: false
+    t.index ["assessment_form_template_id"], name: "index_assessment_form_fields_on_assessment_form_template_id"
+  end
+
+  create_table "assessment_form_submissions", force: :cascade do |t|
+    t.bigint "assessment_form_template_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "respondent_id", null: false
+    t.string "subject_label"
+    t.bigint "subject_user_id"
+    t.datetime "submitted_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assessment_form_template_id"], name: "idx_on_assessment_form_template_id_27a2546b02"
+    t.index ["respondent_id"], name: "index_assessment_form_submissions_on_respondent_id"
+    t.index ["subject_user_id"], name: "index_assessment_form_submissions_on_subject_user_id"
+  end
+
+  create_table "assessment_form_templates", force: :cascade do |t|
+    t.boolean "anonymous", default: false, null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.text "description"
+    t.boolean "is_active", default: true, null: false
+    t.string "name", null: false
+    t.boolean "requires_subject_user", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_assessment_form_templates_on_created_by_id"
   end
 
   create_table "clinical_cases", force: :cascade do |t|
@@ -241,6 +287,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_010023) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_logs", "users"
+  add_foreign_key "assessment_form_answers", "assessment_form_fields"
+  add_foreign_key "assessment_form_answers", "assessment_form_submissions"
+  add_foreign_key "assessment_form_fields", "assessment_form_templates"
+  add_foreign_key "assessment_form_submissions", "assessment_form_templates"
+  add_foreign_key "assessment_form_submissions", "users", column: "respondent_id"
+  add_foreign_key "assessment_form_submissions", "users", column: "subject_user_id"
+  add_foreign_key "assessment_form_templates", "users", column: "created_by_id"
   add_foreign_key "clinical_cases", "users"
   add_foreign_key "clinical_cases", "users", column: "verified_by_id"
   add_foreign_key "clinical_rotations", "academic_periods"

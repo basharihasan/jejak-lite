@@ -1,0 +1,33 @@
+<%= form_with model: template, class: "space-y-4" do |f| %>
+  <% if template.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
+      <%= template.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Nama Formulir", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_field :name, placeholder: "Contoh: Evaluasi Dosen Tutor",
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+  </div>
+
+  <div>
+    <%= f.label :description, "Deskripsi (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_area :description, rows: 2,
+          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+  </div>
+
+  <div class="space-y-2">
+    <label class="flex items-center gap-2 text-sm text-gray-700">
+      <%= f.check_box :is_active, class: "rounded border-gray-300" %> Aktif (bisa diisi pengguna)
+    </label>
+    <label class="flex items-center gap-2 text-sm text-gray-700">
+      <%= f.check_box :anonymous, class: "rounded border-gray-300" %> Anonim (identitas pengisi disembunyikan dari subjek yang dinilai)
+    </label>
+    <label class="flex items-center gap-2 text-sm text-gray-700">
+      <%= f.check_box :requires_subject_user, class: "rounded border-gray-300" %> Formulir menilai dosen tertentu (wajib pilih subjek saat mengisi)
+    </label>
+  </div>
+
+  <%= f.submit "Simpan Formulir", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+<% end %>

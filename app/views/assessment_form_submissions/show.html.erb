@@ -1,0 +1,21 @@
+<div class="max-w-xl">
+  <h1 class="text-xl font-bold text-gray-900"><%= @submission.assessment_form_template.name %></h1>
+  <p class="text-sm text-gray-400 mt-1">
+    <%= @submission.respondent_visible_to?(current_user) ? @submission.respondent.full_name : "Anonim" %>
+    · <%= l(@submission.submitted_at, format: :long) %>
+    <% if @submission.subject_user || @submission.subject_label.present? %>
+      · Subjek: <%= @submission.subject_user&.full_name || @submission.subject_label %>
+    <% end %>
+  </p>
+
+  <div class="mt-4 space-y-3">
+    <% @submission.assessment_form_answers.includes(:assessment_form_field).each do |answer| %>
+      <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-4">
+        <p class="text-xs font-semibold text-gray-500 uppercase mb-1"><%= answer.assessment_form_field.label %></p>
+        <p class="text-sm text-gray-800"><%= answer.value.presence || "-" %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <%= link_to "← Kembali", assessment_form_template_path(@submission.assessment_form_template), class: "mt-6 inline-block text-sm text-gray-500 hover:text-indigo-600" %>
+</div>

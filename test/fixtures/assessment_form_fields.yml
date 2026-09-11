@@ -1,0 +1,13 @@
+kejelasan_materi:
+  assessment_form_template: tutor_evaluation
+  label: Dosen menjelaskan materi dengan jelas
+  field_type: rating
+  position: 1
+  required: true
+
+saran:
+  assessment_form_template: tutor_evaluation
+  label: Saran perbaikan
+  field_type: textarea
+  position: 2
+  required: false

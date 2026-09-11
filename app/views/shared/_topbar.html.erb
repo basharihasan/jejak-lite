@@ -13,6 +13,7 @@
           <div class="absolute left-0 mt-2 w-44 bg-white rounded-xl shadow-lg ring-1 ring-gray-200 py-1 z-10">
             <%= link_to "Refleksi", reflection_entries_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <%= link_to "Portfolio", portfolio_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
+            <%= link_to "Formulir Evaluasi", assessment_form_templates_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <%= link_to "Cari", search_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <%= link_to "Panduan", panduan_path, class: "block px-4 py-2 text-sm hover:bg-gray-50" %>
             <% if current_user.has_role?("admin") %>

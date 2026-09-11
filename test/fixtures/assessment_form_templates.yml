@@ -1,0 +1,7 @@
+tutor_evaluation:
+  name: Evaluasi Dosen Tutor
+  description: Penilaian mahasiswa terhadap dosen tutor kelompok belajar.
+  is_active: true
+  anonymous: true
+  requires_subject_user: true
+  created_by: budi

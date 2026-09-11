@@ -1,0 +1,25 @@
+<style>
+  .pagination { display: flex; gap: 0.25rem; margin-top: 1.5rem; justify-content: center; }
+  .pagination span, .pagination a { padding: 0.4rem 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; }
+  .pagination a { color: #4f46e5; border: 1px solid #e5e7eb; }
+  .pagination .current { background: #4f46e5; color: white; font-weight: 600; }
+</style>
+
+<h1 class="text-xl font-bold text-gray-900">Jawaban Formulir Saya</h1>
+
+<div class="mt-4 space-y-2">
+  <% @submissions.each do |submission| %>
+    <%= link_to assessment_form_submission_path(submission), class: "block bg-white rounded-2xl ring-1 ring-gray-200 p-4 hover:ring-indigo-300 transition" do %>
+      <p class="font-semibold text-gray-800"><%= submission.assessment_form_template.name %></p>
+      <p class="text-xs text-gray-400 mt-0.5">
+        <%= submission.subject_user&.full_name || submission.subject_label %>
+        · <%= l(submission.submitted_at, format: :long) %>
+      </p>
+    <% end %>
+  <% end %>
+  <% if @submissions.empty? %>
+    <p class="text-sm text-gray-400">Belum ada jawaban.</p>
+  <% end %>
+</div>
+
+<%= paginate @submissions %>

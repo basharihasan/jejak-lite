@@ -56,6 +56,12 @@ Rails.application.routes.draw do
   resources :mini_cex_evaluations, except: %i[index]
   get "asesmen", to: "assessments#index", as: :assessments
 
+  resources :assessment_form_templates do
+    resources :assessment_form_fields, only: %i[new create edit update destroy]
+    resources :assessment_form_submissions, only: %i[new create], shallow: true
+  end
+  resources :assessment_form_submissions, only: %i[index show]
+
   # Service worker perlu di-root (bukan /assets) supaya scope-nya mencakup
   # seluruh situs — syarat Push API.
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

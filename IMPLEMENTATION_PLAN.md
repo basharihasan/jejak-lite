@@ -61,11 +61,11 @@ Kartu "Kegiatan Bulan Ini" (hitung nyata), "Kegiatan Terbaru" (3 log terakhir), 
 ### ✅ Fase 8 — DOPS & Mini-CEX
 `DopsEvaluation` (6 dimensi: persiapan/teknik/asepsis/komunikasi/profesionalisme/pasca tindakan) & `MiniCexEvaluation` (7 dimensi: anamnesis/pemeriksaan fisik/profesionalisme/clinical judgment/konseling/organisasi/kompetensi keseluruhan) — skor JSONB per dimensi skala **1–9** (meniru skala Mini-CEX standar internasional), dimensi Profesionalisme & Komunikasi **wajib** (tidak boleh N/A), meniru aturan yang baru diterapkan JEJAK asli. Logika bersama di concern `DimensionScorable` (validasi rentang, rata-rata, dsb). Pundit: hanya dosen/admin bisa membuat, hanya penilai/admin bisa menyunting, mahasiswa hanya bisa melihat miliknya sendiri. Notifikasi otomatis ke mahasiswa saat evaluasi dibuat. Halaman ringkasan gabungan `/asesmen`. 21 test baru (94 total). Diverifikasi manual: dosen menilai (1 dimensi N/A) → rata-rata benar mengecualikan N/A → mahasiswa melihat & dapat notifikasi.
 
-### ⬜ Fase 9 — Assessment Form Builder
-Infrastruktur formulir dinamis (jenis field, skala skor, dimensi penilaian) — dipakai Fase 10 (Formulir Evaluasi) dan berpotensi Fase 12 (Progress Test).
+### ✅ Fase 9 — Assessment Form Builder
+`AssessmentFormTemplate` (nama, deskripsi, aktif/tidak, anonim, wajib-pilih-subjek) + `AssessmentFormField` (label, jenis: rating 1–5/ya-tidak/teks singkat/teks panjang, wajib/opsional, posisi otomatis) + `AssessmentFormSubmission`+`AssessmentFormAnswer` (jawaban aktual). **Digabung dengan alur pengisian penuh** (bukan cuma builder kosong) supaya tidak setengah-jadi — admin bikin formulir+pertanyaan, siapa pun mengisi, hasil bisa dilihat. Anonimitas: `respondent_visible_to?` menyembunyikan identitas pengisi dari subjek yang dinilai (admin selalu bisa lihat) — meniru pola `reveal_identity` JEJAK tanpa membangun UI reveal terpisah. Pundit: admin-only kelola formulir/pertanyaan; siapa pun bisa isi formulir aktif; lihat jawaban dibatasi pengisi/subjek/admin. 12 test baru (102 total). Diverifikasi manual: admin bikin formulir "Evaluasi Blok" + 2 pertanyaan (rating & teks) → mahasiswa mengisi → admin melihat jawaban masuk dengan nilai utuh.
 
-### ⬜ Fase 10 — Formulir Evaluasi
-Tutor Evaluation (evaluasi dosen tutor oleh mahasiswa), Evaluasi Blok, asesmen tambahan lain — didefinisikan lewat Form Builder (Fase 9).
+### ✅ Fase 10 — Formulir Evaluasi (digabung dengan Fase 9, tuntas sekaligus)
+Tiga templat baku di-seed lewat `db/seeds.rb` memakai infrastruktur Fase 9 — bukan model/kode terpisah, sesuai rencana ("didefinisikan lewat Form Builder"): **Evaluasi Dosen Tutor** (anonim, wajib pilih subjek dosen, 4 pertanyaan), **Evaluasi Blok** (anonim, tanpa subjek personal, 4 pertanyaan termasuk ya/tidak), **Asesmen Tambahan** (formulir umum non-anonim, 2 pertanyaan). Admin bebas menambah/mengubah templat lain kapan pun tanpa kode baru. Diverifikasi tampil dengan badge Anonim yang benar di index.
 
 ### ⬜ Fase 11 — Tugas Akhir
 Alur skripsi/proyek akhir: milestone, sesi ujian, skor penguji — versi ringan dari `ScholarlyProject` JEJAK.
@@ -97,8 +97,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 | `study_programs`, `academic_periods`, `clinical_rotations` | 6 | ✅ |
 | `reflection_entries` | 7 | ✅ |
 | `dops_evaluations`, `mini_cex_evaluations` | 8 | ✅ |
-| `assessment_form_templates`, `assessment_form_fields` | 9 | ⬜ |
-| `evaluation_submissions` (tutor/blok/tambahan) | 10 | ⬜ |
+| `assessment_form_templates`, `assessment_form_fields`, `assessment_form_submissions`, `assessment_form_answers` | 9 | ✅ |
 | `final_projects`, `final_project_milestones`, `examiner_scores` | 11 | ⬜ |
 | `assessment_blueprints`, `competency_frameworks`, `competency_items`, `academic_assessment_results` | 13 | ⬜ |
 | `exam_imports`, `exam_scores` (cbt/osce/progress_test) | 12, 14 | ⬜ |
@@ -108,7 +107,7 @@ Pilih target deploy, seed data demo, smoke test alur emas end-to-end, README fin
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 94 test lulus per Fase 8
+bin/rails test       # 102 test lulus per Fase 9-10
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

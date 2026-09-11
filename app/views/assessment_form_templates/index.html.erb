@@ -1,0 +1,30 @@
+<div class="flex items-center justify-between">
+  <h1 class="text-xl font-bold text-gray-900">Formulir Evaluasi</h1>
+  <% if current_user.has_role?("admin") %>
+    <%= link_to "+ Formulir Baru", new_assessment_form_template_path,
+          class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+  <% end %>
+</div>
+
+<div class="mt-4 space-y-2">
+  <% @templates.each do |template| %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5 flex items-center justify-between gap-3 flex-wrap">
+      <div>
+        <div class="flex items-center gap-2">
+          <p class="font-semibold text-gray-800"><%= template.name %></p>
+          <% unless template.is_active? %>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Nonaktif</span>
+          <% end %>
+          <% if template.anonymous? %>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Anonim</span>
+          <% end %>
+        </div>
+        <p class="text-sm text-gray-500 mt-0.5"><%= template.description %></p>
+      </div>
+      <%= link_to "Buka →", template, class: "text-sm text-indigo-600 font-medium" %>
+    </div>
+  <% end %>
+  <% if @templates.empty? %>
+    <p class="text-sm text-gray-400">Belum ada formulir.</p>
+  <% end %>
+</div>
