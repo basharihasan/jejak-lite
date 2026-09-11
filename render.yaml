@@ -1,0 +1,45 @@
+# Blueprint deploy Render (opsional) — satu web service + satu Postgres
+# gratis. Bukan Docker: Render mendeteksi Ruby lewat Gemfile lalu menjalankan
+# bin/render-build.sh (lihat file itu). Isi RAILS_MASTER_KEY manual di
+# dashboard Render (sync: false) — jangan pernah taruh nilai aslinya di sini.
+databases:
+  - name: jejak-lite-db
+    plan: free
+    postgresMajorVersion: 16
+
+services:
+  - type: web
+    name: jejak-lite
+    runtime: ruby
+    plan: free
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec rails server"
+    envVars:
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jejak-lite-db
+          property: connectionString
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: JOB_CONCURRENCY
+        value: "1"
+      # Opsional, isi kalau ingin login Google aktif:
+      # - key: GOOGLE_CLIENT_ID
+      #   sync: false
+      # - key: GOOGLE_CLIENT_SECRET
+      #   sync: false
+      # Opsional, isi kalau ingin notifikasi Web Push aktif:
+      # - key: VAPID_PUBLIC_KEY
+      #   sync: false
+      # - key: VAPID_PRIVATE_KEY
+      #   sync: false
+      # - key: VAPID_SUBJECT
+      #   sync: false
