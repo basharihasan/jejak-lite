@@ -61,6 +61,47 @@
     </div>
   </div>
 
+  <% if @dops_radar || @mini_cex_radar %>
+    <div class="mt-4 grid sm:grid-cols-2 gap-4">
+      <% if @dops_radar %>
+        <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+          <p class="text-sm font-semibold text-gray-700 mb-2">Peta Kompetensi DOPS</p>
+          <div data-controller="radar-chart"
+               data-radar-chart-labels-value="<%= DopsEvaluation::DIMENSIONS.values.to_json %>"
+               data-radar-chart-datasets-value="<%= [ { label: "Rata-rata", data: DopsEvaluation::DIMENSIONS.keys.map { |k| @dops_radar[k] || 0 }, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.15)" } ].to_json %>">
+            <canvas data-radar-chart-target="canvas" height="220"></canvas>
+          </div>
+        </div>
+      <% end %>
+      <% if @mini_cex_radar %>
+        <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+          <p class="text-sm font-semibold text-gray-700 mb-2">Peta Kompetensi Mini-CEX</p>
+          <div data-controller="radar-chart"
+               data-radar-chart-labels-value="<%= MiniCexEvaluation::DIMENSIONS.values.to_json %>"
+               data-radar-chart-datasets-value="<%= [ { label: "Rata-rata", data: MiniCexEvaluation::DIMENSIONS.keys.map { |k| @mini_cex_radar[k] || 0 }, borderColor: "#059669", backgroundColor: "rgba(5,150,105,0.15)" } ].to_json %>">
+            <canvas data-radar-chart-target="canvas" height="220"></canvas>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @milestones.any? %>
+    <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <p class="text-sm font-semibold text-gray-700 mb-1">Target Kompetensi Periode Ini</p>
+      <p class="text-xs text-gray-400 mb-3">Dibandingkan dengan rata-rata capaian keseluruhan Anda (DOPS+Mini-CEX), bukan skor spesifik tiap ranah.</p>
+      <div class="flex flex-wrap gap-2">
+        <% @milestones.each do |milestone| %>
+          <% tercapai = @overall_average && @overall_average >= milestone.expected_score %>
+          <span class="text-xs font-medium px-3 py-1.5 rounded-full <%= tercapai ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' %>">
+            <%= milestone.competency_item.title %>: target <%= milestone.expected_score %>/9
+            <%= tercapai ? "✓ Tercapai" : (@overall_average ? "Di Bawah Target" : "Belum Ada Data") %>
+          </span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
     <p class="text-sm font-semibold text-gray-700 mb-3">Skor Ujian</p>
     <% if @exam_scores.any? %>

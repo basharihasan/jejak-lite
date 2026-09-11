@@ -11,6 +11,7 @@ class AssessmentBlueprintsController < ApplicationController
 
   def show
     authorize @assessment_blueprint
+    @available_competency_items = CompetencyItem.where.not(id: @assessment_blueprint.competency_items.select(:id)).order(:position)
   end
 
   def new
@@ -54,23 +55,14 @@ class AssessmentBlueprintsController < ApplicationController
     @assessment_blueprint = AssessmentBlueprint.find(params[:id])
   end
 
-  # competency_mapping & learning_outcomes ditulis sebagai baris teks
-  # ("Ranah: Bobot" per baris) supaya tak perlu JS dinamis untuk form
-  # sesederhana ini — blueprint tanpa FK ke CompetencyFramework (lihat
-  # catatan arsitektur di model AssessmentBlueprint).
+  # learning_outcomes ditulis sebagai baris teks (satu capaian per baris) —
+  # peta bobot kompetensi sendiri sudah pindah ke AssessmentBlueprintMapping
+  # (relasi FK, dikelola lewat AssessmentBlueprintMappingsController),
+  # menggantikan competency_mapping JSONB label-bebas yang lama.
   def assessment_blueprint_params
-    mapping = {}
-    params.dig(:assessment_blueprint, :competency_mapping_text).to_s.split("\n").each do |line|
-      label, weight = line.split(":", 2)
-      next if label.blank? || weight.blank?
-
-      mapping[label.strip] = weight.strip.to_f
-    end
-
     outcomes = params.dig(:assessment_blueprint, :learning_outcomes_text).to_s
       .split("\n").map(&:strip).reject(&:blank?)
 
-    params.require(:assessment_blueprint).permit(:name, :description)
-      .merge(competency_mapping: mapping, learning_outcomes: outcomes)
+    params.require(:assessment_blueprint).permit(:name, :description).merge(learning_outcomes: outcomes)
   end
 end

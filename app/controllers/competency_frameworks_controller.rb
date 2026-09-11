@@ -11,7 +11,8 @@ class CompetencyFrameworksController < ApplicationController
 
   def show
     authorize @competency_framework
-    @domains = @competency_framework.domains.includes(:children)
+    @domains = @competency_framework.domains.includes(:children, :competency_milestones)
+    @academic_periods = AcademicPeriod.ordered
   end
 
   def new

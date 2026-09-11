@@ -117,6 +117,21 @@ Sadar penuh **tidak** membawa arsitektur JEJAK asli untuk kasus klinis (`Activit
 
 4 test baru (164 total). Diverifikasi manual via HTTP sungguhan: dosen dengan evaluasi draft & kasus pending melihat kedua kartu quick-action di dashboard; mahasiswa dengan evaluasi submitted melihat radar kompetensinya; halaman analitik menampilkan radar kohort + badge warna + filter periode berfungsi (ganti periode → daftar & radar ikut berubah).
 
+### ✅ Fase 20 — Perkaya Kurikulum & Kompetensi (fase terakhir Perkaya JEJAK)
+**Temuan riset yang mengubah rencana**: `AssessmentBlueprint` versi lama (JSONB `competency_mapping` bebas teks) ternyata PERSIS meniru model yang sama di JEJAK asli yang SUDAH DITINGGALKAN di sana (kelas yatim, tidak dipakai controller/view manapun) — JEJAK asli pindah ke mapping berelasi FK (`AssessmentDimensionMapping`). jejak-lite ikut pindah pola yang sama.
+
+**Blueprint ↔ Kompetensi**: tabel baru `assessment_blueprint_mappings` (FK ke `CompetencyItem` + bobot desimal, unique per pasangan) **menggantikan** `competency_mapping` JSONB — data lama dimigrasikan otomatis (cocokkan label ke `CompetencyItem.title` persis; yang tidak cocok dilewati, bukan dipaksakan) sebelum kolom lama dihapus. UI: tambah satu baris mapping (pilih kompetensi + bobot) dengan tombol hapus per baris — pola sama persis dengan form inline tambah-ranah yang sudah ada, bukan JS dinamis baru. Halaman show: `pie_chart` diganti radar chart (bobot per kompetensi).
+
+**`CompetencyMilestone`** (tabel baru, versi ringan dari `CompetencyGrowthTarget` JEJAK asli yang punya 3 tingkat target + kurva kohort): satu target skor (1-9) per domain per periode akademik, dikelola inline dari baris domain di halaman Peta Kompetensi.
+
+**Halaman Capaian Belajar**: tambah radar chart DOPS+Mini-CEX mahasiswa untuk periode terpilih. Untuk tiap target milestone periode itu, tampilkan badge Tercapai/Di Bawah Target — **dibandingkan dengan rata-rata KESELURUHAN DOPS+Mini-CEX mahasiswa, BUKAN skor spesifik ranah itu** (jejak-lite sengaja tidak membangun linkage skor-per-domain — tidak ada sumber data yang menghubungkan skor DOPS/Mini-CEX ke domain kompetensi tertentu secara presisi; badge ini proksi capaian umum, dilabeli jelas sebagai itu di UI, bukan diklaim presisi per-ranah). Tetap SATU periode saja, tanpa grafik tren antar-periode.
+
+**Bug ditemukan & diperbaiki saat verifikasi manual**: menghapus `CompetencyItem` yang sudah dipakai `assessment_blueprint_mappings`/`activity_log_competency_tags` gagal dengan `ForeignKeyViolation` — asosiasi `has_many` dengan `dependent: :destroy` di sisi `CompetencyItem` belum ada untuk kedua tabel baru itu (FK constraint sendiri tidak punya `ON DELETE CASCADE`). Ditambahkan di model.
+
+12 test baru (172 total, semua hijau). Diverifikasi manual via HTTP sungguhan: admin tambah mapping baru → total bobot & radar chart ikut berubah → hapus mapping → kembali seimbang; admin set target milestone → mahasiswa lihat badge "Tercapai" di Capaian Belajar.
+
+**Jejak Lite selesai Fase 0-20** — seluruh siklus "Perkaya Kesenjangan dengan JEJAK Asli" (Fase 17-20) tuntas. 172 test hijau.
+
 ## Model Data (ringkas, akan detail per fase saat digarap)
 
 | Tabel | Fase | Status |
@@ -134,13 +149,17 @@ Sadar penuh **tidak** membawa arsitektur JEJAK asli untuk kasus klinis (`Activit
 | `assessment_blueprints`, `competency_frameworks`, `competency_items` | 13 | ✅ |
 | `exam_imports`, `exam_scores` (cbt/osce/progress_test) | 12+14 | ✅ |
 | _(tanpa tabel baru — agregasi lintas model yang sudah ada)_ | 15 | ✅ |
+| _(kolom baru pada dops_evaluations/mini_cex_evaluations)_ | 17 | ✅ |
+| `case_verification_comments`, `activity_log_competency_tags` (+ kolom baru activity_logs/clinical_cases) | 18 | ✅ |
+| _(tanpa tabel baru — agregasi lintas model yang sudah ada)_ | 19 | ✅ |
+| `assessment_blueprint_mappings`, `competency_milestones` | 20 | ✅ |
 
 ## Menjalankan & Menguji
 
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 164 test lulus per Fase 19
+bin/rails test       # 172 test lulus per Fase 20
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda
@@ -156,3 +175,4 @@ bin/rails test       # 164 test lulus per Fase 19
 - Voice input + "Enhance ✨" AI pada narrative comment DOPS/Mini-CEX — butuh integrasi API AI, di luar cakupan (Gemfile sengaja tanpa gem AI sejak awal).
 - `tom-select` untuk dropdown evaluator/mahasiswa — disebut di rencana awal tapi belum pernah dipasang; ditunda, jumlah user jejak-lite masih kecil sehingga `<select>` polos cukup.
 - Dual verification queue architecture (namespace `Supervisor::...` terpisah) — aksi member `verify`/`request_revision` yang sudah ada di `ClinicalCasesController` sudah cukup untuk skala jejak-lite.
+- Linkage skor-per-domain kompetensi (skor DOPS/Mini-CEX terpetakan presisi ke satu `CompetencyItem`) — tidak dibangun karena butuh mesin mapping dimensi↔kompetensi seperti `AssessmentDimensionMapping` JEJAK asli (dengan whitelist dimensi per kategori asesmen). Badge target milestone di Capaian Belajar (Fase 20) pakai proksi rata-rata keseluruhan, dilabeli jelas sebagai itu — bukan klaim presisi per-ranah yang datanya belum ada.

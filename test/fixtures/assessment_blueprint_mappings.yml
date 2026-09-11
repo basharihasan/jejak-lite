@@ -1,0 +1,19 @@
+osce_klinis:
+  assessment_blueprint: osce_blueprint
+  competency_item: domain_klinis
+  weight: 60
+
+osce_komunikasi:
+  assessment_blueprint: osce_blueprint
+  competency_item: domain_komunikasi
+  weight: 40
+
+unbalanced_klinis:
+  assessment_blueprint: unbalanced_blueprint
+  competency_item: domain_klinis
+  weight: 40
+
+unbalanced_komunikasi:
+  assessment_blueprint: unbalanced_blueprint
+  competency_item: domain_komunikasi
+  weight: 30

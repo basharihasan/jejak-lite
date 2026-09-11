@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_110208) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_112713) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -79,8 +79,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_110208) do
     t.index ["user_id"], name: "index_activity_logs_on_user_id"
   end
 
+  create_table "assessment_blueprint_mappings", force: :cascade do |t|
+    t.bigint "assessment_blueprint_id", null: false
+    t.bigint "competency_item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "weight", precision: 5, scale: 2, null: false
+    t.index ["assessment_blueprint_id", "competency_item_id"], name: "index_blueprint_mappings_uniq", unique: true
+    t.index ["assessment_blueprint_id"], name: "index_assessment_blueprint_mappings_on_assessment_blueprint_id"
+    t.index ["competency_item_id"], name: "index_assessment_blueprint_mappings_on_competency_item_id"
+  end
+
   create_table "assessment_blueprints", force: :cascade do |t|
-    t.jsonb "competency_mapping", default: {}, null: false
     t.datetime "created_at", null: false
     t.text "description"
     t.jsonb "learning_outcomes", default: [], null: false
@@ -202,6 +212,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_110208) do
     t.datetime "updated_at", null: false
     t.index ["competency_framework_id"], name: "index_competency_items_on_competency_framework_id"
     t.index ["parent_id"], name: "index_competency_items_on_parent_id"
+  end
+
+  create_table "competency_milestones", force: :cascade do |t|
+    t.bigint "academic_period_id", null: false
+    t.bigint "competency_item_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "expected_score", null: false
+    t.datetime "updated_at", null: false
+    t.index ["academic_period_id"], name: "index_competency_milestones_on_academic_period_id"
+    t.index ["competency_item_id", "academic_period_id"], name: "index_competency_milestones_uniq", unique: true
+    t.index ["competency_item_id"], name: "index_competency_milestones_on_competency_item_id"
   end
 
   create_table "device_push_tokens", force: :cascade do |t|
@@ -416,6 +437,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_110208) do
   add_foreign_key "activity_log_competency_tags", "activity_logs"
   add_foreign_key "activity_log_competency_tags", "competency_items"
   add_foreign_key "activity_logs", "users"
+  add_foreign_key "assessment_blueprint_mappings", "assessment_blueprints"
+  add_foreign_key "assessment_blueprint_mappings", "competency_items"
   add_foreign_key "assessment_form_answers", "assessment_form_fields"
   add_foreign_key "assessment_form_answers", "assessment_form_submissions"
   add_foreign_key "assessment_form_fields", "assessment_form_templates"
@@ -432,6 +455,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_110208) do
   add_foreign_key "clinical_rotations", "users", column: "preceptor_id"
   add_foreign_key "competency_items", "competency_frameworks"
   add_foreign_key "competency_items", "competency_items", column: "parent_id"
+  add_foreign_key "competency_milestones", "academic_periods"
+  add_foreign_key "competency_milestones", "competency_items"
   add_foreign_key "device_push_tokens", "users"
   add_foreign_key "dops_evaluations", "clinical_rotations"
   add_foreign_key "dops_evaluations", "users", column: "evaluator_id"

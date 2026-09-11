@@ -1,0 +1,4 @@
+klinis_target_current_period:
+  competency_item: domain_klinis
+  academic_period: current_period
+  expected_score: 7

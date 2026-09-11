@@ -76,9 +76,14 @@ Rails.application.routes.draw do
   resources :exam_imports, only: %i[index new create show destroy]
   get "nilai-ujian", to: "exam_scores#index", as: :exam_scores
 
-  resources :assessment_blueprints
+  resources :assessment_blueprints do
+    resources :assessment_blueprint_mappings, only: %i[create destroy]
+  end
   resources :competency_frameworks do
     resources :competency_items, only: %i[create destroy]
+  end
+  resources :competency_items, only: [] do
+    resources :competency_milestones, only: %i[create destroy]
   end
   get "capaian-belajar", to: "academic_assessments#index", as: :academic_assessments
   get "analitik", to: "analytics#index", as: :analytics

@@ -94,18 +94,24 @@ if framework.domains.none?
   end
 end
 
-AssessmentBlueprint.find_or_create_by!(name: "Blueprint OSCE Komprehensif") do |b|
+osce_blueprint = AssessmentBlueprint.find_or_create_by!(name: "Blueprint OSCE Komprehensif") do |b|
   b.description = "Distribusi bobot stasiun OSCE akhir tahap profesi."
-  b.competency_mapping = {
-    "Keterampilan Klinis" => 35,
-    "Komunikasi Efektif" => 20,
-    "Pengelolaan Masalah Kesehatan" => 30,
-    "Profesionalitas yang Luhur" => 15
-  }
   b.learning_outcomes = [
     "Mampu melakukan anamnesis & pemeriksaan fisik sistematis",
     "Mampu menegakkan diagnosis banding yang rasional",
     "Mampu berkomunikasi secara empatik dengan pasien simulasi",
     "Menunjukkan perilaku profesional selama ujian"
   ]
+end
+
+if osce_blueprint.assessment_blueprint_mappings.none?
+  {
+    "Keterampilan Klinis" => 35,
+    "Komunikasi Efektif" => 20,
+    "Pengelolaan Masalah Kesehatan" => 30,
+    "Profesionalitas yang Luhur" => 15
+  }.each do |domain_name, weight|
+    item = CompetencyItem.find_by(title: domain_name)
+    osce_blueprint.assessment_blueprint_mappings.create!(competency_item: item, weight: weight) if item
+  end
 end

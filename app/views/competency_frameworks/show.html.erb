@@ -44,6 +44,30 @@
           </ul>
         <% end %>
 
+        <% if domain.competency_milestones.any? %>
+          <div class="mt-3 flex flex-wrap gap-1.5">
+            <% domain.competency_milestones.each do |milestone| %>
+              <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
+                Target <%= milestone.academic_period.name %>: <%= milestone.expected_score %>/9
+                <% if policy(milestone).destroy? %>
+                  <%= button_to "✕", competency_item_competency_milestone_path(domain, milestone), method: :delete,
+                        class: "text-indigo-400 hover:text-rose-600", form: { data: { turbo_confirm: "Hapus target ini?" } } %>
+                <% end %>
+              </span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if policy(CompetencyMilestone.new).create? && @academic_periods.any? %>
+          <%= form_with url: competency_item_competency_milestones_path(domain), class: "mt-2 flex flex-wrap gap-2 items-center" do |f| %>
+            <%= f.select :academic_period_id, @academic_periods.map { |p| [ p.name, p.id ] }, { include_blank: "Target periode…" },
+                  class: "rounded-lg border-0 py-1.5 px-2 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+            <%= f.number_field :expected_score, min: 1, max: 9, placeholder: "Skor",
+                  class: "w-16 rounded-lg border-0 py-1.5 px-2 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+            <%= f.submit "Set Target", class: "px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold cursor-pointer" %>
+          <% end %>
+        <% end %>
+
         <% if policy(CompetencyItem.new(competency_framework: @competency_framework)).create? %>
           <%= form_with url: competency_framework_competency_items_path(@competency_framework), class: "mt-3 flex gap-2" do |f| %>
             <%= f.hidden_field :parent_id, value: domain.id, name: "competency_item[parent_id]" %>

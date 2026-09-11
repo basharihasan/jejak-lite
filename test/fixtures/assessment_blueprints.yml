@@ -1,10 +1,6 @@
 osce_blueprint:
   name: Blueprint OSCE Blok 5
   description: Distribusi bobot stasiun OSCE blok 5.
-  competency_mapping:
-    Kardiovaskular: 40
-    Respirasi: 35
-    Endokrin: 25
   learning_outcomes:
     - Mampu menginterpretasi EKG dasar
     - Mampu mendiagnosis nyeri dada akut
@@ -12,7 +8,4 @@ osce_blueprint:
 unbalanced_blueprint:
   name: Blueprint Draft Belum Seimbang
   description: Masih disusun, bobot belum genap 100.
-  competency_mapping:
-    Kardiovaskular: 40
-    Respirasi: 30
   learning_outcomes: []

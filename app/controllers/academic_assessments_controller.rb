@@ -19,14 +19,34 @@ class AcademicAssessmentsController < ApplicationController
     if @selected_period
       rotation_ids = ClinicalRotation.for_student(current_user).where(academic_period: @selected_period).pluck(:id)
 
-      @dops_evaluations = DopsEvaluation.where(student: current_user, clinical_rotation_id: rotation_ids).recent
-      @mini_cex_evaluations = MiniCexEvaluation.where(student: current_user, clinical_rotation_id: rotation_ids).recent
+      @dops_evaluations = DopsEvaluation.where(student: current_user, clinical_rotation_id: rotation_ids).submitted.recent
+      @mini_cex_evaluations = MiniCexEvaluation.where(student: current_user, clinical_rotation_id: rotation_ids).submitted.recent
       @exam_scores = ExamScore.where(student: current_user, exam_date: @selected_period.start_date..@selected_period.end_date)
                                .includes(:exam_import).chronological
+
+      @dops_radar = DopsEvaluation.avg_dimension_scores(@dops_evaluations) if @dops_evaluations.any?
+      @mini_cex_radar = MiniCexEvaluation.avg_dimension_scores(@mini_cex_evaluations) if @mini_cex_evaluations.any?
+      @overall_average = overall_average(@dops_evaluations, @mini_cex_evaluations)
+      @milestones = CompetencyMilestone.where(academic_period: @selected_period).includes(:competency_item)
     else
       @dops_evaluations = DopsEvaluation.none
       @mini_cex_evaluations = MiniCexEvaluation.none
       @exam_scores = ExamScore.none
+      @milestones = CompetencyMilestone.none
     end
+  end
+
+  private
+
+  # Milestone dibandingkan dengan rata-rata KESELURUHAN DOPS+Mini-CEX
+  # mahasiswa periode ini — BUKAN skor spesifik ranah kompetensi itu,
+  # karena jejak-lite sengaja tidak membangun linkage skor-per-domain
+  # (lihat IMPLEMENTATION_PLAN.md § Fase 20). Ini proksi capaian umum,
+  # dilabeli jelas sebagai itu di tampilan, bukan diklaim presisi per-ranah.
+  def overall_average(dops_scope, mini_cex_scope)
+    scores = dops_scope.filter_map(&:average_score) + mini_cex_scope.filter_map(&:average_score)
+    return nil if scores.empty?
+
+    (scores.sum / scores.size).round(1)
   end
 end

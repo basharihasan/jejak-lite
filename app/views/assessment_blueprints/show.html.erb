@@ -21,10 +21,48 @@
         Total <%= @assessment_blueprint.total_weight.round(1) %>%
       </span>
     </div>
-    <% if @assessment_blueprint.competency_mapping.present? %>
-      <%= pie_chart @assessment_blueprint.competency_mapping, height: "260px" %>
+    <% weights = @assessment_blueprint.weight_by_competency_item %>
+    <% if weights.present? %>
+      <div data-controller="radar-chart"
+           data-radar-chart-labels-value="<%= weights.keys.map(&:title).to_json %>"
+           data-radar-chart-datasets-value="<%= [ { label: "Bobot (%)", data: weights.values, borderColor: "#4f46e5", backgroundColor: "rgba(79,70,229,0.15)" } ].to_json %>"
+           data-radar-chart-max-value="100">
+        <canvas data-radar-chart-target="canvas" height="260"></canvas>
+      </div>
+
+      <ul class="mt-4 divide-y divide-gray-100">
+        <% @assessment_blueprint.assessment_blueprint_mappings.includes(:competency_item).each do |mapping| %>
+          <li class="flex items-center justify-between py-2 text-sm">
+            <span class="text-gray-700"><%= mapping.competency_item.title %></span>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-gray-800"><%= mapping.weight.to_f.round(1) %>%</span>
+              <% if policy(mapping).destroy? %>
+                <%= button_to "✕", assessment_blueprint_assessment_blueprint_mapping_path(@assessment_blueprint, mapping), method: :delete,
+                      class: "text-xs text-gray-400 hover:text-rose-600",
+                      form: { data: { turbo_confirm: "Hapus mapping ini?" } } %>
+              <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
     <% else %>
       <p class="text-sm text-gray-400">Belum ada peta bobot.</p>
+    <% end %>
+
+    <% if policy(AssessmentBlueprintMapping.new).create? && @available_competency_items.any? %>
+      <%= form_with url: assessment_blueprint_assessment_blueprint_mappings_path(@assessment_blueprint), class: "mt-4 flex flex-wrap gap-2 items-end" do |f| %>
+        <div class="flex-1 min-w-[10rem]">
+          <%= f.label :competency_item_id, "Kompetensi", class: "block text-xs font-semibold text-gray-600 mb-1" %>
+          <%= f.collection_select :competency_item_id, @available_competency_items, :id, :title, {},
+                class: "block w-full rounded-lg border-0 py-2 px-3 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+        </div>
+        <div class="w-24">
+          <%= f.label :weight, "Bobot (%)", class: "block text-xs font-semibold text-gray-600 mb-1" %>
+          <%= f.number_field :weight, step: 0.5, min: 0, max: 100,
+                class: "block w-full rounded-lg border-0 py-2 px-3 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+        </div>
+        <%= f.submit "Tambah", class: "px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold cursor-pointer" %>
+      <% end %>
     <% end %>
   </div>
 
