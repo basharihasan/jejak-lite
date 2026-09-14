@@ -144,6 +144,8 @@
         active: active_class.call(%w[/competency_frameworks /competency_items]) %>
     <%= render "shared/nav_item", label: t("nav.assessment_blueprints"), path: assessment_blueprints_path,
         active: active_class.call("/assessment_blueprints") %>
+    <%= render "shared/nav_item", label: t("nav.learning_units"), path: admin_learning_units_path,
+        active: active_class.call("/admin/learning_units") %>
     <%= render "shared/nav_item", label: t("nav.logbook_case_targets"), path: admin_logbook_case_targets_path,
         active: active_class.call("/admin/logbook_case_targets") %>
     <%= render "shared/nav_item", label: t("nav.diagnosis_definitions"), path: admin_diagnosis_definitions_path,

@@ -58,6 +58,7 @@ id:
     form_templates: "Assessment Form Builder"
     competency_frameworks: "Kerangka Kompetensi"
     assessment_blueprints: "Blueprint Asesmen"
+    learning_units: "Learning Unit & Matrix"
     logbook_case_targets: "Target Kasus Logbook"
     diagnosis_definitions: "Master Diagnosis"
     skill_definitions: "Master Keterampilan"

@@ -86,6 +86,12 @@ Rails.application.routes.draw do
       resources :assessment_instances, only: %i[update destroy], shallow: true
     end
     resources :evaluation_schedules, except: %i[show]
+    resources :learning_units do
+      member do
+        post   :add_mapping
+        delete "mapping/:mapping_id", action: :remove_mapping, as: :remove_mapping
+      end
+    end
     resources :users, only: %i[index edit update] do
       member { patch :reset_password }
       collection do

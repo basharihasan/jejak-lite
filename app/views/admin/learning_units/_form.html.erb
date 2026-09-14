@@ -1,0 +1,17 @@
+<% cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+<% lbl = "block text-sm font-semibold text-gray-700 mb-1" %>
+<%= form_with model: [ :admin, unit ], class: "space-y-4" do |f| %>
+  <% if unit.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm"><%= unit.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div><%= f.label :name, "Nama unit / blok", class: lbl %><%= f.text_field :name, placeholder: "Blok Sistem Kardiovaskular", class: cls %></div>
+    <div><%= f.label :code, "Kode (opsional)", class: lbl %><%= f.text_field :code, placeholder: "BLK-KV", class: cls %></div>
+    <div><%= f.label :study_program_id, "Program studi", class: lbl %><%= f.collection_select :study_program_id, @study_programs, :id, :name, { include_blank: "Pilih..." }, class: cls %></div>
+    <div><%= f.label :academic_period_id, "Periode (opsional)", class: lbl %><%= f.collection_select :academic_period_id, @academic_periods, :id, :name, { include_blank: "Semua periode" }, class: cls %></div>
+    <div><%= f.label :credits, "SKS (opsional)", class: lbl %><%= f.number_field :credits, min: 1, class: cls %></div>
+    <div><%= f.label :assessment_blueprint_id, "Blueprint kompetensi (opsional)", class: lbl %><%= f.collection_select :assessment_blueprint_id, @blueprints, :id, :name, { include_blank: "—" }, class: cls %></div>
+  </div>
+  <div><%= f.label :description, "Keterangan", class: lbl %><%= f.text_area :description, rows: 2, class: cls %></div>
+  <div><%= f.submit "Simpan", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %></div>
+<% end %>

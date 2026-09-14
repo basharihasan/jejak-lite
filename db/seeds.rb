@@ -199,3 +199,19 @@ end
 ].each do |name, level, category|
   SkillDefinition.find_or_create_by!(name: name) { |s| s.skdi_level = level; s.category = category }
 end
+
+# Fase 26 — Learning Unit contoh + Assessment Matrix (bobot 100%): CBT 60%,
+# SOCA 40%. Idempoten; hanya dibuat bila event-nya ada (demo:seed).
+if (period = AcademicPeriod.order(:start_date).last) && (sp = StudyProgram.find_by(code: "pssk"))
+  unit = LearningUnit.find_or_create_by!(name: "Blok Sistem Kardiovaskular", study_program: sp, academic_period: period) do |u|
+    u.code = "BLK-KV"
+    u.credits = 6
+    u.description = "Contoh unit dengan dua komponen nilai."
+  end
+  { "CBT Blok Demo" => 60, "SOCA Sistem Kardiovaskular" => 40 }.each do |event_name, weight|
+    event = AssessmentEvent.find_by(name: event_name)
+    next if event.nil?
+
+    AssessmentMapping.find_or_create_by!(learning_unit: unit, assessment_event: event) { |m| m.weight = weight }
+  end
+end

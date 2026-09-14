@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_190003) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -203,6 +203,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_190003) do
     t.index ["examiner_id"], name: "index_assessment_instances_on_examiner_id"
     t.index ["student_id", "status"], name: "index_assessment_instances_on_student_id_and_status"
     t.index ["student_id"], name: "index_assessment_instances_on_student_id"
+  end
+
+  create_table "assessment_mappings", force: :cascade do |t|
+    t.bigint "assessment_event_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "learning_unit_id", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "weight", precision: 5, scale: 2, default: "0.0", null: false
+    t.index ["assessment_event_id"], name: "index_assessment_mappings_on_assessment_event_id"
+    t.index ["learning_unit_id", "assessment_event_id"], name: "idx_assessment_mappings_unique", unique: true
+    t.index ["learning_unit_id"], name: "index_assessment_mappings_on_learning_unit_id"
   end
 
   create_table "break_glass_accesses", force: :cascade do |t|
@@ -454,6 +465,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_190003) do
     t.index ["supervisor_id"], name: "index_final_projects_on_supervisor_id"
   end
 
+  create_table "learning_units", force: :cascade do |t|
+    t.bigint "academic_period_id"
+    t.bigint "assessment_blueprint_id"
+    t.string "code"
+    t.datetime "created_at", null: false
+    t.integer "credits"
+    t.text "description"
+    t.string "name", null: false
+    t.bigint "study_program_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["academic_period_id"], name: "index_learning_units_on_academic_period_id"
+    t.index ["assessment_blueprint_id"], name: "index_learning_units_on_assessment_blueprint_id"
+    t.index ["study_program_id", "academic_period_id", "name"], name: "idx_learning_units_unique", unique: true
+    t.index ["study_program_id"], name: "index_learning_units_on_study_program_id"
+  end
+
   create_table "logbook_case_targets", force: :cascade do |t|
     t.bigint "academic_period_id"
     t.datetime "created_at", null: false
@@ -653,6 +680,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_190003) do
   add_foreign_key "assessment_instances", "clinical_cases"
   add_foreign_key "assessment_instances", "users", column: "examiner_id"
   add_foreign_key "assessment_instances", "users", column: "student_id"
+  add_foreign_key "assessment_mappings", "assessment_events"
+  add_foreign_key "assessment_mappings", "learning_units"
   add_foreign_key "break_glass_accesses", "clinical_cases"
   add_foreign_key "break_glass_accesses", "users"
   add_foreign_key "case_verification_comments", "clinical_cases"
@@ -686,6 +715,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_190003) do
   add_foreign_key "final_project_milestones", "final_projects"
   add_foreign_key "final_projects", "users", column: "student_id"
   add_foreign_key "final_projects", "users", column: "supervisor_id"
+  add_foreign_key "learning_units", "academic_periods"
+  add_foreign_key "learning_units", "assessment_blueprints"
+  add_foreign_key "learning_units", "study_programs"
   add_foreign_key "logbook_case_targets", "academic_periods"
   add_foreign_key "logbook_case_targets", "study_programs"
   add_foreign_key "mini_cex_evaluations", "clinical_rotations"

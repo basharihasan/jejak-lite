@@ -28,11 +28,20 @@ class AcademicAssessmentsController < ApplicationController
       @mini_cex_radar = MiniCexEvaluation.avg_dimension_scores(@mini_cex_evaluations) if @mini_cex_evaluations.any?
       @overall_average = overall_average(@dops_evaluations, @mini_cex_evaluations)
       @milestones = CompetencyMilestone.where(academic_period: @selected_period).includes(:competency_item)
+      # Pilar C: nilai blok dari Assessment Matrix & posisi terhadap kohort.
+      @learning_units = LearningUnit.for_student(current_user)
+                                    .where(academic_period_id: [ nil, @selected_period.id ])
+                                    .includes(assessment_mappings: :assessment_event).ordered
+                                    .map { |u| { unit: u, score: u.score_for(current_user), components: u.components_for(current_user) } }
+                                    .select { |row| row[:score] }
+      @percentiles = CohortPercentileCalculator.new(student: current_user, period: @selected_period).call
     else
       @dops_evaluations = DopsEvaluation.none
       @mini_cex_evaluations = MiniCexEvaluation.none
       @exam_scores = []
       @milestones = CompetencyMilestone.none
+      @learning_units = []
+      @percentiles = []
     end
   end
 

@@ -185,7 +185,16 @@ Layout diganti total meniru `app/views/layouts/application.html.erb` + `shared/_
 
 23 test baru (228 total, hijau). Smoke HTTP: 8 akun × 45 halaman, nol 500. Screenshot: Asesmen Saya (mahasiswa) & Assessment Events (admin).
 
-### ⏳ Fase 26 — Pilar C: Assessment Matrix per Learning Unit, kurva persentil kohort, Peta EPA
+### ✅ Fase 26 — Pilar C: Assessment Matrix per Learning Unit & kurva persentil kohort
+- **LearningUnit + AssessmentMapping** (`/admin/learning_units`, admin & kaprodi): blok/modul per prodi (opsional per periode, SKS, blueprint kompetensi) yang nilainya disusun dari beberapa Assessment Event dengan bobot. Halaman unit menampilkan total bobot (ditandai hijau saat 100%), penambahan/penghapusan komponen, dan **rekap nilai unit per mahasiswa**.
+- **Perhitungan nilai unit**: rata-rata TERBOBOT persentase tiap komponen, tetapi **hanya dari komponen yang sudah dinilai** — bobot yang belum ada nilainya tidak masuk penyebut, dan angkanya dilabeli "dari X% bobot" supaya tidak terbaca sebagai nilai akhir. Percobaan wakil tiap event = nilai tertinggi (`AssessmentInstance.representative_for`).
+- **Kurva persentil kohort** (`CohortPercentileCalculator`): posisi mahasiswa terhadap angkatannya, **per tipe asesmen** dan **dalam satu periode** — tidak pernah mencampur alat ukur atau antar-tahun (lihat catatan `assessment-type-mix-shifts-per-period`). Kohort **gabungan PSSK + PSPD** mengikuti jejak.pro. Pita P10–P90 + median + penanda posisi digambar dengan CSS (tanpa Plotly). **Penjaga privasi**: persentil hanya tampil bila kohort ≥ 3 mahasiswa, agar nilai perorangan tak bisa diterka.
+- Keduanya tampil di **Analisis Capaian Pembelajaran** (`/capaian-belajar`) di bawah radar DOPS/Mini-CEX yang sudah ada, dan unit prodi lain tidak pernah tampil.
+
+9 test baru (237 total, hijau). Smoke HTTP: 8 akun × 48 halaman, nol 500. Screenshot: Analisis Capaian Pembelajaran dengan Nilai Blok & Posisi terhadap Kohort.
+
+**Paket Dasar (🟢) `DAFTAR_FITUR_JEJAK.md` v2.0 kini tertutup penuh di jejak-lite.** Yang tersisa dari tabel gap Fase 22: CDSS Fornas pada resep (sengaja ditunda — butuh katalog obat nasional yang tidak ada di tier ini).
+
 
 ## Model Data (ringkas, akan detail per fase saat digarap)
 

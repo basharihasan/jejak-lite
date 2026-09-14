@@ -1,0 +1,33 @@
+<% content_for :title, "Learning Unit & Assessment Matrix" %>
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Learning Unit & Assessment Matrix</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Blok/modul dan komponen nilainya: event asesmen mana yang menyusun nilai unit, dengan bobot berapa.</p>
+  </div>
+  <%= link_to "+ Learning Unit", new_admin_learning_unit_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>
+
+<div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+      <tr><th class="text-left px-5 py-3">Unit</th><th class="text-left px-5 py-3">Prodi · Periode</th><th class="text-left px-5 py-3">SKS</th><th class="text-left px-5 py-3">Komponen</th><th class="text-left px-5 py-3">Total bobot</th><th></th></tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% @units.each do |u| %>
+        <tr>
+          <td class="px-5 py-3 font-semibold text-gray-800"><%= link_to u.name, admin_learning_unit_path(u), class: "hover:text-indigo-600" %><span class="block text-[10px] text-gray-400"><%= u.code %></span></td>
+          <td class="px-5 py-3 text-gray-600"><%= u.study_program.name %> · <%= u.academic_period&.name || "semua periode" %></td>
+          <td class="px-5 py-3 text-gray-600"><%= u.credits || "—" %></td>
+          <td class="px-5 py-3 text-gray-600"><%= u.assessment_mappings.size %></td>
+          <td class="px-5 py-3">
+            <span class="text-xs font-bold px-2 py-0.5 rounded-full <%= u.weights_complete? ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' %>"><%= u.total_weight.round(1) %>%</span>
+          </td>
+          <td class="px-5 py-3 text-right"><%= link_to "Kelola", admin_learning_unit_path(u), class: "text-indigo-600 font-medium hover:underline" %></td>
+        </tr>
+      <% end %>
+      <% if @units.empty? %>
+        <tr><td colspan="6" class="px-5 py-6 text-center text-gray-400">Belum ada learning unit.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
