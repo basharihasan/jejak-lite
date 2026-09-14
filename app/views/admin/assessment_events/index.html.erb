@@ -1,0 +1,45 @@
+<% content_for :title, "Assessment Events" %>
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Assessment Events</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Wadah semua nilai: impor CBT/OSCE/Progress Test, rubrik penguji (SOCA/MSP, esai, refleksi), CBD & Long Case.</p>
+  </div>
+  <%= link_to "+ Event Baru", new_admin_assessment_event_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>
+
+<div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+      <tr>
+        <th class="text-left px-5 py-3">Event</th>
+        <th class="text-left px-5 py-3">Tipe</th>
+        <th class="text-left px-5 py-3">Periode · Prodi · Blok</th>
+        <th class="text-left px-5 py-3">Tanggal</th>
+        <th class="text-left px-5 py-3">Status</th>
+        <th class="text-right px-5 py-3">Percobaan</th>
+        <th class="px-5 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% @events.each do |e| %>
+        <% status_cls = { "draft" => "bg-gray-100 text-gray-600", "published" => "bg-emerald-50 text-emerald-700", "closed" => "bg-rose-50 text-rose-700" }[e.status] %>
+        <tr>
+          <td class="px-5 py-3 font-semibold text-gray-800"><%= link_to e.name, admin_assessment_event_path(e), class: "hover:text-indigo-600" %></td>
+          <td class="px-5 py-3 text-gray-600"><%= e.type_label %><span class="block text-[10px] text-gray-400"><%= e.family_label %><%= " · percobaan berulang" if e.allow_multiple_attempts? %></span></td>
+          <td class="px-5 py-3 text-gray-600"><%= e.academic_period.name %> · <%= e.study_program&.name || "Semua prodi" %><%= " · #{e.block_name}" if e.block_name.present? %></td>
+          <td class="px-5 py-3 text-gray-600"><%= e.exam_date ? l(e.exam_date, format: :long) : "—" %></td>
+          <td class="px-5 py-3"><span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= status_cls %>"><%= e.status_label %></span></td>
+          <td class="px-5 py-3 text-right text-gray-700"><%= e.assessment_instances.size %></td>
+          <td class="px-5 py-3 text-right whitespace-nowrap">
+            <% if e.importable? %><%= link_to "Impor CSV", import_admin_assessment_event_path(e), class: "text-indigo-600 font-medium hover:underline mr-2" %><% end %>
+            <%= link_to "Sunting", edit_admin_assessment_event_path(e), class: "text-gray-600 hover:text-indigo-600" %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @events.empty? %>
+        <tr><td colspan="7" class="px-5 py-6 text-center text-gray-400">Belum ada event asesmen.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<div class="mt-3"><%= paginate @events %></div>

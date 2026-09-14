@@ -1,0 +1,66 @@
+<% content_for :title, @instance.assessment_event.name %>
+<% e = @instance.assessment_event %>
+<div class="max-w-2xl space-y-4">
+  <div>
+    <%= link_to "← Asesmen Saya", student_assessments_path, class: "text-xs text-gray-500 hover:text-indigo-600" %>
+    <h1 class="text-xl font-bold text-gray-900 mt-1"><%= e.name %></h1>
+    <p class="text-sm text-gray-500 mt-0.5"><%= e.type_label %> · percobaan ke-<%= @instance.attempt_number %> · <%= @instance.status_label %>
+      <% if @instance.scheduled_at %> · jadwal <%= l(@instance.scheduled_at, format: :short) %><% end %>
+      <% if @instance.examiner %> · penguji <%= @instance.examiner.full_name %><% end %></p>
+  </div>
+
+  <% if @instance.clinical_case %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Kasus yang diajukan</p>
+      <%= link_to @instance.clinical_case.chief_complaint, clinical_case_path(@instance.clinical_case), class: "text-sm font-semibold text-indigo-600 hover:underline" %>
+      <p class="text-xs text-gray-400 mt-0.5"><%= l(@instance.clinical_case.case_date, format: :long) %></p>
+    </div>
+  <% end %>
+
+  <% if @instance.status == "scored" %>
+    <div class="bg-emerald-50 rounded-2xl ring-1 ring-emerald-200 p-5">
+      <p class="text-xs font-semibold text-emerald-700 uppercase">Nilai</p>
+      <p class="text-3xl font-bold text-gray-900 mt-1"><%= @instance.score %> <span class="text-base font-normal text-gray-500">/ <%= @instance.max_score %> (<%= @instance.percentage %>%)</span></p>
+      <p class="text-xs text-gray-500 mt-1">Dinilai <%= l(@instance.scored_at, format: :long) %><%= " oleh #{@instance.examiner.full_name}" if @instance.examiner %></p>
+      <% if @instance.has_feedback? %>
+        <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <% if @instance.feedback_keep.present? %>
+            <div class="bg-white rounded-xl p-3"><p class="text-[10px] font-bold uppercase text-emerald-700">Pertahankan</p><p class="text-sm text-gray-700 mt-1 whitespace-pre-line"><%= @instance.feedback_keep %></p></div>
+          <% end %>
+          <% if @instance.feedback_improve.present? %>
+            <div class="bg-white rounded-xl p-3"><p class="text-[10px] font-bold uppercase text-amber-700">Tingkatkan</p><p class="text-sm text-gray-700 mt-1 whitespace-pre-line"><%= @instance.feedback_improve %></p></div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if e.requires_submission? %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <p class="text-sm font-semibold text-gray-800">Pengumpulan</p>
+      <% if @instance.document.attached? %>
+        <p class="text-xs text-gray-600 mt-1">📎 <%= link_to @instance.document.filename, rails_blob_path(@instance.document, disposition: "attachment"), class: "text-indigo-600 hover:underline" %> · dikumpulkan <%= l(@instance.submitted_at, format: :short) if @instance.submitted_at %></p>
+      <% end %>
+      <% if @instance.self_evaluation.present? %>
+        <div class="mt-2 bg-gray-50 rounded-xl p-3"><p class="text-[10px] font-bold uppercase text-gray-500">Evaluasi diri</p><p class="text-sm text-gray-700 mt-1 whitespace-pre-line"><%= @instance.self_evaluation %></p></div>
+      <% end %>
+
+      <% if @instance.status != "scored" && e.submission_open? %>
+        <%= form_with url: submit_student_assessment_path(@instance), method: :patch, multipart: true, class: "mt-4 space-y-3" do |f| %>
+          <div>
+            <%= f.label :document, (@instance.document.attached? ? "Ganti dokumen (opsional)" : "Dokumen (PDF/DOCX/gambar)"), class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.file_field :document, class: "block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-indigo-700" %>
+          </div>
+          <div>
+            <%= f.label :self_evaluation, "Evaluasi diri", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.text_area :self_evaluation, rows: 4, value: @instance.self_evaluation, placeholder: "Apa yang sudah Anda kuasai, apa yang masih perlu ditingkatkan...",
+                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+          <%= f.submit (@instance.status == "submitted" ? "Perbarui pengumpulan" : "Kumpulkan"), class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+        <% end %>
+      <% elsif @instance.status != "scored" %>
+        <p class="text-xs text-amber-700 mt-2">Pengumpulan sudah ditutup.</p>
+      <% end %>
+    </div>
+  <% end %>
+</div>

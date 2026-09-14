@@ -9,7 +9,7 @@ class AcademicAssessmentsControllerTest < ActionDispatch::IntegrationTest
     get academic_assessments_path
     assert_response :success
     assert_match dops_evaluations(:dops_siti_infus).procedure_name, response.body
-    assert_match exam_imports(:cbt_blok1).kind_label, response.body
+    assert_match assessment_events(:cbt_blok).name, response.body
   end
 
   test "tidak menampilkan data mahasiswa lain" do

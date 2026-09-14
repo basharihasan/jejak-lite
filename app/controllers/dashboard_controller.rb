@@ -40,6 +40,8 @@ class DashboardController < ApplicationController
 
     @ongoing_rotation = current_user.clinical_rotations.ongoing.first
     @upcoming_rotation = current_user.clinical_rotations.upcoming.first
+    @upcoming_schedules = EvaluationSchedule.for_user(current_user).upcoming.includes(:student, :evaluator).limit(3)
+    @pending_assessments = current_user.assessment_instances.awaiting_score.includes(:assessment_event).recent.limit(3)
 
     load_instructor_quick_actions if current_user.instructor?
     load_own_competency_radar

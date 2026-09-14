@@ -174,7 +174,17 @@ Layout diganti total meniru `app/views/layouts/application.html.erb` + `shared/_
 
 16 test baru (221 total, hijau). Smoke HTTP: 8 akun × 38 halaman, nol 500. Screenshot: halaman kasus tersamar dengan Break Glass + QR, lembar persetujuan pasien di lebar ponsel.
 
-### ⏳ Fase 25 — Pilar B: Assessment Events + impor CSV berpemetaan kolom + percobaan berulang, CBD, Long Case, EPA entrustment, jadwal WBA, jurnal umpan balik penguji
+### ✅ Fase 25 — Pilar B: Assessment Events, impor CSV berpemetaan kolom, percobaan berulang, rubrik penguji, CBD/Long Case, jadwal WBA, Peta EPA, jurnal umpan balik
+- **AssessmentEvent + AssessmentInstance menggantikan ExamImport/ExamScore** (Fase 12). Satu wadah untuk semua nilai, bertipe **14 instrumen** dalam empat keluarga: ujian tulis (CBT, nilai tutor, Tinjauan, TMEX, Progress Test), ujian praktik (OSCE), rubrik penguji (SOCA/MSP, Essay & Festival Gagasan, Community Project, Refleksi dinilai, EBCR), dan berbasis kasus (CBD, Long Case) — sesuai matriks PSSK/PSPD di `DAFTAR_FITUR_JEJAK.md` § Pilar B. Event dibatasi periode + prodi + blok/stase; `visible_to?` mencocokkan enrolment tutorial/rotasi aktif mahasiswa. **Migrasi menyalin data lama** (2 event, 3 nilai di dev); tabel `exam_imports`/`exam_scores` sengaja ditinggal untuk diverifikasi manual sebelum di-drop.
+- **Percobaan berulang** (`allow_multiple_attempts`): unik per (event, mahasiswa, `attempt_number`); `AssessmentInstance.representative_for` memilih nilai tertinggi — jangan `find_by`.
+- **Impor CSV 3 langkah berpemetaan kolom** (`AssessmentScoreImporter`): unggah → petakan (email, skor, nilai maks, nomor percobaan) dengan tebakan otomatis dari nama header → jalankan; pemisah `,`/`;`, desimal koma, BOM dibuang; email tak dikenal dilaporkan, tidak dibuat otomatis; event sekali-jalan menimpa percobaan 1.
+- **Alur rubrik**: mahasiswa mendaftar (`/student/assessments`) → unggah dokumen + evaluasi diri → penguji menilai di **Lembar Penguji** (`/examiner_evaluations`; percobaan tanpa penguji boleh diambil) dengan nilai + umpan balik "pertahankan/tingkatkan" → notifikasi ke mahasiswa. Event boleh menunjuk Assessment Form Template (Fase 9) sebagai rubrik terstruktur.
+- **CBD & Long Case dari kasus**: tombol Inisiasi di halaman kasus (status `submitted`/`verified` milik sendiri), kasus tertaut ke percobaan, penguji terisi dari verifier kasus atau preseptor rotasi aktif — meniru "inisiasi terintegrasi" jejak.pro.
+- **Peta EPA & Tingkat Entrustment** (`/dashboard/entrustment`, `EntrustmentDecision`): level 1–5 per ranah kerangka kompetensi, **supersede** bukan timpa (riwayat tersimpan). Terisi otomatis saat verifikasi kasus bila verifier mencentang ranah EPA (peta 6 level kasus → 1–5), atau manual oleh pembimbing yang punya relasi (tutor enrolment, preseptor rotasi, pembimbing tugas akhir, verifier kasus).
+- **Jadwal DOPS & Mini-CEX** (`EvaluationSchedule`) + kartu beranda "Jadwal mendatang" & "Asesmen menunggu"; **Evaluasi Akademik** (`/nilai-ujian`) kini per tipe asesmen dengan tren persentase; **Jurnal Umpan Balik Penguji** (`/student/feedback_journal`) menggabungkan umpan balik rubrik, CBD/Long Case, DOPS, dan Mini-CEX dalam satu linimasa.
+
+23 test baru (228 total, hijau). Smoke HTTP: 8 akun × 45 halaman, nol 500. Screenshot: Asesmen Saya (mahasiswa) & Assessment Events (admin).
+
 ### ⏳ Fase 26 — Pilar C: Assessment Matrix per Learning Unit, kurva persentil kohort, Peta EPA
 
 ## Model Data (ringkas, akan detail per fase saat digarap)

@@ -158,20 +158,40 @@ namespace :demo do
       end
     end
 
-    exam_import = ExamImport.find_or_create_by!(name: "CBT Blok Demo", kind: "cbt") do |ei|
-      ei.imported_by = admin
-      ei.row_count = 2
-      ei.unmatched_count = 0
+    # Fase 25 — Assessment Event & percobaan (menggantikan ExamImport/ExamScore).
+    cbt_event = AssessmentEvent.find_or_create_by!(name: "CBT Blok Demo", assessment_type: "cbt", academic_period: period) do |e|
+      e.study_program = sarjana
+      e.exam_date = 6.days.ago.to_date
+      e.status = "published"
+      e.created_by = admin
     end
-    ExamScore.find_or_create_by!(exam_import: exam_import, student: mahasiswa1) do |s|
-      s.score = 82
-      s.max_score = 100
-      s.exam_date = 6.days.ago.to_date
+    { mahasiswa1 => 82, mahasiswa2 => 74 }.each do |student, score|
+      AssessmentInstance.find_or_create_by!(assessment_event: cbt_event, student: student, attempt_number: 1) do |i|
+        i.score = score
+        i.max_score = 100
+        i.status = "scored"
+        i.source = "import"
+        i.scored_at = 6.days.ago
+      end
     end
-    ExamScore.find_or_create_by!(exam_import: exam_import, student: mahasiswa2) do |s|
-      s.score = 74
-      s.max_score = 100
-      s.exam_date = 6.days.ago.to_date
+    soca_event = AssessmentEvent.find_or_create_by!(name: "SOCA Sistem Kardiovaskular", assessment_type: "soca_msp", academic_period: period) do |e|
+      e.study_program = sarjana
+      e.block_name = "Sistem Kardiovaskular"
+      e.exam_date = 3.days.from_now.to_date
+      e.status = "published"
+      e.submission_close_at = 7.days.from_now
+      e.created_by = admin
+    end
+    TutorialEnrollment.find_or_create_by!(user: mahasiswa1, academic_period: period, block_name: "Sistem Kardiovaskular") do |te|
+      te.tutor = dosen
+      te.group_name = "Kelompok 1"
+      te.active = true
+    end
+    AssessmentInstance.find_or_create_by!(assessment_event: soca_event, student: mahasiswa1, attempt_number: 1) do |i|
+      i.examiner = dosen
+      i.status = "submitted"
+      i.submitted_at = 1.day.ago
+      i.self_evaluation = "Saya sudah memahami patofisiologi gagal jantung, masih perlu latihan menyusun rencana tatalaksana."
     end
 
     ReflectionEntry.find_or_create_by!(user: mahasiswa1, entry_date: 2.days.ago.to_date) do |r|

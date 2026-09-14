@@ -21,8 +21,8 @@ class AcademicAssessmentsController < ApplicationController
 
       @dops_evaluations = DopsEvaluation.where(student: current_user, clinical_rotation_id: rotation_ids).submitted.recent
       @mini_cex_evaluations = MiniCexEvaluation.where(student: current_user, clinical_rotation_id: rotation_ids).submitted.recent
-      @exam_scores = ExamScore.where(student: current_user, exam_date: @selected_period.start_date..@selected_period.end_date)
-                               .includes(:exam_import).chronological
+      @exam_scores = current_user.assessment_instances.scored.in_period(@selected_period)
+                                 .includes(:assessment_event).sort_by(&:effective_date)
 
       @dops_radar = DopsEvaluation.avg_dimension_scores(@dops_evaluations) if @dops_evaluations.any?
       @mini_cex_radar = MiniCexEvaluation.avg_dimension_scores(@mini_cex_evaluations) if @mini_cex_evaluations.any?
@@ -31,7 +31,7 @@ class AcademicAssessmentsController < ApplicationController
     else
       @dops_evaluations = DopsEvaluation.none
       @mini_cex_evaluations = MiniCexEvaluation.none
-      @exam_scores = ExamScore.none
+      @exam_scores = []
       @milestones = CompetencyMilestone.none
     end
   end

@@ -14,7 +14,7 @@ class AssessmentFormSubmissionsController < ApplicationController
 
   def new
     @template = AssessmentFormTemplate.active.find(params[:assessment_form_template_id])
-    @submission = @template.assessment_form_submissions.build
+    @submission = @template.assessment_form_submissions.build(subject_user_id: params[:subject_user_id].presence)
     load_subject_candidates
   end
 

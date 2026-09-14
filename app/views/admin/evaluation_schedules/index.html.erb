@@ -1,0 +1,33 @@
+<% content_for :title, "Jadwal DOPS & Mini-CEX" %>
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Jadwal DOPS & Mini-CEX</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Rencana penilaian di tempat kerja; mahasiswa & penilai diberi notifikasi. Evaluasinya sendiri tetap diisi lewat form DOPS/Mini-CEX.</p>
+  </div>
+  <%= link_to "+ Jadwal Baru", new_admin_evaluation_schedule_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>
+<div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+      <tr><th class="text-left px-5 py-3">Waktu</th><th class="text-left px-5 py-3">Jenis</th><th class="text-left px-5 py-3">Mahasiswa</th><th class="text-left px-5 py-3">Penilai</th><th class="text-left px-5 py-3">Topik / Rotasi</th><th class="text-left px-5 py-3">Status</th><th></th></tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% @schedules.each do |s| %>
+        <tr>
+          <td class="px-5 py-3 text-gray-700 whitespace-nowrap"><%= l(s.scheduled_at, format: :short) %></td>
+          <td class="px-5 py-3 font-semibold text-gray-800"><%= s.kind_label %></td>
+          <td class="px-5 py-3 text-gray-700"><%= s.student.full_name %></td>
+          <td class="px-5 py-3 text-gray-600"><%= s.evaluator&.full_name || "—" %></td>
+          <td class="px-5 py-3 text-gray-600"><%= s.topic %><%= " · #{s.clinical_rotation.station_name}" if s.clinical_rotation %></td>
+          <td class="px-5 py-3"><span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= { 'planned' => 'bg-sky-50 text-sky-700', 'done' => 'bg-emerald-50 text-emerald-700', 'cancelled' => 'bg-gray-100 text-gray-500' }[s.status] %>"><%= s.status_label %></span></td>
+          <td class="px-5 py-3 text-right whitespace-nowrap">
+            <%= link_to "Sunting", edit_admin_evaluation_schedule_path(s), class: "text-indigo-600 font-medium hover:underline" %>
+            <%= button_to "Hapus", admin_evaluation_schedule_path(s), method: :delete, class: "ml-2 text-rose-600 hover:underline inline", form: { class: "inline", data: { turbo_confirm: "Hapus jadwal ini?" } } %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @schedules.empty? %><tr><td colspan="7" class="px-5 py-6 text-center text-gray-400">Belum ada jadwal.</td></tr><% end %>
+    </tbody>
+  </table>
+</div>
+<div class="mt-3"><%= paginate @schedules %></div>

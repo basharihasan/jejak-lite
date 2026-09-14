@@ -1,0 +1,9 @@
+siti_cbt_1:
+  assessment_event: cbt_blok
+  student: siti
+  attempt_number: 1
+  status: scored
+  score: 62
+  max_score: 100
+  source: import
+  scored_at: <%= 5.days.ago %>

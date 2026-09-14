@@ -1,0 +1,32 @@
+<% content_for :title, "Lembar Penguji" %>
+<% status_cls = { "registered" => "bg-gray-100 text-gray-600", "submitted" => "bg-amber-50 text-amber-700", "scored" => "bg-emerald-50 text-emerald-700" } %>
+<div class="space-y-5">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Rubric-based Assessment — Lembar Penguji</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Percobaan yang ditugaskan kepada Anda dan pengumpulan yang belum bertugas penguji.</p>
+  </div>
+
+  <% [ [ "Ditugaskan kepada saya", @mine ], [ "Belum bertugas penguji (boleh diambil)", @unassigned ] ].each do |title, rows| %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+      <div class="px-5 py-4 border-b border-gray-100"><p class="text-sm font-semibold text-gray-800"><%= title %> <span class="text-gray-400 font-normal">(<%= rows.size %>)</span></p></div>
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+          <tr><th class="text-left px-5 py-3">Mahasiswa</th><th class="text-left px-5 py-3">Event</th><th class="text-left px-5 py-3">Status</th><th class="text-left px-5 py-3">Dikumpulkan</th><th class="text-left px-5 py-3">Nilai</th><th></th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% rows.each do |i| %>
+            <tr>
+              <td class="px-5 py-3 font-medium text-gray-800"><%= i.student.full_name %></td>
+              <td class="px-5 py-3 text-gray-600"><%= i.assessment_event.name %><span class="block text-[10px] text-gray-400"><%= i.type_label %> · ke-<%= i.attempt_number %></span></td>
+              <td class="px-5 py-3"><span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= status_cls[i.status] %>"><%= i.status_label %></span></td>
+              <td class="px-5 py-3 text-gray-500"><%= i.submitted_at ? l(i.submitted_at, format: :short) : "—" %></td>
+              <td class="px-5 py-3 text-gray-700"><%= i.score ? "#{i.score}/#{i.max_score}" : "—" %></td>
+              <td class="px-5 py-3 text-right"><%= link_to (i.status == "scored" ? "Lihat" : "Nilai"), examiner_evaluation_path(i), class: "text-indigo-600 font-medium hover:underline" %></td>
+            </tr>
+          <% end %>
+          <% if rows.empty? %><tr><td colspan="6" class="px-5 py-6 text-center text-gray-400">Kosong.</td></tr><% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

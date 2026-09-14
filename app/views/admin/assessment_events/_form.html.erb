@@ -1,0 +1,66 @@
+<% cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+<% lbl = "block text-sm font-semibold text-gray-700 mb-1" %>
+<%= form_with model: [ :admin, event ], class: "space-y-4" do |f| %>
+  <% if event.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm"><%= event.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Nama event", class: lbl %>
+    <%= f.text_field :name, placeholder: "Contoh: CBT Blok Kardiovaskular 2026", class: cls %>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :assessment_type, "Tipe asesmen", class: lbl %>
+      <%= f.select :assessment_type, AssessmentEvent.types_for_select, {}, class: cls %>
+      <p class="text-[11px] text-gray-400 mt-1">Ujian tulis/praktik → nilai lewat impor CSV. Rubrik penguji → mahasiswa mengumpulkan, penguji menilai. Berbasis kasus → diinisiasi dari Kasus Klinis.</p>
+    </div>
+    <div>
+      <%= f.label :status, "Status", class: lbl %>
+      <%= f.select :status, AssessmentEvent::STATUSES.invert, {}, class: cls %>
+      <p class="text-[11px] text-gray-400 mt-1">Hanya event <strong>Terbit</strong> yang tampil bagi mahasiswa.</p>
+    </div>
+    <div>
+      <%= f.label :academic_period_id, "Periode akademik", class: lbl %>
+      <%= f.collection_select :academic_period_id, @academic_periods, :id, :name, {}, class: cls %>
+    </div>
+    <div>
+      <%= f.label :study_program_id, "Program studi", class: lbl %>
+      <%= f.collection_select :study_program_id, @study_programs, :id, :name, { include_blank: "Semua prodi" }, class: cls %>
+    </div>
+    <div>
+      <%= f.label :block_name, "Blok / stase (opsional)", class: lbl %>
+      <%= f.text_field :block_name, placeholder: "Sistem Kardiovaskular", class: cls %>
+      <p class="text-[11px] text-gray-400 mt-1">Bila diisi, hanya mahasiswa yang enrolment tutorial/rotasinya cocok yang melihat event ini.</p>
+    </div>
+    <div>
+      <%= f.label :exam_date, "Tanggal ujian", class: lbl %>
+      <%= f.date_field :exam_date, class: cls %>
+    </div>
+    <div>
+      <%= f.label :max_score, "Nilai maksimum", class: lbl %>
+      <%= f.number_field :max_score, step: "0.01", min: 1, class: cls %>
+    </div>
+    <div>
+      <%= f.label :submission_close_at, "Batas pengumpulan (opsional)", class: lbl %>
+      <%= f.datetime_local_field :submission_close_at, class: cls %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= f.label :assessment_form_template_id, "Rubrik penguji (Assessment Form Builder, opsional)", class: lbl %>
+      <%= f.collection_select :assessment_form_template_id, @form_templates, :id, :name, { include_blank: "Tanpa rubrik terstruktur — penguji memberi nilai langsung" }, class: cls %>
+    </div>
+  </div>
+
+  <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+    <%= f.check_box :allow_multiple_attempts, class: "rounded border-gray-300 text-indigo-600" %>
+    Boleh dijalani berulang dalam periode ini (ujian ulang / remedial pada event yang sama)
+  </label>
+
+  <div>
+    <%= f.label :description, "Keterangan (opsional)", class: lbl %>
+    <%= f.text_area :description, rows: 2, class: cls %>
+  </div>
+
+  <div><%= f.submit "Simpan", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %></div>
+<% end %>

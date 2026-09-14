@@ -103,12 +103,12 @@
   <% end %>
 
   <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
-    <p class="text-sm font-semibold text-gray-700 mb-3">Skor Ujian</p>
+    <p class="text-sm font-semibold text-gray-700 mb-3">Nilai Asesmen Periode Ini</p>
     <% if @exam_scores.any? %>
       <div class="space-y-1.5">
         <% @exam_scores.each do |score| %>
           <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-600"><%= score.exam_import.kind_label %> · <%= l(score.exam_date, format: :long) %></span>
+            <span class="text-gray-600"><%= score.type_label %> · <%= score.assessment_event.name %> · <%= l(score.effective_date, format: :long) %><%= " · ke-#{score.attempt_number}" if score.attempt_number > 1 %></span>
             <span class="font-semibold text-gray-800"><%= score.score %>/<%= score.max_score %> (<%= score.percentage %>%)</span>
           </div>
         <% end %>

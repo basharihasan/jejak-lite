@@ -1,0 +1,18 @@
+<% cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+<% lbl = "block text-sm font-semibold text-gray-700 mb-1" %>
+<%= form_with model: [ :admin, schedule ], class: "space-y-4" do |f| %>
+  <% if schedule.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm"><%= schedule.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div><%= f.label :kind, "Jenis", class: lbl %><%= f.select :kind, EvaluationSchedule::KINDS.invert, {}, class: cls %></div>
+    <div><%= f.label :scheduled_at, "Waktu", class: lbl %><%= f.datetime_local_field :scheduled_at, class: cls %></div>
+    <div><%= f.label :student_id, "Mahasiswa", class: lbl %><%= f.collection_select :student_id, @students, :id, :full_name, { include_blank: "Pilih..." }, class: cls %></div>
+    <div><%= f.label :evaluator_id, "Penilai", class: lbl %><%= f.collection_select :evaluator_id, @evaluators, :id, :full_name, { include_blank: "—" }, class: cls %></div>
+    <div><%= f.label :clinical_rotation_id, "Rotasi (opsional)", class: lbl %><%= f.collection_select :clinical_rotation_id, @rotations, :id, ->(r) { "#{r.user.full_name} — #{r.station_name}" }, { include_blank: "—" }, class: cls %></div>
+    <div><%= f.label :status, "Status", class: lbl %><%= f.select :status, EvaluationSchedule::STATUSES.invert, {}, class: cls %></div>
+  </div>
+  <div><%= f.label :topic, "Topik / prosedur (opsional)", class: lbl %><%= f.text_field :topic, class: cls %></div>
+  <div><%= f.label :notes, "Catatan", class: lbl %><%= f.text_area :notes, rows: 2, class: cls %></div>
+  <div><%= f.submit "Simpan", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %></div>
+<% end %>

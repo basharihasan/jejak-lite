@@ -2,7 +2,7 @@
 
 class ClinicalCasesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_clinical_case, only: %i[show edit update destroy submit verify request_revision break_glass issue_consent revoke_consent]
+  before_action :set_clinical_case, only: %i[show edit update destroy submit verify request_revision break_glass issue_consent revoke_consent initiate_assessment]
 
   def index
     @scope = params[:scope] == "to_verify" && current_user.can_verify_clinical_cases? ? "to_verify" : "mine"
@@ -26,6 +26,43 @@ class ClinicalCasesController < ApplicationController
     @break_glass = BreakGlassAccess.active_for(current_user, @clinical_case) if @privacy_mode
     @identity_visible = !@privacy_mode || @break_glass.present?
     @patient_consent = @clinical_case.patient_consent
+    # Tombol "Inisiasi CBD / Long Case": event berbasis kasus yang tampil bagi
+    # pemilik kasus dan belum dipakai kasus ini.
+    if policy(@clinical_case).initiate_assessment?
+      used_event_ids = @clinical_case.assessment_instances.pluck(:assessment_event_id)
+      @case_based_events = AssessmentEvent.published.where(assessment_type: %w[cbd long_case]).ordered
+                                          .select { |e| e.visible_to?(@clinical_case.user) && e.submission_open? }
+                                          .reject { |e| used_event_ids.include?(e.id) }
+    end
+    @case_assessments = @clinical_case.assessment_instances.includes(:assessment_event, :examiner)
+  end
+
+  # Inisiasi CBD / Long Case langsung dari kasus: kasus ini ditautkan ke
+  # percobaan baru, penguji terisi dari verifier kasus atau preseptor rotasi
+  # aktif, dan statusnya langsung "dikumpulkan" (kasusnya adalah dokumennya).
+  def initiate_assessment
+    authorize @clinical_case
+    event = AssessmentEvent.published.where(assessment_type: %w[cbd long_case]).find(params[:assessment_event_id])
+    unless event.visible_to?(current_user) && event.submission_open?
+      redirect_to @clinical_case, alert: "Event ini tidak tersedia untuk Anda."
+      return
+    end
+    if @clinical_case.assessment_instances.exists?(assessment_event: event)
+      redirect_to @clinical_case, alert: "Kasus ini sudah diajukan ke #{event.name}."
+      return
+    end
+
+    examiner = @clinical_case.verified_by || current_user.clinical_rotations.ongoing.first&.preceptor
+    instance = current_user.assessment_instances.create!(
+      assessment_event: event, attempt_number: AssessmentInstance.next_attempt_number(event, current_user),
+      max_score: event.max_score, clinical_case: @clinical_case, examiner: examiner,
+      status: "submitted", submitted_at: Time.current
+    )
+    if examiner
+      Notification.notify!(recipient: examiner, sender: current_user, notifiable: instance,
+                           title: "Permintaan #{event.type_label}", message: "#{current_user.full_name}: #{@clinical_case.chief_complaint}")
+    end
+    redirect_to student_assessment_path(instance), notice: "#{event.type_label} diinisiasi dari kasus ini."
   end
 
   # Break Glass: membuka identitas pasien untuk 30 menit dengan alasan tertulis;
@@ -99,7 +136,8 @@ class ClinicalCasesController < ApplicationController
     authorize @clinical_case
     @clinical_case.verify!(
       by: current_user, entrustment_level: params[:entrustment_level],
-      recommend_remediation: ActiveModel::Type::Boolean.new.cast(params[:recommend_remediation]) || false, comment: params[:comment]
+      recommend_remediation: ActiveModel::Type::Boolean.new.cast(params[:recommend_remediation]) || false, comment: params[:comment],
+      epa_item_ids: Array(params[:epa_item_ids]).reject(&:blank?)
     )
     redirect_to @clinical_case, notice: "Kasus klinis diverifikasi."
   end

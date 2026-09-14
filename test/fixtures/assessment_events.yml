@@ -1,0 +1,34 @@
+cbt_blok:
+  name: CBT Blok Kardiovaskular
+  assessment_type: cbt
+  academic_period: current_period
+  study_program: sarjana_kedokteran
+  exam_date: <%= 5.days.ago.to_date %>
+  status: published
+  max_score: 100
+  allow_multiple_attempts: true
+
+soca_kardio:
+  name: SOCA Sistem Kardiovaskular
+  assessment_type: soca_msp
+  academic_period: current_period
+  study_program: sarjana_kedokteran
+  block_name: Sistem Kardiovaskular
+  exam_date: <%= 3.days.from_now.to_date %>
+  status: published
+  max_score: 100
+  submission_close_at: <%= 10.days.from_now %>
+
+cbd_ipd:
+  name: CBD Ilmu Penyakit Dalam
+  assessment_type: cbd
+  academic_period: current_period
+  status: published
+  max_score: 100
+
+draft_event:
+  name: Event Draf
+  assessment_type: essay_gagasan
+  academic_period: current_period
+  status: draft
+  max_score: 100

@@ -30,6 +30,9 @@ class User < ApplicationRecord
   has_many :final_projects, foreign_key: :student_id, inverse_of: :student, dependent: :destroy
   has_many :supervised_final_projects, class_name: "FinalProject", foreign_key: :supervisor_id, inverse_of: :supervisor, dependent: :nullify
   has_many :examiner_scores_given, class_name: "ExaminerScore", foreign_key: :examiner_id, inverse_of: :examiner, dependent: :destroy
+  has_many :assessment_instances, foreign_key: :student_id, inverse_of: :student, dependent: :destroy
+  has_many :examined_assessment_instances, class_name: "AssessmentInstance", foreign_key: :examiner_id, inverse_of: :examiner, dependent: :nullify
+  has_many :entrustment_decisions, foreign_key: :student_id, inverse_of: :student, dependent: :destroy
 
   # Peran yang boleh menilai/memverifikasi mahasiswa (DOPS, Mini-CEX, Kasus
   # Klinis) — dosen, preseptor (pembimbing klinis di wahana), dan admin.
@@ -67,6 +70,15 @@ class User < ApplicationRecord
 
     user.save
     user
+  end
+
+  # Relasi pembimbingan longgar: pernah menilai DOPS/Mini-CEX, membimbing
+  # tugas akhir, atau memverifikasi kasus mahasiswa ini.
+  def supervised_by?(instructor)
+    dops_evaluations_as_student.exists?(evaluator: instructor) ||
+      mini_cex_evaluations_as_student.exists?(evaluator: instructor) ||
+      final_projects.exists?(supervisor: instructor) ||
+      clinical_cases.exists?(verified_by: instructor)
   end
 
   def has_role?(code)

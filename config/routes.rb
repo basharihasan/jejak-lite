@@ -52,6 +52,7 @@ Rails.application.routes.draw do
       post  :break_glass
       post  :issue_consent
       patch :revoke_consent
+      post  :initiate_assessment   # CBD / Long Case dari kasus
     end
   end
   # Lembar persetujuan pasien — publik, tanpa login, bertoken 32 karakter.
@@ -75,6 +76,16 @@ Rails.application.routes.draw do
       collection { post :import }
     end
     resources :logbook_case_targets, except: %i[show]
+    resources :assessment_events do
+      member do
+        get  :import
+        post :import_preview
+        post :import_create
+        post :add_instance
+      end
+      resources :assessment_instances, only: %i[update destroy], shallow: true
+    end
+    resources :evaluation_schedules, except: %i[show]
     resources :users, only: %i[index edit update] do
       member { patch :reset_password }
       collection do
@@ -107,8 +118,23 @@ Rails.application.routes.draw do
     resources :examiner_scores, only: %i[new create], shallow: true
   end
 
-  resources :exam_imports, only: %i[index new create show destroy]
-  get "nilai-ujian", to: "exam_scores#index", as: :exam_scores
+  # Fase 25 — Pilar B: Evaluasi Akademik (nilai per tipe), asesmen berbasis
+  # rubrik/dokumen untuk mahasiswa, lembar penilai untuk penguji, jurnal umpan
+  # balik penguji.
+  get "nilai-ujian", to: "academic_scores#index", as: :exam_scores
+  namespace :student do
+    resources :assessments, only: %i[index show] do
+      member { patch :submit }
+    end
+    resources :assessment_events, only: [] do
+      member { post :register }
+    end
+    get "feedback_journal", to: "feedback_journal#index"
+  end
+  resources :examiner_evaluations, only: %i[index show update]
+  # Peta EPA & Tingkat Entrustment (jejak.pro: /dashboard/entrustment)
+  get  "dashboard/entrustment", to: "entrustment_decisions#index",  as: :entrustment_decisions
+  post "dashboard/entrustment", to: "entrustment_decisions#create"
 
   resources :assessment_blueprints do
     resources :assessment_blueprint_mappings, only: %i[create destroy]

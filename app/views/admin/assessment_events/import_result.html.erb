@@ -1,0 +1,20 @@
+<% content_for :title, "Hasil Impor — #{@event.name}" %>
+<div class="max-w-2xl space-y-5">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Hasil Impor</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Langkah 3 dari 3 — <%= @event.name %></p>
+  </div>
+  <div class="rounded-2xl ring-1 p-5 <%= @result.errors.any? ? 'bg-amber-50 ring-amber-200' : 'bg-emerald-50 ring-emerald-200' %>">
+    <p class="text-sm font-semibold text-gray-800"><%= @result.created %> nilai baru, <%= @result.updated %> diperbarui, <%= @result.unmatched.size %> email tak dikenal, <%= @result.errors.size %> baris gagal.</p>
+    <% if @result.unmatched.any? %>
+      <p class="text-xs text-gray-700 mt-2"><strong>Tidak ditemukan:</strong> <%= @result.unmatched.uniq.join(", ") %></p>
+    <% end %>
+    <% if @result.errors.any? %>
+      <ul class="mt-2 text-xs text-rose-700 list-disc pl-5 space-y-0.5"><% @result.errors.each do |e| %><li><%= e %></li><% end %></ul>
+    <% end %>
+  </div>
+  <div class="flex gap-3">
+    <%= link_to "Lihat event", admin_assessment_event_path(@event), class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+    <%= link_to "Impor lagi", import_admin_assessment_event_path(@event), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium px-4 py-2" %>
+  </div>
+</div>

@@ -13,10 +13,13 @@
           <span class="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold">
             <%= user.full_name.first.upcase %>
           </span>
-          <div>
+          <div class="min-w-0 flex-1">
             <p class="text-sm font-semibold text-gray-800"><%= user.full_name %></p>
-            <p class="text-xs text-gray-400"><%= user.email %></p>
+            <p class="text-xs text-gray-400"><%= user.email %><%= " · #{user.roles.map(&:name).join(', ')}" if user.roles.any? %></p>
           </div>
+          <% if current_user.instructor? && user.has_role?("mahasiswa") %>
+            <%= link_to "Peta EPA", entrustment_decisions_path(student_id: user.id), class: "shrink-0 text-xs font-semibold text-indigo-600 hover:underline" %>
+          <% end %>
         </div>
       <% end %>
     <% else %>

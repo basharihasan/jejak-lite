@@ -1,0 +1,41 @@
+<% content_for :title, "Evaluasi Akademik" %>
+<div class="space-y-4">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Evaluasi Akademik</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Nilai Anda per tipe asesmen — CBT, OSCE, Progress Test, nilai tutor, rubrik penguji, CBD/Long Case. Persentase dipakai agar skala yang berbeda bisa dibandingkan.</p>
+  </div>
+
+  <% if @pending.any? %>
+    <div class="bg-amber-50 rounded-2xl ring-1 ring-amber-200 p-4 text-sm text-amber-800">
+      <%= @pending.size %> asesmen menunggu: <%= @pending.map { |i| link_to(i.assessment_event.name, student_assessment_path(i), class: "font-semibold hover:underline") }.join(", ").html_safe %>.
+    </div>
+  <% end %>
+
+  <% if @by_type.empty? %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6 text-sm text-gray-400">Belum ada nilai yang tercatat.</div>
+  <% end %>
+
+  <% @by_type.each do |type, rows| %>
+    <% rows = rows.sort_by(&:effective_date) %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
+        <p class="text-sm font-semibold text-gray-700"><%= AssessmentEvent::TYPES.dig(type, 0) || type %></p>
+        <p class="text-xs text-gray-400">rata-rata <strong class="text-gray-700"><%= (rows.filter_map(&:percentage).sum / rows.size.to_f).round(1) %>%</strong> · <%= rows.size %> nilai</p>
+      </div>
+      <% if rows.size > 1 %>
+        <%= line_chart rows.map { |i| [ i.effective_date, i.percentage ] }, colors: [ "#4f46e5" ], height: "160px", suffix: "%", max: 100, min: 0 %>
+      <% end %>
+      <div class="mt-3 divide-y divide-gray-100">
+        <% rows.reverse.each do |i| %>
+          <div class="py-2 flex items-center justify-between gap-3 text-sm">
+            <div class="min-w-0">
+              <%= link_to i.assessment_event.name, student_assessment_path(i), class: "font-medium text-gray-800 hover:text-indigo-600" %>
+              <span class="text-xs text-gray-400">· <%= l(i.effective_date, format: :long) %><%= " · ke-#{i.attempt_number}" if i.attempt_number > 1 %></span>
+            </div>
+            <span class="font-semibold text-gray-700 shrink-0"><%= i.score %>/<%= i.max_score %> <span class="text-xs text-gray-400">(<%= i.percentage %>%)</span></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -50,7 +50,7 @@ class AppShellTest < ActionDispatch::IntegrationTest
     assert_select "aside#sidebar" do
       assert_select "p", text: "Konfigurasi"
       assert_select "a[href=?]", academic_periods_path
-      assert_select "a[href=?]", exam_imports_path
+      assert_select "a[href=?]", admin_assessment_events_path
       assert_select "a[href=?]", competency_frameworks_path
       assert_select "a[href=?]", assessment_blueprints_path
     end

@@ -44,6 +44,7 @@ class ClinicalCase < ApplicationRecord
 
   has_many :break_glass_accesses, dependent: :destroy
   has_one :patient_consent, dependent: :destroy
+  has_many :assessment_instances, dependent: :nullify # CBD / Long Case yang berangkat dari kasus ini
 
   before_save :sync_diagnosis_definition
 
@@ -91,12 +92,13 @@ class ClinicalCase < ApplicationRecord
     case_verification_comments.create!(user: user, action: "submitted")
   end
 
-  def verify!(by:, entrustment_level: nil, recommend_remediation: false, comment: nil)
+  def verify!(by:, entrustment_level: nil, recommend_remediation: false, comment: nil, epa_item_ids: [])
     update!(
       status: "verified", verified_by: by, verified_at: Time.current,
       entrustment_level: entrustment_level, recommend_remediation: recommend_remediation
     )
     case_verification_comments.create!(user: by, action: "verified", body: comment)
+    record_entrustment_decisions!(by: by, epa_item_ids: epa_item_ids)
     Notification.notify!(
       recipient: user, sender: by, notifiable: self,
       title: "Kasus klinis terverifikasi", message: chief_complaint
@@ -154,6 +156,21 @@ class ClinicalCase < ApplicationRecord
   # FKTP = pelayanan primer; selainnya (RS: rawat jalan/inap, IGD, ICU, OK) = FKRTL.
   def facility_type
     clinical_setting == "pelayanan_primer" ? "fktp" : "fkrtl"
+  end
+
+  # Verifikasi menulis level entrustment EPA untuk ranah yang dipilih verifier
+  # (peta 6 level kasus → skala 1–5, lihat EntrustmentDecision::CASE_LEVEL_MAP).
+  # Tanpa ranah terpilih tidak ada yang ditulis — tidak menebak.
+  def record_entrustment_decisions!(by:, epa_item_ids:)
+    level = EntrustmentDecision::CASE_LEVEL_MAP[entrustment_level]
+    return if level.nil? || epa_item_ids.blank?
+
+    CompetencyItem.where(id: epa_item_ids, parent_id: nil).find_each do |item|
+      EntrustmentDecision.decide!(
+        student: user, competency_item: item, level: level, decided_by: by, clinical_case: self,
+        justification: "Verifikasi kasus \"#{chief_complaint}\" (#{I18n.l(case_date, format: :long)}): #{entrustment_level_label}."
+      )
+    end
   end
 
   private

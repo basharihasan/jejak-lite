@@ -1,0 +1,62 @@
+<% content_for :title, "Asesmen Saya" %>
+<% status_cls = { "registered" => "bg-gray-100 text-gray-600", "submitted" => "bg-amber-50 text-amber-700", "scored" => "bg-emerald-50 text-emerald-700" } %>
+<div class="space-y-5">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Rubric-based Assessment</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Event asesmen yang tersedia untuk Anda (prodi & blok cocok), pengumpulan dokumen/evaluasi diri, nilai & umpan balik penguji. CBD & Long Case diinisiasi dari halaman kasus klinis.</p>
+  </div>
+
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <p class="text-sm font-semibold text-gray-800 mb-3">Event tersedia</p>
+    <% if @available_events.empty? %>
+      <p class="text-sm text-gray-400">Tidak ada event terbit yang cocok dengan prodi/blok Anda saat ini.</p>
+    <% else %>
+      <div class="divide-y divide-gray-100">
+        <% @available_events.each do |e| %>
+          <% mine = @attempts_by_event[e.id] || [] %>
+          <div class="py-3 flex items-start justify-between gap-3 flex-wrap">
+            <div class="min-w-0">
+              <p class="font-semibold text-gray-800"><%= e.name %></p>
+              <p class="text-xs text-gray-500"><%= e.type_label %> · <%= e.academic_period.name %><%= " · #{e.block_name}" if e.block_name.present? %>
+                <% if e.submission_close_at %> · batas <%= l(e.submission_close_at, format: :short) %><% end %>
+                <%= " · boleh diulang" if e.allow_multiple_attempts? %></p>
+              <% if mine.any? %>
+                <p class="text-xs text-gray-400 mt-0.5">Percobaan Anda: <%= mine.sort_by(&:attempt_number).map { |i| link_to("ke-#{i.attempt_number} (#{i.status_label}#{i.percentage ? ", #{i.percentage}%" : ''})", student_assessment_path(i), class: "text-indigo-600 hover:underline") }.join(" · ").html_safe %></p>
+              <% end %>
+            </div>
+            <% if e.case_based? %>
+              <span class="text-xs text-gray-500">Inisiasi dari <%= link_to "Kasus Klinis", clinical_cases_path, class: "text-indigo-600 hover:underline" %></span>
+            <% elsif e.submission_open? && (mine.empty? || (e.allow_multiple_attempts? && mine.all? { |i| i.status == "scored" })) %>
+              <%= button_to (mine.empty? ? "Daftar" : "Daftar ulang"), register_student_assessment_event_path(e), method: :post,
+                    class: "rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 cursor-pointer" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+    <div class="px-5 py-4 border-b border-gray-100"><p class="text-sm font-semibold text-gray-800">Riwayat asesmen saya</p></div>
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+        <tr><th class="text-left px-5 py-3">Event</th><th class="text-left px-5 py-3">Ke-</th><th class="text-left px-5 py-3">Status</th><th class="text-left px-5 py-3">Nilai</th><th class="text-left px-5 py-3">Penguji</th><th></th></tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @my_instances.each do |i| %>
+          <tr>
+            <td class="px-5 py-3 font-medium text-gray-800"><%= i.assessment_event.name %><span class="block text-[10px] text-gray-400"><%= i.type_label %></span></td>
+            <td class="px-5 py-3 text-gray-500"><%= i.attempt_number %></td>
+            <td class="px-5 py-3"><span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= status_cls[i.status] %>"><%= i.status_label %></span></td>
+            <td class="px-5 py-3 text-gray-700"><%= i.score ? "#{i.score}/#{i.max_score} (#{i.percentage}%)" : "—" %></td>
+            <td class="px-5 py-3 text-gray-600"><%= i.examiner&.full_name || "—" %></td>
+            <td class="px-5 py-3 text-right"><%= link_to "Buka", student_assessment_path(i), class: "text-indigo-600 font-medium hover:underline" %></td>
+          </tr>
+        <% end %>
+        <% if @my_instances.empty? %>
+          <tr><td colspan="6" class="px-5 py-6 text-center text-gray-400">Belum ada asesmen.</td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -38,6 +38,11 @@ class ClinicalCasePolicy < ApplicationPolicy
     owner?
   end
 
+  # CBD/Long Case hanya dari kasus milik sendiri yang sudah diajukan/diverifikasi.
+  def initiate_assessment?
+    owner? && %w[submitted verified].include?(record.status)
+  end
+
   class Scope < Scope
     def resolve
       if user.can_verify_clinical_cases?

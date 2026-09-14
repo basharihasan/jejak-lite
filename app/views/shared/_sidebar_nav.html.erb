@@ -73,7 +73,7 @@
 <div>
   <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.assessment") %></p>
 
-  <% assessment_active = active_class.call(%w[/nilai-ujian /asesmen /dops_evaluations /mini_cex_evaluations /assessment_form_templates /assessment_form_submissions]) %>
+  <% assessment_active = active_class.call(%w[/nilai-ujian /asesmen /dops_evaluations /mini_cex_evaluations /assessment_form_templates /assessment_form_submissions /student/assessments /student/feedback_journal /examiner_evaluations]) %>
   <div data-controller="accordion" data-accordion-open-value="<%= assessment_active ? 'true' : 'false' %>" class="mb-1">
     <button type="button" data-action="click->accordion#toggle"
             class="w-full group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer select-none">
@@ -88,7 +88,16 @@
           active: active_class.call("/nilai-ujian") %>
       <%= render "shared/nav_item", label: t("nav.workplace_assessment"), path: assessments_path,
           active: active_class.call(%w[/asesmen /dops_evaluations /mini_cex_evaluations]) %>
-      <%= render "shared/nav_item", label: t("nav.rubric_assessment"), path: assessment_form_templates_path,
+      <% if is_instructor %>
+        <%= render "shared/nav_item", label: t("nav.rubric_assessment"), path: examiner_evaluations_path,
+            active: active_class.call("/examiner_evaluations") %>
+      <% else %>
+        <%= render "shared/nav_item", label: t("nav.rubric_assessment"), path: student_assessments_path,
+            active: active_class.call("/student/assessments") %>
+        <%= render "shared/nav_item", label: t("nav.feedback_journal"), path: student_feedback_journal_path,
+            active: active_class.call("/student/feedback_journal") %>
+      <% end %>
+      <%= render "shared/nav_item", label: t("nav.form_templates"), path: assessment_form_templates_path,
           active: active_class.call(%w[/assessment_form_templates /assessment_form_submissions]) %>
     </div>
   </div>
@@ -99,6 +108,8 @@
   <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.competency") %></p>
   <%= render "shared/nav_item", label: t("nav.competency_map"), path: academic_assessments_path,
       active: active_class.call("/capaian-belajar") %>
+  <%= render "shared/nav_item", label: t("nav.epa_map"), path: entrustment_decisions_path,
+      active: active_class.call("/dashboard/entrustment") %>
 </div>
 
 <%# ── 5. COACHING CENTER — dosen, preseptor, kaprodi, admin ── %>
@@ -125,8 +136,10 @@
         active: active_class.call("/study_programs") %>
     <%= render "shared/nav_item", label: t("nav.users"), path: admin_users_path,
         active: active_class.call("/admin/users") %>
-    <%= render "shared/nav_item", label: t("nav.exam_imports"), path: exam_imports_path,
-        active: active_class.call("/exam_imports") %>
+    <%= render "shared/nav_item", label: t("nav.assessment_events"), path: admin_assessment_events_path,
+        active: active_class.call("/admin/assessment_events") %>
+    <%= render "shared/nav_item", label: t("nav.evaluation_schedules"), path: admin_evaluation_schedules_path,
+        active: active_class.call("/admin/evaluation_schedules") %>
     <%= render "shared/nav_item", label: t("nav.competency_frameworks"), path: competency_frameworks_path,
         active: active_class.call(%w[/competency_frameworks /competency_items]) %>
     <%= render "shared/nav_item", label: t("nav.assessment_blueprints"), path: assessment_blueprints_path,
