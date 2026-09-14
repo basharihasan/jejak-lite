@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_180003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -79,6 +79,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
     t.index ["user_id"], name: "index_activity_logs_on_user_id"
   end
 
+  create_table "app_settings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.jsonb "value", default: {}, null: false
+    t.index ["key"], name: "index_app_settings_on_key", unique: true
+    t.index ["updated_by_id"], name: "index_app_settings_on_updated_by_id"
+  end
+
   create_table "assessment_blueprint_mappings", force: :cascade do |t|
     t.bigint "assessment_blueprint_id", null: false
     t.bigint "competency_item_id", null: false
@@ -144,6 +154,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
     t.index ["created_by_id"], name: "index_assessment_form_templates_on_created_by_id"
   end
 
+  create_table "break_glass_accesses", force: :cascade do |t|
+    t.bigint "clinical_case_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.string "ip_address"
+    t.text "reason", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["clinical_case_id"], name: "index_break_glass_accesses_on_clinical_case_id"
+    t.index ["user_id", "clinical_case_id", "expires_at"], name: "idx_break_glass_active_lookup"
+    t.index ["user_id"], name: "index_break_glass_accesses_on_user_id"
+  end
+
   create_table "case_verification_comments", force: :cascade do |t|
     t.string "action", null: false
     t.text "body"
@@ -166,12 +189,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
     t.string "entrustment_level"
     t.text "family_history"
     t.text "general_condition"
+    t.string "icd10_code"
     t.text "learning_points"
     t.text "management"
+    t.text "patient_address"
+    t.integer "patient_age"
     t.string "patient_age_group"
+    t.text "patient_birth_date"
     t.string "patient_gender"
+    t.text "patient_medical_record_number"
+    t.text "patient_name"
+    t.string "patient_occupation"
+    t.text "patient_phone"
     t.text "physical_examination"
     t.boolean "recommend_remediation", default: false, null: false
+    t.string "skdi_level"
     t.string "status", default: "draft", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
@@ -239,6 +271,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
     t.bigint "user_id", null: false
     t.index ["endpoint"], name: "index_device_push_tokens_on_endpoint", unique: true
     t.index ["user_id"], name: "index_device_push_tokens_on_user_id"
+  end
+
+  create_table "diagnosis_definitions", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "icd10_code"
+    t.string "name", null: false
+    t.string "skdi_level"
+    t.string "system_group"
+    t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "idx_diagnosis_definitions_lower_name", unique: true
+    t.index ["icd10_code"], name: "index_diagnosis_definitions_on_icd10_code"
   end
 
   create_table "dops_evaluations", force: :cascade do |t|
@@ -322,6 +366,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
     t.index ["supervisor_id"], name: "index_final_projects_on_supervisor_id"
   end
 
+  create_table "logbook_case_targets", force: :cascade do |t|
+    t.bigint "academic_period_id"
+    t.datetime "created_at", null: false
+    t.string "facility_type", null: false
+    t.text "notes"
+    t.bigint "study_program_id", null: false
+    t.integer "target_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["academic_period_id"], name: "index_logbook_case_targets_on_academic_period_id"
+    t.index ["study_program_id", "academic_period_id", "facility_type"], name: "idx_logbook_case_targets_unique", unique: true
+    t.index ["study_program_id"], name: "index_logbook_case_targets_on_study_program_id"
+  end
+
   create_table "mini_cex_evaluations", force: :cascade do |t|
     t.string "case_complexity"
     t.string "case_description", null: false
@@ -365,6 +422,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
     t.index ["sender_id"], name: "index_notifications_on_sender_id"
   end
 
+  create_table "patient_consents", force: :cascade do |t|
+    t.bigint "clinical_case_id", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "items", default: {}, null: false
+    t.datetime "revoked_at"
+    t.datetime "signed_at"
+    t.string "signer_name"
+    t.string "signer_relation"
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["clinical_case_id"], name: "index_patient_consents_on_clinical_case_id", unique: true
+    t.index ["token"], name: "index_patient_consents_on_token", unique: true
+  end
+
   create_table "reflection_entries", force: :cascade do |t|
     t.bigint "activity_log_id"
     t.bigint "clinical_case_id"
@@ -386,6 +457,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_roles_on_code", unique: true
+  end
+
+  create_table "skill_definitions", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "skdi_level"
+    t.datetime "updated_at", null: false
+    t.index "lower((name)::text)", name: "idx_skill_definitions_lower_name", unique: true
   end
 
   create_table "study_programs", force: :cascade do |t|
@@ -465,6 +546,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
   add_foreign_key "activity_log_competency_tags", "activity_logs"
   add_foreign_key "activity_log_competency_tags", "competency_items"
   add_foreign_key "activity_logs", "users"
+  add_foreign_key "app_settings", "users", column: "updated_by_id"
   add_foreign_key "assessment_blueprint_mappings", "assessment_blueprints"
   add_foreign_key "assessment_blueprint_mappings", "competency_items"
   add_foreign_key "assessment_form_answers", "assessment_form_fields"
@@ -474,6 +556,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
   add_foreign_key "assessment_form_submissions", "users", column: "respondent_id"
   add_foreign_key "assessment_form_submissions", "users", column: "subject_user_id"
   add_foreign_key "assessment_form_templates", "users", column: "created_by_id"
+  add_foreign_key "break_glass_accesses", "clinical_cases"
+  add_foreign_key "break_glass_accesses", "users"
   add_foreign_key "case_verification_comments", "clinical_cases"
   add_foreign_key "case_verification_comments", "users"
   add_foreign_key "clinical_cases", "users"
@@ -497,11 +581,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
   add_foreign_key "final_project_milestones", "final_projects"
   add_foreign_key "final_projects", "users", column: "student_id"
   add_foreign_key "final_projects", "users", column: "supervisor_id"
+  add_foreign_key "logbook_case_targets", "academic_periods"
+  add_foreign_key "logbook_case_targets", "study_programs"
   add_foreign_key "mini_cex_evaluations", "clinical_rotations"
   add_foreign_key "mini_cex_evaluations", "users", column: "evaluator_id"
   add_foreign_key "mini_cex_evaluations", "users", column: "student_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "notifications", "users", column: "sender_id"
+  add_foreign_key "patient_consents", "clinical_cases"
   add_foreign_key "reflection_entries", "activity_logs"
   add_foreign_key "reflection_entries", "clinical_cases"
   add_foreign_key "reflection_entries", "users"

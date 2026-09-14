@@ -19,6 +19,30 @@
   </div>
 <% end %>
 
+<% if @case_targets.present? %>
+  <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <p class="text-sm font-semibold text-gray-700">Pemenuhan Target Kasus (terverifikasi)</p>
+      <p class="text-[11px] text-gray-400">FKTP = Pelayanan Primer · FKRTL = rumah sakit</p>
+    </div>
+    <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <% @case_targets.each do |row| %>
+        <% target = row[:target]; achieved = row[:achieved]; pct = target.target_count.zero? ? 100 : [ (achieved * 100.0 / target.target_count).round, 100 ].min %>
+        <div>
+          <div class="flex items-baseline justify-between">
+            <p class="text-xs font-semibold text-gray-600"><%= target.facility_label %></p>
+            <p class="text-xs text-gray-500"><span class="font-bold text-gray-800"><%= achieved %></span> / <%= target.target_count %></p>
+          </div>
+          <div class="mt-1.5 h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div class="h-full rounded-full <%= pct >= 100 ? 'bg-emerald-500' : 'bg-indigo-500' %>" style="width: <%= pct %>%"></div>
+          </div>
+          <% if target.academic_period %><p class="text-[10px] text-gray-400 mt-1"><%= target.academic_period.name %></p><% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
 <% if @stats[:total].positive? %>
   <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">

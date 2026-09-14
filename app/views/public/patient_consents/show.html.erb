@@ -1,0 +1,58 @@
+<% student = @consent.clinical_case.user %>
+<div class="bg-white rounded-2xl ring-1 ring-slate-200 shadow-sm p-6">
+  <div class="flex items-center gap-3">
+    <div class="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold">J</div>
+    <div>
+      <p class="text-sm font-bold text-slate-900">Lembar Persetujuan Pasien</p>
+      <p class="text-xs text-slate-500"><%= student.study_program&.name || "Program Studi" %> · JEJAK</p>
+    </div>
+  </div>
+
+  <div class="mt-5 text-sm text-slate-700 space-y-2">
+    <p>Mahasiswa <strong><%= student.full_name %></strong> mencatat kunjungan Anda sebagai bagian dari <strong>pendidikan kedokteran</strong>. Catatan ini disimpan terenkripsi; <strong>nama dan identitas Anda selalu disembunyikan</strong> dari pembaca lain.</p>
+    <p>Penggunaan untuk penelitian mensyaratkan Anda dihubungi kembali dan/atau izin Komite Etik Penelitian. Anda berhak menolak sebagian atau seluruh butir di bawah ini tanpa memengaruhi pelayanan yang Anda terima.</p>
+  </div>
+
+  <% if @consent.revoked? %>
+    <div class="mt-5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">Lembar ini sudah dicabut dan tidak dapat diisi lagi.</div>
+  <% elsif @consent.signed? %>
+    <div class="mt-5 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800">
+      <p class="font-semibold">Jawaban Anda sudah tersimpan (<%= l(@consent.signed_at, format: :long) %>).</p>
+      <ul class="mt-2 space-y-1">
+        <% PatientConsent::ITEMS.each do |key, text| %>
+          <li><%= @consent.granted?(key) ? "✓ Setuju" : "✗ Tidak setuju" %> — <%= text %></li>
+        <% end %>
+      </ul>
+      <p class="mt-2 text-xs">Ingin mengubah jawaban? Sampaikan kepada mahasiswa/dokter yang merawat agar lembar ini diterbitkan ulang.</p>
+    </div>
+  <% else %>
+    <%= form_with url: public_patient_consent_path(@consent.token), method: :patch, class: "mt-5 space-y-4" do |f| %>
+      <fieldset class="space-y-2">
+        <legend class="text-sm font-semibold text-slate-800 mb-1">Saya menyetujui:</legend>
+        <% PatientConsent::ITEMS.each do |key, text| %>
+          <label class="flex items-start gap-3 rounded-xl border border-slate-200 px-3 py-3 text-sm cursor-pointer hover:bg-slate-50 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+            <%= check_box_tag "items[#{key}]", "1", key == "education", id: "items_#{key}", class: "mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" %>
+            <span class="text-slate-700"><%= text %></span>
+          </label>
+        <% end %>
+      </fieldset>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <%= label_tag :signer_name, "Nama Anda", class: "block text-sm font-semibold text-slate-700 mb-1" %>
+          <%= text_field_tag :signer_name, nil, required: true, autocomplete: "name",
+                class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+        </div>
+        <div>
+          <%= label_tag :signer_relation, "Sebagai", class: "block text-sm font-semibold text-slate-700 mb-1" %>
+          <%= select_tag :signer_relation, options_for_select(PatientConsent::RELATIONS.invert, "pasien"),
+                class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-500">Dengan menekan tombol di bawah, Anda menyatakan telah membaca penjelasan di atas dan memberikan jawaban secara sukarela.</p>
+      <%= f.submit "Kirim Jawaban", class: "w-full rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-3 text-sm cursor-pointer" %>
+    <% end %>
+  <% end %>
+</div>
+<p class="mt-4 text-center text-[11px] text-slate-400">Tautan ini bersifat pribadi untuk satu kasus. Jangan bagikan kepada orang lain.</p>

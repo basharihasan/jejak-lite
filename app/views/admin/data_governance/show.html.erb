@@ -1,0 +1,75 @@
+<% content_for :title, "Data Governance" %>
+<div class="space-y-5">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Data Governance</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Perlindungan identitas pasien pada Kasus Klinis dan jejak audit Break Glass.</p>
+  </div>
+
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h2 class="text-sm font-semibold text-gray-800">Contextual Privacy Mode</h2>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= @privacy_mode ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' %>">
+            <%= @privacy_mode ? "Menyala" : "Mati" %>
+          </span>
+        </div>
+        <p class="text-xs text-gray-500 mt-1 max-w-xl">
+          Saat menyala, nama, No. RM, tanggal lahir, telepon, dan alamat pasien disamarkan di halaman kasus untuk <em>semua</em> pembaca — termasuk pemilik kasus — dan hanya terbuka 30 menit lewat Break Glass beralasan. Usia, jenis kelamin, dan pekerjaan tidak disamarkan. Bawaannya <strong>menyala</strong> (gagal ke arah aman). Kolomnya sendiri selalu terenkripsi di basis data, apa pun sakelar ini.
+        </p>
+        <p class="text-[11px] text-gray-400 mt-2">
+          <% if @locked_by_env %>
+            Dikunci oleh variabel lingkungan <code>PRIVACY_MODE</code> — ubah di server, bukan di sini.
+          <% elsif @privacy_row %>
+            Terakhir diubah oleh <%= @privacy_row.updated_by&.full_name || "—" %> pada <%= l(@privacy_row.updated_at, format: :long) %>.
+          <% else %>
+            Belum pernah diubah — memakai nilai bawaan.
+          <% end %>
+          · <%= @cases_with_identity %> kasus menyimpan identitas pasien.
+        </p>
+      </div>
+      <% unless @locked_by_env %>
+        <%= form_with url: admin_data_governance_path, method: :patch do |f| %>
+          <%= hidden_field_tag :privacy_mode, (!@privacy_mode).to_s %>
+          <%= f.submit (@privacy_mode ? "Matikan Privacy Mode" : "Nyalakan Privacy Mode"),
+                class: "rounded-xl #{@privacy_mode ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white text-sm font-semibold px-4 py-2 cursor-pointer",
+                data: { turbo_confirm: (@privacy_mode ? "Mematikan Privacy Mode membuka identitas pasien untuk semua pembaca kasus. Lanjutkan?" : nil) } %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h2 class="text-sm font-semibold text-gray-800">Jejak Audit Break Glass</h2>
+      <p class="text-xs text-gray-500 mt-0.5">100 pembukaan terakhir. Baris tidak pernah dihapus.</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+          <tr>
+            <th class="text-left px-6 py-3">Waktu</th>
+            <th class="text-left px-6 py-3">Pengguna</th>
+            <th class="text-left px-6 py-3">Kasus</th>
+            <th class="text-left px-6 py-3">Alasan</th>
+            <th class="text-left px-6 py-3">Berlaku s.d.</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @accesses.each do |a| %>
+            <tr>
+              <td class="px-6 py-3 text-gray-600 whitespace-nowrap"><%= l(a.created_at, format: :short) %></td>
+              <td class="px-6 py-3 font-medium text-gray-800"><%= a.user.full_name %></td>
+              <td class="px-6 py-3"><%= link_to a.clinical_case.chief_complaint.truncate(40), clinical_case_path(a.clinical_case), class: "text-indigo-600 hover:underline" %> <span class="text-xs text-gray-400">(<%= a.clinical_case.user.full_name %>)</span></td>
+              <td class="px-6 py-3 text-gray-700"><%= a.reason %></td>
+              <td class="px-6 py-3 text-gray-500 whitespace-nowrap"><%= l(a.expires_at, format: :short) %> <%= a.active? ? "🟢" : "" %></td>
+            </tr>
+          <% end %>
+          <% if @accesses.empty? %>
+            <tr><td colspan="5" class="px-6 py-6 text-center text-gray-400">Belum ada pembukaan Break Glass.</td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

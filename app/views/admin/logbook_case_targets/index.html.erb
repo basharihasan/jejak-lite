@@ -1,0 +1,42 @@
+<% content_for :title, "Target Kasus Logbook" %>
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Target Kasus Logbook (FKTP / FKRTL)</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Target jumlah kasus <em>terverifikasi</em> per prodi. FKTP = setting "Pelayanan Primer"; selainnya FKRTL. Periode kosong = berlaku umum.</p>
+  </div>
+  <%= link_to "+ Tambah Target", new_admin_logbook_case_target_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>
+
+<div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+      <tr>
+        <th class="text-left px-5 py-3">Prodi</th>
+        <th class="text-left px-5 py-3">Periode</th>
+        <th class="text-left px-5 py-3">Fasilitas</th>
+        <th class="text-right px-5 py-3">Target</th>
+        <th class="text-left px-5 py-3">Catatan</th>
+        <th class="px-5 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% @targets.each do |t| %>
+        <tr>
+          <td class="px-5 py-3 font-semibold text-gray-800"><%= t.study_program.name %></td>
+          <td class="px-5 py-3 text-gray-600"><%= t.academic_period&.name || "Umum" %></td>
+          <td class="px-5 py-3 text-gray-600"><%= t.facility_label %></td>
+          <td class="px-5 py-3 text-right font-semibold text-gray-800"><%= t.target_count %></td>
+          <td class="px-5 py-3 text-gray-500"><%= t.notes %></td>
+          <td class="px-5 py-3 text-right whitespace-nowrap">
+            <%= link_to "Sunting", edit_admin_logbook_case_target_path(t), class: "text-indigo-600 font-medium hover:underline" %>
+            <%= button_to "Hapus", admin_logbook_case_target_path(t), method: :delete, class: "ml-2 text-rose-600 hover:underline inline",
+                  form: { class: "inline", data: { turbo_confirm: "Hapus target ini?" } } %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @targets.empty? %>
+        <tr><td colspan="6" class="px-5 py-6 text-center text-gray-400">Belum ada target. Kartu pemenuhan target di Kasus Klinis tidak tampil sampai ada target.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

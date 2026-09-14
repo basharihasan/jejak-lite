@@ -1,0 +1,15 @@
+<%= render "admin/master_data/index",
+      title: "Master Diagnosis (SKDI / ICD-10)",
+      subtitle: "Sumber pilihan diagnosis pada wizard Kasus Klinis; kode ICD-10 & level SKDI ikut tersalin ke kasus.",
+      records: @records, query: @query,
+      columns: [
+        [ "Nama", ->(r) { r.name } ],
+        [ "ICD-10", ->(r) { r.icd10_code } ],
+        [ "SKDI", ->(r) { r.skdi_level } ],
+        [ "Sistem", ->(r) { r.system_group } ]
+      ],
+      new_path: new_admin_diagnosis_definition_path,
+      import_path: import_admin_diagnosis_definitions_path,
+      edit_path: ->(r) { edit_admin_diagnosis_definition_path(r) },
+      destroy_path: ->(r) { admin_diagnosis_definition_path(r) },
+      csv_hint: "nama,kode_icd10,level_skdi,sistem\nDemam tifoid,A01.0,4A,Infeksi\nHipertensi esensial,I10,4A,Kardiovaskular" %>

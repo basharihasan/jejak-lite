@@ -1,0 +1,14 @@
+<%= render "admin/master_data/index",
+      title: "Master Keterampilan Klinis (SKDI)",
+      subtitle: "Sumber pilihan nama prosedur pada DOPS.",
+      records: @records, query: @query,
+      columns: [
+        [ "Nama", ->(r) { r.name } ],
+        [ "SKDI", ->(r) { r.skdi_level } ],
+        [ "Kategori", ->(r) { r.category } ]
+      ],
+      new_path: new_admin_skill_definition_path,
+      import_path: import_admin_skill_definitions_path,
+      edit_path: ->(r) { edit_admin_skill_definition_path(r) },
+      destroy_path: ->(r) { admin_skill_definition_path(r) },
+      csv_hint: "nama,level_skdi,kategori\nPemasangan infus,4A,Prosedur Terapeutik\nPemeriksaan EKG,4A,Prosedur Diagnostik" %>

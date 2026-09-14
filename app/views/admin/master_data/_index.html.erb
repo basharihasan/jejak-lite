@@ -1,0 +1,57 @@
+<%# Daftar master data generik — dipakai Diagnosis & Keterampilan.
+    Lokal: title, subtitle, records, query, columns [[label, lambda]],
+    new_path, import_path, edit_path (lambda), destroy_path (lambda), csv_hint %>
+<% content_for :title, title %>
+<div class="flex items-center justify-between flex-wrap gap-3">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900"><%= title %></h1>
+    <p class="text-sm text-gray-500 mt-0.5"><%= subtitle %></p>
+  </div>
+  <%= link_to "+ Tambah", new_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+</div>
+
+<div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="lg:col-span-2">
+    <%= form_with url: request.path, method: :get, class: "flex gap-2" do |f| %>
+      <%= f.text_field :q, value: query, placeholder: "Cari...", class: "flex-1 rounded-xl border-0 py-2 px-3 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+      <%= f.submit "Cari", class: "rounded-xl bg-slate-800 text-white text-sm font-semibold px-4 py-2 cursor-pointer" %>
+    <% end %>
+
+    <div class="mt-3 bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+          <tr>
+            <% columns.each do |label, _| %><th class="text-left px-4 py-3"><%= label %></th><% end %>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% records.each do |r| %>
+            <tr class="<%= 'opacity-50' unless r.active? %>">
+              <% columns.each do |_, getter| %><td class="px-4 py-2.5 text-gray-700"><%= getter.call(r) %></td><% end %>
+              <td class="px-4 py-2.5 text-right whitespace-nowrap">
+                <%= link_to "Sunting", edit_path.call(r), class: "text-indigo-600 font-medium hover:underline" %>
+                <%= button_to "Hapus", destroy_path.call(r), method: :delete, class: "ml-2 text-rose-600 hover:underline inline",
+                      form: { class: "inline", data: { turbo_confirm: "Hapus #{r.name}?" } } %>
+              </td>
+            </tr>
+          <% end %>
+          <% if records.empty? %>
+            <tr><td colspan="<%= columns.size + 1 %>" class="px-4 py-6 text-center text-gray-400">Belum ada data. Tambah manual atau impor CSV.</td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-3"><%= paginate records %></div>
+  </div>
+
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5 h-fit">
+    <h2 class="text-sm font-semibold text-gray-800">Impor CSV</h2>
+    <p class="text-xs text-gray-500 mt-1">Nama yang sudah ada diperbarui, bukan digandakan.</p>
+    <%= form_with url: import_path, method: :post, multipart: true, class: "mt-3 space-y-2" do |f| %>
+      <%= f.file_field :file, accept: ".csv,text/csv", required: true, class: "block w-full text-xs text-gray-700 file:mr-2 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-700" %>
+      <%= f.submit "Impor", class: "rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 cursor-pointer" %>
+    <% end %>
+    <pre class="mt-3 text-[11px] bg-slate-900 text-slate-100 rounded-xl p-3 overflow-x-auto"><%= csv_hint %></pre>
+  </div>
+</div>

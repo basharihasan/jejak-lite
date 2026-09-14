@@ -15,7 +15,9 @@
         <%= l(@clinical_case.case_date, format: :long) %>
         <% if @clinical_case.user != current_user %> · dilaporkan oleh <%= @clinical_case.user.full_name %><% end %>
         <% if @clinical_case.patient_age_group.present? %> · <%= @clinical_case.patient_age_group %><% end %>
+        <% if @clinical_case.display_age %> (<%= @clinical_case.display_age %> th)<% end %>
         <% if @clinical_case.patient_gender.present? %>, <%= @clinical_case.patient_gender %><% end %>
+        <% if @clinical_case.patient_occupation.present? %> · <%= @clinical_case.patient_occupation %><% end %>
       </p>
       <p class="text-xs text-gray-400 mt-1">
         <% [@clinical_case.clinical_setting && ClinicalContextOptions::CLINICAL_SETTINGS[@clinical_case.clinical_setting],
@@ -42,6 +44,13 @@
     <div class="mt-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 text-sm">
       Diverifikasi oleh <%= @clinical_case.verified_by&.full_name %> pada <%= l(@clinical_case.verified_at, format: :long) %>.
     </div>
+  <% end %>
+
+  <%= render "clinical_cases/patient_identity", clinical_case: @clinical_case,
+        identity_visible: @identity_visible, privacy_mode: @privacy_mode, break_glass: @break_glass %>
+
+  <% if policy(@clinical_case).issue_consent? || @patient_consent %>
+    <%= render "clinical_cases/patient_consent", clinical_case: @clinical_case, consent: @patient_consent %>
   <% end %>
 
   <% if @clinical_case.case_verification_comments.any? %>
@@ -121,6 +130,12 @@
       <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
         <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Diagnosis</p>
         <p class="text-sm text-gray-700 whitespace-pre-line"><%= @clinical_case.diagnosis %></p>
+        <% if @clinical_case.icd10_code.present? || @clinical_case.skdi_level.present? %>
+          <p class="mt-1.5 flex flex-wrap gap-1.5">
+            <% if @clinical_case.icd10_code.present? %><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">ICD-10 <%= @clinical_case.icd10_code %></span><% end %>
+            <% if @clinical_case.skdi_level.present? %><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">SKDI <%= @clinical_case.skdi_level %></span><% end %>
+          </p>
+        <% end %>
       </div>
     <% end %>
     <% if @clinical_case.management.present? %>

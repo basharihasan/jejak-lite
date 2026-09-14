@@ -54,6 +54,10 @@ id:
     exam_imports: "Impor Nilai Ujian"
     competency_frameworks: "Kerangka Kompetensi"
     assessment_blueprints: "Blueprint Asesmen"
+    logbook_case_targets: "Target Kasus Logbook"
+    diagnosis_definitions: "Master Diagnosis"
+    skill_definitions: "Master Keterampilan"
+    data_governance: "Data Governance"
     mobile:
       home: "Beranda"
       activity: "Log Keg."

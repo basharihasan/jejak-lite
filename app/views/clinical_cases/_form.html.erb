@@ -35,6 +35,58 @@
         </div>
       </div>
 
+      <%# Identitas pasien — terenkripsi di basis data dan disamarkan di
+          halaman kasus (Privacy Mode); hanya pemilik kasus yang melihatnya
+          di form ini. Usia persis & pekerjaan tidak sensitif. %>
+      <div class="mt-5 rounded-2xl ring-1 ring-amber-200 bg-amber-50/60 p-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <p class="text-sm font-semibold text-gray-800">Identitas Pasien</p>
+            <p class="text-xs text-gray-500 mt-0.5">Disimpan terenkripsi dan disamarkan bagi pembaca lain; hanya dibuka lewat Break Glass beralasan yang tercatat.</p>
+          </div>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Data sensitif</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+          <div>
+            <%= f.label :patient_name, "Nama Pasien", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.text_field :patient_name, autocomplete: "off",
+                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+          <div>
+            <%= f.label :patient_medical_record_number, "No. Rekam Medis", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.text_field :patient_medical_record_number, autocomplete: "off",
+                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+          <div>
+            <%= f.label :patient_birth_date, "Tanggal Lahir", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.date_field :patient_birth_date, value: clinical_case.patient_birth_date,
+                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+          <div>
+            <%= f.label :patient_phone, "Telepon", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.text_field :patient_phone, autocomplete: "off",
+                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+          <div class="sm:col-span-2">
+            <%= f.label :patient_address, "Alamat", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.text_field :patient_address, autocomplete: "off",
+                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <%= f.label :patient_age, "Usia (tahun)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.number_field :patient_age, min: 0, max: 149,
+                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+          <div>
+            <%= f.label :patient_occupation, "Pekerjaan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= f.text_field :patient_occupation,
+                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <div>
           <%= f.label :clinical_setting, "Setting Klinis", class: "block text-sm font-semibold text-gray-700 mb-1" %>
@@ -107,8 +159,14 @@
       <h2 class="text-lg font-bold text-gray-900 mb-4">Diagnosis & Tatalaksana</h2>
       <div>
         <%= f.label :diagnosis, "Diagnosis", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-        <%= f.text_area :diagnosis, rows: 3,
-              class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+        <p class="text-xs text-gray-400 mb-1">Ketik untuk memilih dari master Diagnosis SKDI — kode ICD-10 & level SKDI terisi otomatis bila cocok.</p>
+        <%= f.text_field :diagnosis, list: "diagnosis-definitions", autocomplete: "off",
+              class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+        <datalist id="diagnosis-definitions">
+          <% DiagnosisDefinition.active.ordered.pluck(:name, :icd10_code, :skdi_level).each do |name, code, level| %>
+            <option value="<%= name %>"><%= [ code, level && "SKDI #{level}" ].compact.join(" · ") %></option>
+          <% end %>
+        </datalist>
       </div>
       <div class="mt-4">
         <%= f.label :management, "Tatalaksana", class: "block text-sm font-semibold text-gray-700 mb-1" %>

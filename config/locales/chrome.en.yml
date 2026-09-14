@@ -54,6 +54,10 @@ en:
     exam_imports: "Import Exam Scores"
     competency_frameworks: "Competency Framework"
     assessment_blueprints: "Assessment Blueprint"
+    logbook_case_targets: "Logbook Case Targets"
+    diagnosis_definitions: "Diagnosis Master"
+    skill_definitions: "Skills Master"
+    data_governance: "Data Governance"
     mobile:
       home: "Home"
       activity: "Activity"

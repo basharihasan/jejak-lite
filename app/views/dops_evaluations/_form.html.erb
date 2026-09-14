@@ -24,7 +24,11 @@
       <%= f.text_field :procedure_name, placeholder: "Contoh: Pemasangan Infus", list: "common_procedures",
             class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
       <datalist id="common_procedures">
-        <% DopsEvaluation::COMMON_PROCEDURES.each do |name| %><option value="<%= name %>"><% end %>
+        <%# Master Keterampilan (Konfigurasi → Master Keterampilan) diutamakan;
+            daftar bawaan COMMON_PROCEDURES tetap jadi cadangan bila master kosong. %>
+        <% names = SkillDefinition.active.ordered.pluck(:name, :skdi_level) %>
+        <% names = DopsEvaluation::COMMON_PROCEDURES.map { |n| [ n, nil ] } if names.empty? %>
+        <% names.each do |name, level| %><option value="<%= name %>"><%= "SKDI #{level}" if level %></option><% end %>
       </datalist>
     </div>
     <div>

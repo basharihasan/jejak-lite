@@ -119,3 +119,83 @@ if osce_blueprint.assessment_blueprint_mappings.none?
     osce_blueprint.assessment_blueprint_mappings.create!(competency_item: item, weight: weight) if item
   end
 end
+
+# Fase 24 — Master Diagnosis (SKDI 2012 / ICD-10) & Keterampilan Klinis —
+# contoh awal yang lazim di FKTP/FKRTL; admin menambah lewat UI atau impor CSV.
+# Idempoten: nama yang sudah ada tidak diubah.
+[
+  [ "Demam tifoid", "A01.0", "4A", "Infeksi" ],
+  [ "Demam dengue", "A90", "4A", "Infeksi" ],
+  [ "Malaria", "B54", "4A", "Infeksi" ],
+  [ "Tuberkulosis paru", "A15.0", "4A", "Respirasi" ],
+  [ "Infeksi saluran pernapasan atas akut", "J06.9", "4A", "Respirasi" ],
+  [ "Pneumonia", "J18.9", "4A", "Respirasi" ],
+  [ "Asma bronkial", "J45.9", "4A", "Respirasi" ],
+  [ "Penyakit paru obstruktif kronik", "J44.9", "3B", "Respirasi" ],
+  [ "Hipertensi esensial", "I10", "4A", "Kardiovaskular" ],
+  [ "Gagal jantung", "I50.9", "3B", "Kardiovaskular" ],
+  [ "Angina pektoris", "I20.9", "3B", "Kardiovaskular" ],
+  [ "Infark miokard akut", "I21.9", "3B", "Kardiovaskular" ],
+  [ "Diabetes melitus tipe 2", "E11.9", "4A", "Endokrin" ],
+  [ "Hipertiroid", "E05.9", "3A", "Endokrin" ],
+  [ "Dislipidemia", "E78.5", "4A", "Endokrin" ],
+  [ "Obesitas", "E66.9", "4A", "Endokrin" ],
+  [ "Gastritis", "K29.7", "4A", "Gastrointestinal" ],
+  [ "Gastroenteritis akut", "A09", "4A", "Gastrointestinal" ],
+  [ "Apendisitis akut", "K35.8", "3B", "Gastrointestinal" ],
+  [ "Hepatitis A", "B15.9", "4A", "Gastrointestinal" ],
+  [ "Infeksi saluran kemih", "N39.0", "4A", "Urogenital" ],
+  [ "Batu saluran kemih", "N20.9", "3A", "Urogenital" ],
+  [ "Penyakit ginjal kronik", "N18.9", "2", "Urogenital" ],
+  [ "Anemia defisiensi besi", "D50.9", "4A", "Hematologi" ],
+  [ "Stroke iskemik", "I63.9", "3B", "Saraf" ],
+  [ "Epilepsi", "G40.9", "3A", "Saraf" ],
+  [ "Migrain", "G43.9", "4A", "Saraf" ],
+  [ "Vertigo perifer", "H81.1", "4A", "Saraf" ],
+  [ "Depresi", "F32.9", "3A", "Psikiatri" ],
+  [ "Gangguan cemas menyeluruh", "F41.1", "3A", "Psikiatri" ],
+  [ "Dermatitis atopik", "L20.9", "4A", "Kulit" ],
+  [ "Skabies", "B86", "4A", "Kulit" ],
+  [ "Urtikaria", "L50.9", "4A", "Kulit" ],
+  [ "Konjungtivitis", "H10.9", "4A", "Mata" ],
+  [ "Otitis media akut", "H66.9", "4A", "THT" ],
+  [ "Tonsilitis akut", "J03.9", "4A", "THT" ],
+  [ "Osteoartritis", "M19.9", "3A", "Muskuloskeletal" ],
+  [ "Fraktur tertutup", "T14.2", "3B", "Muskuloskeletal" ],
+  [ "Kehamilan normal", "Z34.9", "4A", "Obstetri" ],
+  [ "Preeklamsia", "O14.9", "3B", "Obstetri" ],
+  [ "Diare akut pada anak", "A09", "4A", "Anak" ],
+  [ "Gizi kurang pada anak", "E44.1", "4A", "Anak" ]
+].each do |name, code, level, group|
+  DiagnosisDefinition.find_or_create_by!(name: name) { |d| d.icd10_code = code; d.skdi_level = level; d.system_group = group }
+end
+
+[
+  [ "Pemasangan infus", "4A", "Prosedur Terapeutik" ],
+  [ "Injeksi intramuskular", "4A", "Prosedur Terapeutik" ],
+  [ "Injeksi intravena", "4A", "Prosedur Terapeutik" ],
+  [ "Pungsi vena", "4A", "Prosedur Diagnostik" ],
+  [ "Pemasangan kateter urin", "4A", "Prosedur Terapeutik" ],
+  [ "Pemasangan NGT", "4A", "Prosedur Terapeutik" ],
+  [ "Jahit luka", "4A", "Bedah Minor" ],
+  [ "Insisi dan drainase abses", "4A", "Bedah Minor" ],
+  [ "Ekstraksi kuku", "4A", "Bedah Minor" ],
+  [ "Sirkumsisi", "4A", "Bedah Minor" ],
+  [ "Pemasangan bidai", "4A", "Muskuloskeletal" ],
+  [ "Resusitasi jantung paru", "4A", "Kegawatdaruratan" ],
+  [ "Pemasangan oropharyngeal airway", "4A", "Kegawatdaruratan" ],
+  [ "Pemeriksaan EKG", "4A", "Prosedur Diagnostik" ],
+  [ "Interpretasi EKG", "4A", "Prosedur Diagnostik" ],
+  [ "Pemeriksaan gula darah kapiler", "4A", "Prosedur Diagnostik" ],
+  [ "Pemeriksaan rectal toucher", "4A", "Prosedur Diagnostik" ],
+  [ "Pemeriksaan fundus mata", "4A", "Prosedur Diagnostik" ],
+  [ "Pemeriksaan otoskopi", "4A", "Prosedur Diagnostik" ],
+  [ "Pemeriksaan Leopold", "4A", "Obstetri" ],
+  [ "Pertolongan persalinan normal", "4A", "Obstetri" ],
+  [ "Pemasangan IUD", "4A", "Obstetri" ],
+  [ "Nebulisasi", "4A", "Respirasi" ],
+  [ "Pemasangan kanul oksigen", "4A", "Respirasi" ],
+  [ "Pengambilan swab tenggorok", "4A", "Prosedur Diagnostik" ]
+].each do |name, level, category|
+  SkillDefinition.find_or_create_by!(name: name) { |s| s.skdi_level = level; s.category = category }
+end

@@ -49,8 +49,14 @@ Rails.application.routes.draw do
       patch :submit
       patch :verify
       patch :request_revision
+      post  :break_glass
+      post  :issue_consent
+      patch :revoke_consent
     end
   end
+  # Lembar persetujuan pasien — publik, tanpa login, bertoken 32 karakter.
+  get   "persetujuan/:token", to: "public/patient_consents#show",   as: :public_patient_consent
+  patch "persetujuan/:token", to: "public/patient_consents#update"
 
   resources :clinical_rotations, except: %i[show]
   # Enrolment Tutorial (PSSK) — padanan rotasi klinik untuk blok/sistem.
@@ -61,6 +67,14 @@ Rails.application.routes.draw do
   resources :study_programs, only: %i[index new create edit update]
 
   namespace :admin do
+    resource :data_governance, only: %i[show update], controller: "data_governance"
+    resources :diagnosis_definitions, except: %i[show] do
+      collection { post :import }
+    end
+    resources :skill_definitions, except: %i[show] do
+      collection { post :import }
+    end
+    resources :logbook_case_targets, except: %i[show]
     resources :users, only: %i[index edit update] do
       member { patch :reset_password }
       collection do

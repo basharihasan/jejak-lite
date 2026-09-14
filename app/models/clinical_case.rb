@@ -35,6 +35,18 @@ class ClinicalCase < ApplicationRecord
   belongs_to :user
   belongs_to :verified_by, class_name: "User", optional: true
 
+  # Identitas pasien — terenkripsi di basis data (Active Record Encryption)
+  # dan DISAMARKAN di tampilan selama Privacy Mode menyala; dibuka hanya lewat
+  # Break Glass beralasan (lihat BreakGlassAccess). Usia persis, jenis kelamin,
+  # dan pekerjaan sengaja tidak termasuk (bukan data sensitif).
+  encrypts :patient_name, :patient_medical_record_number, :patient_birth_date, :patient_phone, :patient_address
+  SENSITIVE_PATIENT_FIELDS = %i[patient_name patient_medical_record_number patient_birth_date patient_phone patient_address].freeze
+
+  has_many :break_glass_accesses, dependent: :destroy
+  has_one :patient_consent, dependent: :destroy
+
+  before_save :sync_diagnosis_definition
+
   has_many :case_verification_comments, -> { chronological }, dependent: :destroy
 
   has_many_attached :evidence_files
@@ -43,6 +55,8 @@ class ClinicalCase < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validates :patient_age_group, inclusion: { in: AGE_GROUPS }, allow_blank: true
   validates :patient_gender, inclusion: { in: GENDERS }, allow_blank: true
+  validates :patient_age, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than: 150 }, allow_nil: true
+  validate :patient_birth_date_is_a_date
 
   scope :recent, -> { order(case_date: :desc, created_at: :desc) }
   scope :owned_by, ->(user) { where(user: user) }
@@ -96,5 +110,67 @@ class ClinicalCase < ApplicationRecord
       recipient: user, sender: by, notifiable: self,
       title: "Kasus klinis perlu direvisi", message: comment
     )
+  end
+  def patient_identity_present?
+    SENSITIVE_PATIENT_FIELDS.any? { |f| public_send(f).present? }
+  end
+
+  def patient_birth_date_as_date
+    return nil if patient_birth_date.blank?
+
+    Date.iso8601(patient_birth_date)
+  rescue Date::Error
+    nil
+  end
+
+  # Usia yang ditampilkan: kolom patient_age bila diisi, kalau tidak dihitung
+  # dari tanggal lahir terhadap tanggal kasus.
+  def display_age
+    return patient_age if patient_age.present?
+
+    dob = patient_birth_date_as_date
+    return nil unless dob && case_date
+
+    age = case_date.year - dob.year
+    age -= 1 if case_date < dob + age.years
+    age
+  end
+
+  # Samaran identitas ala JEJAK: inisial nama + "***", No. RM disembunyikan
+  # kecuali dua digit terakhir.
+  def masked_patient_name
+    return nil if patient_name.blank?
+
+    initials = patient_name.split.map { |w| w[0] }.join.upcase
+    "#{initials[0, 3]}***"
+  end
+
+  def masked_medical_record_number
+    return nil if patient_medical_record_number.blank?
+
+    "RM-****#{patient_medical_record_number.to_s.last(2)}"
+  end
+
+  # FKTP = pelayanan primer; selainnya (RS: rawat jalan/inap, IGD, ICU, OK) = FKRTL.
+  def facility_type
+    clinical_setting == "pelayanan_primer" ? "fktp" : "fkrtl"
+  end
+
+  private
+
+  def patient_birth_date_is_a_date
+    return if patient_birth_date.blank?
+
+    errors.add(:patient_birth_date, "bukan tanggal yang valid") if patient_birth_date_as_date.nil?
+  end
+
+  # Cocokkan teks diagnosis dengan master DiagnosisDefinition supaya kode
+  # ICD-10 & level SKDI terisi tanpa mahasiswa mengetik kode.
+  def sync_diagnosis_definition
+    return unless will_save_change_to_diagnosis?
+
+    definition = DiagnosisDefinition.match(diagnosis)
+    self.icd10_code = definition&.icd10_code
+    self.skdi_level = definition&.skdi_level
   end
 end

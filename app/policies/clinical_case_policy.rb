@@ -28,6 +28,16 @@ class ClinicalCasePolicy < ApplicationPolicy
     verify?
   end
 
+  # Break Glass: siapa pun yang boleh membuka kasus (pemilik, pembimbing/
+  # verifier, admin) boleh membukanya — tetapi selalu beralasan & tercatat.
+  def break_glass?
+    show?
+  end
+
+  def issue_consent?
+    owner?
+  end
+
   class Scope < Scope
     def resolve
       if user.can_verify_clinical_cases?

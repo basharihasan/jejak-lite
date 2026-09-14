@@ -2,12 +2,13 @@
 
 class ClinicalCasesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_clinical_case, only: %i[show edit update destroy submit verify request_revision]
+  before_action :set_clinical_case, only: %i[show edit update destroy submit verify request_revision break_glass issue_consent revoke_consent]
 
   def index
     @scope = params[:scope] == "to_verify" && current_user.can_verify_clinical_cases? ? "to_verify" : "mine"
     base_scope = @scope == "to_verify" ? ClinicalCase.awaiting_verification : current_user.clinical_cases
     @clinical_cases = base_scope.recent.page(params[:page])
+    @case_targets = @scope == "mine" ? case_target_progress : []
 
     stats_scope = @scope == "to_verify" ? ClinicalCase.all : current_user.clinical_cases
     @stats = {
@@ -19,6 +20,40 @@ class ClinicalCasesController < ApplicationController
 
   def show
     authorize @clinical_case
+    # Identitas pasien tersamar selama Privacy Mode menyala, kecuali pengguna
+    # ini memegang Break Glass aktif untuk kasus ini.
+    @privacy_mode = AppSetting.privacy_mode?
+    @break_glass = BreakGlassAccess.active_for(current_user, @clinical_case) if @privacy_mode
+    @identity_visible = !@privacy_mode || @break_glass.present?
+    @patient_consent = @clinical_case.patient_consent
+  end
+
+  # Break Glass: membuka identitas pasien untuk 30 menit dengan alasan tertulis;
+  # setiap pembukaan tercatat permanen (BreakGlassAccess) dan terlihat admin di
+  # Data Governance.
+  def break_glass
+    authorize @clinical_case
+    access = BreakGlassAccess.new(user: current_user, clinical_case: @clinical_case,
+                                  reason: params[:reason], expires_at: BreakGlassAccess::DURATION.from_now,
+                                  ip_address: request.remote_ip)
+    if access.save
+      redirect_to @clinical_case, notice: "Identitas pasien dibuka sampai #{l(access.expires_at, format: :short)}. Akses ini tercatat."
+    else
+      redirect_to @clinical_case, alert: "Break Glass ditolak: #{access.errors.full_messages.to_sentence}"
+    end
+  end
+
+  def issue_consent
+    authorize @clinical_case
+    @clinical_case.patient_consent&.destroy
+    @clinical_case.create_patient_consent!
+    redirect_to @clinical_case, notice: "QR persetujuan pasien diterbitkan. Minta pasien memindai atau membuka tautannya."
+  end
+
+  def revoke_consent
+    authorize @clinical_case, :issue_consent?
+    @clinical_case.patient_consent&.revoke!
+    redirect_to @clinical_case, notice: "Persetujuan pasien dicabut.", status: :see_other
   end
 
   def new
@@ -77,6 +112,18 @@ class ClinicalCasesController < ApplicationController
 
   private
 
+  # Pemenuhan target kasus (FKTP/FKRTL) mahasiswa: kasus TERVERIFIKASI
+  # dikelompokkan menurut ClinicalCase#facility_type.
+  def case_target_progress
+    targets = LogbookCaseTarget.applicable_for(current_user)
+    return [] if targets.empty?
+
+    verified = current_user.clinical_cases.where(status: "verified").group(:clinical_setting).count
+    counts = Hash.new(0)
+    verified.each { |setting, n| counts[setting == "pelayanan_primer" ? "fktp" : "fkrtl"] += n }
+    targets.map { |t| { target: t, achieved: counts[t.facility_type] } }
+  end
+
   def set_clinical_case
     @clinical_case = ClinicalCase.find(params[:id])
   end
@@ -84,6 +131,8 @@ class ClinicalCasesController < ApplicationController
   def clinical_case_params
     permitted = params.require(:clinical_case).permit(
       :case_date, :chief_complaint, :patient_age_group, :patient_gender,
+      :patient_name, :patient_medical_record_number, :patient_birth_date, :patient_phone, :patient_address,
+      :patient_age, :patient_occupation,
       :clinical_setting, :case_complexity,
       :anamnesis, :general_condition, :physical_examination, :family_history,
       :diagnosis, :management, :learning_points, evidence_files: [],

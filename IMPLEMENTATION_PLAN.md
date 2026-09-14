@@ -164,7 +164,16 @@ Layout diganti total meniru `app/views/layouts/application.html.erb` + `shared/_
 
 21 test baru (205 total, hijau). Smoke HTTP: 8 akun × 32 halaman, nol 500. Screenshot: daftar Pengguna dalam EN (cangkang berbahasa Inggris, isi tetap Indonesia).
 
-### ⏳ Fase 24 — Pilar A: Privacy Mode + Break Glass, QR persetujuan pasien, master Diagnosis/ICD-10/Keterampilan, target kasus FKTP/FKRTL
+### ✅ Fase 24 — Pilar A: identitas pasien terenkripsi, Privacy Mode + Break Glass, QR persetujuan pasien, master Diagnosis/Keterampilan, target kasus FKTP/FKRTL
+- **Identitas pasien** pada ClinicalCase (nama, No. RM, tanggal lahir, telepon, alamat) — kolom `encrypts` Active Record Encryption; kunci dari ENV `AR_ENCRYPTION_*` → credentials → (dev/test saja) diturunkan dari `secret_key_base`; production tanpa kunci menolak boot (`config/initializers/active_record_encryption.rb`). Usia persis & pekerjaan (`patient_age`, `patient_occupation`) **tidak** sensitif — keputusan pengelola 14 Sep 2026 — tampil di kepala halaman. Blok "Identitas Pasien" ditambahkan ke Langkah 1 wizard.
+- **Contextual Privacy Mode** (`AppSetting`, bawaan MENYALA — gagal ke arah aman; ENV `PRIVACY_MODE` mengunci) menyamarkan identitas untuk semua pembaca termasuk pemilik (`AF***`, `RM-****56`, `••••`). **Break Glass**: tombol di kartu identitas → alasan ≥10 karakter → `BreakGlassAccess` 30 menit, IP tercatat, baris tak pernah dihapus; policy `break_glass?` = `show?`. **Konfigurasi → Data Governance** (`/admin/data_governance`): sakelar + 100 audit terakhir.
+- **Persetujuan pasien via QR** (`PatientConsent`, token 32 karakter): pemilik kasus menerbitkan/menerbitkan ulang/mencabut dari halaman kasus; pasien membuka `/persetujuan/:token` (layout `public_consent`, tanpa login, tanpa isi kasus), mencentang 3 butir (pendidikan/foto/publikasi), menulis nama & relasi; jawaban tampil butir per butir di kasus; peringatan bila ada lampiran tapi foto tidak disetujui. *Beda dari jejak.pro*: QR hanya dari kasus yang sudah tersimpan (jejak.pro bisa sebelum simpan).
+- **Master Diagnosis** (`DiagnosisDefinition`: nama, ICD-10, level SKDI, sistem) & **Master Keterampilan** (`SkillDefinition`) — CRUD admin + impor CSV (`MasterDataCsvImporter`, alias header ID/EN) + 42 diagnosis & 25 keterampilan seed. Diagnosis wizard jadi input ber-`datalist`; `ClinicalCase#sync_diagnosis_definition` menyalin `icd10_code`/`skdi_level` (lencana di halaman kasus). DOPS memakai master keterampilan, jatuh ke `COMMON_PROCEDURES` bila kosong.
+- **Target Kasus Logbook** (`LogbookCaseTarget`: prodi × periode(opsional) × FKTP/FKRTL): CRUD admin; kartu "Pemenuhan Target Kasus" di Kasus Klinis menghitung kasus **terverifikasi** per fasilitas (`facility_type`: pelayanan_primer → FKTP, lainnya → FKRTL).
+- **Pelajaran**: `helper_method :label` menimpa helper form `label` Rails → 500 di halaman form master data; tertangkap smoke HTTP, bukan test — sekarang ada test halaman new/edit. Dinamai ulang `resource_label`.
+
+16 test baru (221 total, hijau). Smoke HTTP: 8 akun × 38 halaman, nol 500. Screenshot: halaman kasus tersamar dengan Break Glass + QR, lembar persetujuan pasien di lebar ponsel.
+
 ### ⏳ Fase 25 — Pilar B: Assessment Events + impor CSV berpemetaan kolom + percobaan berulang, CBD, Long Case, EPA entrustment, jadwal WBA, jurnal umpan balik penguji
 ### ⏳ Fase 26 — Pilar C: Assessment Matrix per Learning Unit, kurva persentil kohort, Peta EPA
 

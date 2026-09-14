@@ -1,0 +1,26 @@
+<% cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+<%= form_with model: [ :admin, record ], class: "space-y-4" do |f| %>
+  <% if record.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm"><%= record.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <div>
+    <%= f.label :name, "Nama diagnosis", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_field :name, class: cls %>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div>
+      <%= f.label :icd10_code, "Kode ICD-10", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :icd10_code, placeholder: "A01.0", class: cls %>
+    </div>
+    <div>
+      <%= f.label :skdi_level, "Level SKDI", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.select :skdi_level, DiagnosisDefinition::SKDI_LEVELS, { include_blank: "-" }, class: cls %>
+    </div>
+    <div>
+      <%= f.label :system_group, "Sistem", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :system_group, placeholder: "Respirasi", class: cls %>
+    </div>
+  </div>
+  <label class="inline-flex items-center gap-2 text-sm text-gray-700"><%= f.check_box :active, class: "rounded border-gray-300 text-indigo-600" %> Aktif (tampil di datalist)</label>
+  <div><%= f.submit "Simpan", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %></div>
+<% end %>
