@@ -1,0 +1,47 @@
+<%# Satu baris resep. Dipakai untuk baris yang sudah ada maupun sebagai
+    cetakan baris baru (index NEW_RECORD diganti Stimulus). %>
+<% cell = "block w-full rounded-lg border-0 py-2 px-2.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+<div class="rounded-xl bg-white ring-1 ring-gray-200 p-3" data-prescription-target="row">
+  <%= f.hidden_field :id %>
+  <%= f.hidden_field :_destroy, value: "0" %>
+  <div class="grid grid-cols-2 sm:grid-cols-12 gap-2">
+    <div class="col-span-2 sm:col-span-4">
+      <label class="block text-[11px] font-semibold text-gray-500 mb-1">Nama obat <span class="text-rose-500">*</span></label>
+      <%= f.text_field :medication_name, list: "medication-definitions", autocomplete: "off",
+            placeholder: "Parasetamol", class: cell,
+            data: { field: "medication_name", action: "input->prescription#renderPreview" } %>
+    </div>
+    <div class="sm:col-span-2">
+      <label class="block text-[11px] font-semibold text-gray-500 mb-1">Sediaan</label>
+      <%= f.select :dosage_form, MedicationDefinition::DOSAGE_FORMS, { include_blank: "—" },
+            class: cell, data: { field: "dosage_form", action: "change->prescription#renderPreview" } %>
+    </div>
+    <div class="sm:col-span-2">
+      <label class="block text-[11px] font-semibold text-gray-500 mb-1">Kekuatan</label>
+      <%= f.text_field :strength, placeholder: "500 mg", class: cell,
+            data: { field: "strength", action: "input->prescription#renderPreview" } %>
+    </div>
+    <div class="sm:col-span-2">
+      <label class="block text-[11px] font-semibold text-gray-500 mb-1">Jumlah</label>
+      <%= f.text_field :quantity, placeholder: "X", class: cell,
+            data: { field: "quantity", action: "input->prescription#renderPreview" } %>
+    </div>
+    <div class="sm:col-span-2">
+      <label class="block text-[11px] font-semibold text-gray-500 mb-1">Rute</label>
+      <%= f.select :route, PrescriptionItem::ROUTES, { include_blank: "—" }, class: cell %>
+    </div>
+    <div class="col-span-2 sm:col-span-6">
+      <label class="block text-[11px] font-semibold text-gray-500 mb-1">Aturan pakai (signa)</label>
+      <%= f.text_field :signa, placeholder: "3 dd tab I p.c.", class: cell,
+            data: { field: "signa", action: "input->prescription#renderPreview" } %>
+    </div>
+    <div class="col-span-2 sm:col-span-5">
+      <label class="block text-[11px] font-semibold text-gray-500 mb-1">Catatan (opsional)</label>
+      <%= f.text_field :notes, placeholder: "Hentikan bila muncul ruam", class: cell %>
+    </div>
+    <div class="col-span-2 sm:col-span-1 flex items-end">
+      <button type="button" data-action="prescription#remove"
+              class="w-full rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold py-2">Hapus</button>
+    </div>
+  </div>
+</div>

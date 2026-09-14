@@ -75,6 +75,9 @@ Rails.application.routes.draw do
     resources :skill_definitions, except: %i[show] do
       collection { post :import }
     end
+    resources :medication_definitions, except: %i[show] do
+      collection { post :import }
+    end
     resources :logbook_case_targets, except: %i[show]
     resources :assessment_events do
       member do

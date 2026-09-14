@@ -1,0 +1,16 @@
+<%= render "admin/master_data/index",
+      title: "Master Obat (Formularium)",
+      subtitle: "Sumber pilihan obat saat mahasiswa berlatih menulis resep pada Logbook Kasus Klinis.",
+      records: @records, query: @query,
+      columns: [
+        [ "Nama", ->(r) { r.name } ],
+        [ "Kekuatan", ->(r) { r.strength } ],
+        [ "Sediaan", ->(r) { r.dosage_form } ],
+        [ "Kelas terapi", ->(r) { r.category } ],
+        [ "Dosis lazim", ->(r) { r.usual_dosage } ]
+      ],
+      new_path: new_admin_medication_definition_path,
+      import_path: import_admin_medication_definitions_path,
+      edit_path: ->(r) { edit_admin_medication_definition_path(r) },
+      destroy_path: ->(r) { admin_medication_definition_path(r) },
+      csv_hint: "nama,kekuatan,sediaan,kelas,dosis_lazim\nParasetamol,500 mg,Tablet,Analgesik-Antipiretik,3-4 x 500 mg\nAmoksisilin,500 mg,Kapsul,Antibiotik,3 x 500 mg" %>

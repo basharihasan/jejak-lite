@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_030001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_040001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -523,6 +523,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_030001) do
     t.index ["study_program_id"], name: "index_logbook_case_targets_on_study_program_id"
   end
 
+  create_table "medication_definitions", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.string "dosage_form"
+    t.string "name", null: false
+    t.string "strength"
+    t.datetime "updated_at", null: false
+    t.string "usual_dosage"
+    t.index "lower((name)::text), COALESCE(strength, ''::character varying)", name: "idx_medication_definitions_unique", unique: true
+  end
+
   create_table "mini_cex_evaluations", force: :cascade do |t|
     t.string "case_complexity"
     t.string "case_description", null: false
@@ -578,6 +590,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_030001) do
     t.datetime "updated_at", null: false
     t.index ["clinical_case_id"], name: "index_patient_consents_on_clinical_case_id", unique: true
     t.index ["token"], name: "index_patient_consents_on_token", unique: true
+  end
+
+  create_table "prescription_items", force: :cascade do |t|
+    t.bigint "clinical_case_id", null: false
+    t.datetime "created_at", null: false
+    t.string "dosage_form"
+    t.string "medication_name", null: false
+    t.string "notes"
+    t.integer "position", default: 0, null: false
+    t.string "quantity"
+    t.string "route"
+    t.string "signa"
+    t.string "strength"
+    t.datetime "updated_at", null: false
+    t.index ["clinical_case_id"], name: "index_prescription_items_on_clinical_case_id"
   end
 
   create_table "reflection_entries", force: :cascade do |t|
@@ -771,6 +798,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_030001) do
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "notifications", "users", column: "sender_id"
   add_foreign_key "patient_consents", "clinical_cases"
+  add_foreign_key "prescription_items", "clinical_cases"
   add_foreign_key "reflection_entries", "activity_logs"
   add_foreign_key "reflection_entries", "clinical_cases"
   add_foreign_key "reflection_entries", "users"

@@ -152,6 +152,8 @@
         active: active_class.call("/admin/diagnosis_definitions") %>
     <%= render "shared/nav_item", label: t("nav.skill_definitions"), path: admin_skill_definitions_path,
         active: active_class.call("/admin/skill_definitions") %>
+    <%= render "shared/nav_item", label: t("nav.medication_definitions"), path: admin_medication_definitions_path,
+        active: active_class.call("/admin/medication_definitions") %>
     <%= render "shared/nav_item", label: t("nav.data_governance"), path: admin_data_governance_path,
         active: active_class.call("/admin/data_governance") %>
   </div>

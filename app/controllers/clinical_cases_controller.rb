@@ -174,6 +174,7 @@ class ClinicalCasesController < ApplicationController
       :clinical_setting, :case_complexity,
       :anamnesis, :general_condition, :physical_examination, :family_history,
       :diagnosis, :management, :learning_points, evidence_files: [],
+      prescription_items_attributes: %i[id medication_name strength dosage_form quantity signa route notes _destroy],
       vital_signs: ClinicalCase::VITAL_SIGN_FIELDS.keys
     )
     permitted[:vital_signs] = permitted[:vital_signs].to_h.compact_blank if permitted[:vital_signs]

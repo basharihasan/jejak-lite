@@ -62,6 +62,7 @@ en:
     logbook_case_targets: "Logbook Case Targets"
     diagnosis_definitions: "Diagnosis Master"
     skill_definitions: "Skills Master"
+    medication_definitions: "Medication Master"
     data_governance: "Data Governance"
     mobile:
       home: "Home"

@@ -11,7 +11,10 @@ class MasterDataCsvImporter
     "icd10_code" => %w[icd10_code icd10 kode_icd10 kode],
     "skdi_level" => %w[skdi_level skdi level_skdi level],
     "system_group" => %w[system_group sistem system],
-    "category" => %w[category kategori]
+    "category" => %w[category kategori kelas kelas_terapi],
+    "strength" => %w[strength kekuatan dosis],
+    "dosage_form" => %w[dosage_form sediaan bentuk],
+    "usual_dosage" => %w[usual_dosage dosis_lazim anjuran]
   }.freeze
 
   def initialize(model, io)

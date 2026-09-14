@@ -168,6 +168,59 @@
           <% end %>
         </datalist>
       </div>
+      <%# ── Latihan menulis resep ── %>
+      <div class="mt-5 rounded-2xl ring-1 ring-indigo-100 bg-indigo-50/50 p-4" data-controller="prescription">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <p class="text-sm font-semibold text-gray-800">Resep <span class="font-normal text-gray-500">— latihan menulis resep</span></p>
+            <p class="text-[11px] text-gray-500 mt-0.5">Isi per kolom; sistem menyusunnya menjadi resep berformat <strong>R/</strong> di bawah. Preseptor meninjau resep ini saat verifikasi kasus.</p>
+          </div>
+          <button type="button" data-action="prescription#add"
+                  class="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2">+ Tambah Obat</button>
+        </div>
+
+        <div class="mt-3 space-y-2" data-prescription-target="rows">
+          <%= f.fields_for :prescription_items do |pf| %>
+            <%= render "clinical_cases/prescription_fields", f: pf %>
+          <% end %>
+        </div>
+
+        <p class="mt-2 text-xs text-gray-400" data-prescription-target="empty" <%= "hidden" if clinical_case.prescription_items.any? %>>
+          Belum ada obat. Tekan <strong>+ Tambah Obat</strong> bila kasus ini memerlukan terapi farmakologis.
+        </p>
+
+        <%# Cetakan baris baru — tidak ikut terkirim karena berada di <template>. %>
+        <template data-prescription-target="template">
+          <%= f.fields_for :prescription_items, PrescriptionItem.new, child_index: "NEW_RECORD" do |pf| %>
+            <%= render "clinical_cases/prescription_fields", f: pf %>
+          <% end %>
+        </template>
+
+        <datalist id="medication-definitions">
+          <% MedicationDefinition.active.ordered.limit(500).each do |med| %>
+            <option value="<%= med.name %>"><%= [ med.label, med.usual_dosage.presence ].compact.join(" · ") %></option>
+          <% end %>
+        </datalist>
+
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-1">Pratinjau resep</p>
+            <pre data-prescription-target="preview" class="rounded-xl bg-white ring-1 ring-gray-200 p-3 text-sm text-gray-800 whitespace-pre-wrap font-mono min-h-20">Pratinjau resep muncul di sini setelah nama obat diisi.</pre>
+          </div>
+          <div class="rounded-xl bg-white ring-1 ring-gray-200 p-3">
+            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-1">Singkatan lazim</p>
+            <ul class="text-[11px] text-gray-600 space-y-0.5">
+              <li><strong>R/</strong> — recipe (ambillah)</li>
+              <li><strong>No.</strong> — jumlah, angka Romawi (X = 10)</li>
+              <li><strong>S</strong> — signa (aturan pakai)</li>
+              <li><strong>dd</strong> — de die (per hari)</li>
+              <li><strong>a.c. / p.c.</strong> — sebelum / sesudah makan</li>
+              <li><strong>tab I</strong> — satu tablet tiap minum</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div class="mt-4">
         <%= f.label :management, "Tatalaksana", class: "block text-sm font-semibold text-gray-700 mb-1" %>
         <%= f.text_area :management, rows: 4,

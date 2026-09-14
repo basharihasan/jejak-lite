@@ -62,6 +62,7 @@ id:
     logbook_case_targets: "Target Kasus Logbook"
     diagnosis_definitions: "Master Diagnosis"
     skill_definitions: "Master Keterampilan"
+    medication_definitions: "Master Obat"
     data_governance: "Data Governance"
     mobile:
       home: "Beranda"

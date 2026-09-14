@@ -49,6 +49,9 @@ class ClinicalCase < ApplicationRecord
   before_save :sync_diagnosis_definition
 
   has_many :case_verification_comments, -> { chronological }, dependent: :destroy
+  # Latihan menulis resep: baris resep terstruktur milik kasus ini.
+  has_many :prescription_items, -> { ordered }, dependent: :destroy, inverse_of: :clinical_case
+  accepts_nested_attributes_for :prescription_items, allow_destroy: true
 
   has_many_attached :evidence_files
 
@@ -113,6 +116,23 @@ class ClinicalCase < ApplicationRecord
       title: "Kasus klinis perlu direvisi", message: comment
     )
   end
+  # Baris resep yang BENAR-BENAR kosong dibuang diam-diam (mahasiswa menambah
+  # baris lalu tidak jadi memakainya); baris yang sudah terisi sebagian tetapi
+  # tanpa nama obat DITAHAN dan dilaporkan — isian yang sudah diketik tidak
+  # boleh hilang tanpa jejak.
+  def prescription_items_attributes=(attributes)
+    cleaned = attributes.to_h.reject do |_index, row|
+      next false if row["id"].present? || row[:id].present?
+
+      %w[medication_name strength dosage_form quantity signa route notes].all? { |key| row[key].blank? && row[key.to_sym].blank? }
+    end
+    super(cleaned)
+  end
+
+  def prescription?
+    prescription_items.any?
+  end
+
   def patient_identity_present?
     SENSITIVE_PATIENT_FIELDS.any? { |f| public_send(f).present? }
   end

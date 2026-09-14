@@ -252,3 +252,56 @@ if (period = AcademicPeriod.order(:start_date).last) && (framework = CompetencyF
     end
   end
 end
+
+# Master Obat — daftar generik yang lazim dipakai di FKTP/FKRTL, untuk latihan
+# menulis resep pada Logbook Kasus Klinis. Bukan katalog harga/stok apotek.
+[
+  [ "Parasetamol", "500 mg", "Tablet", "Analgesik-Antipiretik", "3-4 x 500 mg" ],
+  [ "Parasetamol", "120 mg/5 mL", "Sirup", "Analgesik-Antipiretik", "10-15 mg/kgBB/kali" ],
+  [ "Ibuprofen", "400 mg", "Tablet", "AINS", "3 x 400 mg p.c." ],
+  [ "Asam mefenamat", "500 mg", "Tablet", "AINS", "3 x 500 mg p.c." ],
+  [ "Amoksisilin", "500 mg", "Kapsul", "Antibiotik", "3 x 500 mg" ],
+  [ "Amoksisilin", "125 mg/5 mL", "Sirup", "Antibiotik", "25-50 mg/kgBB/hari" ],
+  [ "Sefiksim", "100 mg", "Kapsul", "Antibiotik", "2 x 100 mg" ],
+  [ "Siprofloksasin", "500 mg", "Tablet", "Antibiotik", "2 x 500 mg" ],
+  [ "Kotrimoksazol", "480 mg", "Tablet", "Antibiotik", "2 x 960 mg" ],
+  [ "Eritromisin", "500 mg", "Tablet", "Antibiotik", "4 x 500 mg" ],
+  [ "Metronidazol", "500 mg", "Tablet", "Antibiotik", "3 x 500 mg" ],
+  [ "Omeprazol", "20 mg", "Kapsul", "Penghambat Pompa Proton", "1-2 x 20 mg a.c." ],
+  [ "Ranitidin", "150 mg", "Tablet", "Antagonis H2", "2 x 150 mg" ],
+  [ "Antasida", "200 mg", "Tablet", "Antasida", "3 x 1 tab a.c." ],
+  [ "Domperidon", "10 mg", "Tablet", "Antiemetik", "3 x 10 mg a.c." ],
+  [ "Ondansetron", "4 mg", "Tablet", "Antiemetik", "2-3 x 4 mg" ],
+  [ "Oralit", "200 mL", "Suspensi", "Rehidrasi Oral", "Tiap diare cair" ],
+  [ "Zinc", "20 mg", "Tablet", "Suplemen", "1 x 20 mg selama 10 hari" ],
+  [ "Amlodipin", "10 mg", "Tablet", "Antihipertensi", "1 x 5-10 mg" ],
+  [ "Kaptopril", "25 mg", "Tablet", "Antihipertensi", "2-3 x 12,5-25 mg a.c." ],
+  [ "Lisinopril", "10 mg", "Tablet", "Antihipertensi", "1 x 10 mg" ],
+  [ "Bisoprolol", "5 mg", "Tablet", "Beta-blocker", "1 x 2,5-5 mg" ],
+  [ "Furosemid", "40 mg", "Tablet", "Diuretik", "1-2 x 40 mg" ],
+  [ "Hidroklorotiazid", "25 mg", "Tablet", "Diuretik", "1 x 12,5-25 mg" ],
+  [ "Simvastatin", "20 mg", "Tablet", "Statin", "1 x 20 mg malam" ],
+  [ "Metformin", "500 mg", "Tablet", "Antidiabetik Oral", "2-3 x 500 mg p.c." ],
+  [ "Glimepirid", "2 mg", "Tablet", "Antidiabetik Oral", "1 x 1-4 mg a.c." ],
+  [ "Insulin human", "100 IU/mL", "Injeksi", "Insulin", "Sesuai titrasi" ],
+  [ "Salbutamol", "2 mg", "Tablet", "Bronkodilator", "3 x 2-4 mg" ],
+  [ "Salbutamol", "100 mcg/puff", "Inhalasi", "Bronkodilator", "2 puff bila sesak" ],
+  [ "Ambroksol", "30 mg", "Tablet", "Mukolitik", "3 x 30 mg" ],
+  [ "Setirizin", "10 mg", "Tablet", "Antihistamin", "1 x 10 mg malam" ],
+  [ "Klorfeniramin maleat", "4 mg", "Tablet", "Antihistamin", "3 x 4 mg" ],
+  [ "Deksametason", "0,5 mg", "Tablet", "Kortikosteroid", "3 x 0,5 mg p.c." ],
+  [ "Metilprednisolon", "4 mg", "Tablet", "Kortikosteroid", "Sesuai indikasi" ],
+  [ "Hidrokortison", "2,5%", "Krim", "Kortikosteroid Topikal", "2 x sehari oles tipis" ],
+  [ "Mikonazol", "2%", "Krim", "Antijamur Topikal", "2 x sehari" ],
+  [ "Permetrin", "5%", "Krim", "Antiskabies", "Oles 8-12 jam, ulangi 1 minggu" ],
+  [ "Asam folat", "1 mg", "Tablet", "Suplemen", "1 x 1 mg" ],
+  [ "Sulfas ferosus", "300 mg", "Tablet", "Suplemen Besi", "1-3 x 300 mg p.c." ],
+  [ "Vitamin B kompleks", nil, "Tablet", "Suplemen", "1 x 1 tab" ],
+  [ "Kloramfenikol", "0,5%", "Tetes", "Antibiotik Topikal Mata", "4-6 x 1 tetes" ],
+  [ "Parasetamol", "1000 mg", "Infus", "Analgesik-Antipiretik", "3-4 x 1 g IV" ],
+  [ "Ringer laktat", "500 mL", "Infus", "Cairan Kristaloid", "Sesuai kebutuhan" ]
+].each do |name, strength, form, category, dosage|
+  med = MedicationDefinition.find_or_initialize_by(name: name, strength: strength)
+  med.assign_attributes(dosage_form: form, category: category, usual_dosage: dosage, active: true)
+  med.save!
+end
