@@ -6,17 +6,23 @@ Rencana lengkap, keputusan arsitektur, dan status tiap fase (0–16, semua ✅) 
 
 ## Fitur
 
-- **Akun & Peran** — multi-peran per akun (mahasiswa/dosen/preseptor/kaprodi/admin) dengan fitur ganti peran aktif; login email/password atau Google.
-- **Logbook & Kasus Klinis** — pencatatan kegiatan klinis/non-klinis, kasus klinis dengan alur verifikasi dosen/preseptor, kalender + feed iCal.
-- **Rotasi & Periode Akademik** — jadwal rotasi per mahasiswa, dikelola admin.
-- **Asesmen** — DOPS & Mini-CEX (skala 1–9, dimensi wajib profesionalisme/komunikasi), Assessment Form Builder (dipakai untuk Evaluasi Tutor/Blok/lainnya), Tugas Akhir + milestone + skor penguji, Progress Test/CBT/OSCE lewat impor CSV.
-- **Kurikulum** — Blueprint Asesmen (peta bobot kompetensi), Peta Kompetensi (pohon ranah/sub-kompetensi), halaman "Analisis Capaian Pembelajaran" pribadi per periode.
-- **Dashboard Analitik** — satu halaman `/analitik` yang menampilkan bagian berbeda sesuai peran: mahasiswa bimbingan (dosen), mahasiswa di wahana (preseptor), seluruh mahasiswa satu program studi (Kaprodi).
-- **Notifikasi** — in-app + Web Push (VAPID).
+Seluruh baris **tingkat Dasar (🟢)** pada `DAFTAR_FITUR_JEJAK.md` di repo utama `PFKV2` — tidak lebih:
+
+- **Akun & Peran** — multi-peran per akun (mahasiswa/dosen/preseptor/kaprodi/admin) + Ganti Peran; login email/password atau Google; kelola pengguna & impor CSV; bahasa antarmuka ID/EN; tema terang/gelap/ikuti sistem.
+- **Pencatatan Kasus** — wizard Kasus Klinis 4 langkah, identitas pasien terenkripsi dengan **Privacy Mode** + **Break Glass** beraudit, QR persetujuan pasien (halaman publik tanpa login), master Diagnosis/ICD-10 & Keterampilan, target kasus FKTP/FKRTL, logbook kegiatan + kalender/iCal, verifikasi preseptor.
+- **Asesmen** — Assessment Events (CBT, nilai tutor, Tinjauan, TMEX, Progress Test, OSCE, SOCA/MSP, esai & festival gagasan, community project, refleksi dinilai, EBCR, CBD, Long Case) dengan impor CSV berpemetaan kolom, percobaan berulang, alur rubrik mahasiswa→penguji, DOPS & Mini-CEX + jadwalnya, jurnal umpan balik penguji.
+- **Pemetaan Capaian** — Peta Kompetensi per periode, Peta EPA & Tingkat Entrustment (1–5, ber-supersede), Assessment Matrix per Learning Unit, kurva persentil kohort (gabungan PSSK+PSPD), portofolio longitudinal.
+- **Kurikulum & Rotasi** — periode akademik, program studi (pssk/pspd), rotasi klinik, enrolment tutorial, blueprint & kerangka kompetensi.
+- **Dashboard Analitik & Notifikasi** — `/analitik` per peran; notifikasi in-app + Web Push (VAPID).
+
+Rencana lengkap & status tiap fase (0–26, semua ✅) ada di [`IMPLEMENTATION_PLAN.md`](IMPLEMENTATION_PLAN.md).
 
 ## Menjalankan secara lokal
 
-1. Salin `.env.example` (kalau ada) atau buat `.env` berisi kredensial Postgres lokal:
+
+**Prasyarat:** Ruby (sesuai `.ruby-version`), PostgreSQL yang berjalan, dan Node tidak diperlukan (Tailwind & importmap tanpa bundler JS).
+
+1. Buat `.env` berisi kredensial Postgres lokal:
 
    ```env
    POSTGRES_USER=postgres
@@ -26,10 +32,33 @@ Rencana lengkap, keputusan arsitektur, dan status tiap fase (0–16, semua ✅) 
    ```
 
 2. `bundle install`
-3. `bin/rails db:setup` (create + migrate + seed data rujukan: peran, program studi, templat formulir baku, contoh peta kompetensi & blueprint)
-4. `bin/dev` (menjalankan Rails server + Tailwind watcher lewat Procfile.dev)
+3. `bin/rails db:setup` (create + migrate + seed data rujukan: peran, program studi, templat formulir, kerangka kompetensi & blueprint, master diagnosis & keterampilan, contoh Learning Unit)
+4. `bin/dev` → buka <http://localhost:3000>
+
+`bin/dev` menjalankan Rails server + Tailwind watcher sekaligus (lewat `Procfile.dev`). Ganti port dengan `PORT=3060 bin/dev`.
+
+Kalau tidak ingin memakai foreman, jalankan dua terminal:
+
+```bash
+ruby bin/rails server            # terminal 1
+ruby bin/rails tailwindcss:watch # terminal 2 — hanya perlu saat mengubah tampilan
+```
+
+> **Windows:** panggil lewat `ruby bin/rails ...` (bukan `bin/rails ...`) bila shell Anda menolak menjalankan skrip tanpa ekstensi. Bila port 3000 sudah dipakai proses lain, hentikan dulu (`netstat -ano | findstr :3000`, lalu `taskkill /PID <pid> /F`) atau pakai port lain.
 
 Login Google (opsional) aktif otomatis kalau `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` diisi di `.env`. Web Push (opsional) aktif kalau `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT` diisi.
+
+### Kunci enkripsi data pasien
+
+Identitas pasien pada Kasus Klinis (nama, No. RM, tanggal lahir, telepon, alamat) disimpan terenkripsi (Active Record Encryption). Di **development/test** kuncinya diturunkan otomatis dari `secret_key_base` — tidak perlu setup. Di **production** wajib diisi, kalau tidak aplikasi sengaja menolak boot:
+
+```env
+AR_ENCRYPTION_PRIMARY_KEY=...
+AR_ENCRYPTION_DETERMINISTIC_KEY=...
+AR_ENCRYPTION_KEY_DERIVATION_SALT=...
+```
+
+Hasilkan ketiganya dengan `bin/rails db:encryption:init`. Opsional: `PRIVACY_MODE=true|false` mengunci sakelar Contextual Privacy Mode dari server (bawaannya menyala, diatur admin lewat **Konfigurasi → Data Governance**).
 
 ### Data demo (opsional, untuk mencoba semua fitur)
 
@@ -37,7 +66,7 @@ Login Google (opsional) aktif otomatis kalau `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_S
 bin/rails demo:seed
 ```
 
-Membuat 7 akun contoh (password sama semua: `password123`, sengaja lemah — **hanya untuk demo**, jangan pernah dipakai untuk akun sungguhan):
+Membuat 8 akun contoh (password sama semua: `password123`, sengaja lemah — **hanya untuk demo**, jangan pernah dipakai untuk akun sungguhan):
 
 | Email | Peran | Kegunaan |
 |---|---|---|
@@ -48,14 +77,17 @@ Membuat 7 akun contoh (password sama semua: `password123`, sengaja lemah — **h
 | `multirole.demo@jejaklite.test` | Mahasiswa + Dosen | Contoh satu akun berperan ganda (fitur Ganti Peran) |
 | `mahasiswa1.demo@jejaklite.test` | Mahasiswa | Punya logbook, kasus klinis, DOPS/Mini-CEX, tugas akhir, nilai ujian |
 | `mahasiswa2.demo@jejaklite.test` | Mahasiswa | Kasus klinis & nilai ujian (untuk melihat agregasi lintas mahasiswa) |
+| `demo@jejaklite.test` | Mahasiswa + Dosen | Akun serba-guna untuk mencoba cepat |
 
 Task ini idempoten (aman dijalankan berkali-kali) dan terpisah dari `db/seeds.rb` karena isinya akun contoh berpassword publik, bukan data rujukan aplikasi.
 
 ## Test
 
 ```bash
-bin/rails test
+bin/rails test   # 237 test, semua hijau per Fase 26
 ```
+
+Selain test suite, tiap fase diverifikasi dengan **smoke test HTTP sungguhan**: login sebagai tiap akun demo lalu membuka seluruh halaman sidebar, memastikan nol 500. Cara cepat melakukannya sendiri: jalankan server, lalu buka halaman-halaman itu sebagai `admin.demo@jejaklite.test` dan `mahasiswa1.demo@jejaklite.test`.
 
 ## Deploy (Render, opsional)
 
