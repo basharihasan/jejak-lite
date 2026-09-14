@@ -141,6 +141,26 @@ Ditambahkan setelah pengguna membandingkan langsung `localhost:3000/clinical_cas
 
 6 test baru (176 total, semua hijau). Diverifikasi manual via HTTP sungguhan: wizard 4 langkah tampil dengan benar (`data-controller="wizard"`, 4 `[data-wizard-target="step"]`), submit satu kali membawa semua field termasuk tanda vital nested, BMI terhitung otomatis dan tampil di halaman show.
 
+## Fase 22–26 — "Semirip mungkin dengan jejak.pro, hanya fitur 🟢"
+
+Diputuskan 14 September 2026 setelah `DAFTAR_FITUR_JEJAK.md` v2.0 (di repo PFKV2) menetapkan **Paket Dasar = fondasi + tiga pilar**: (A) pencatatan kasus, (B) asesmen dasar PSSK & PSPD, (C) pemetaan capaian. Pilihan pengguna: lanjutkan jejak-lite (bukan salin-potong PFKV2) dan tiru tampilan jejak.pro; syarat mutlak "jangan sampai ada error" — tiap fase: test hijau + smoke test HTTP sungguhan (`tmp/smoke.sh`, login tiap akun demo, buka semua halaman sidebar).
+
+### ✅ Fase 22 — Cangkang UI jejak.pro (sidebar, topbar, tema)
+Layout diganti total meniru `app/views/layouts/application.html.erb` + `shared/_sidebar`, `_sidebar_nav`, `_nav_item`, `_topbar`, `_flash` jejak.pro: sidebar gelap `bg-slate-900` lebar 64 dengan blok brand, identitas + peran aktif + tombol Edit Profil, kotak "Cari menu" (filter sisi klien), grup navigasi berjudul kapital, accordion (Logbook, Asesmen & Evaluasi), footer Panduan/Pengaturan; sidebar geser untuk layar kecil + overlay; topbar putih lengket dengan hamburger, judul halaman (`content_for :title`), pengalih peran (select), pencarian, tombol tema, bantuan, lonceng notifikasi (dropdown beranimasi), menu akun; bilah navigasi bawah mobile. Stimulus `sidebar`, `accordion`, `notification_dropdown`, `theme_toggle`, `flash` diambil apa adanya dari jejak.pro. CSS tema jejak.pro (`--color-primary`, retrofit mode gelap `html.dark`, skala huruf `text-size-*`) disalin utuh; font Inter di-self-host di `public/vendor/fonts/inter`.
+
+**Grup sidebar hanya yang 🟢**: Ikhtisar, Perjalanan Belajar, Asesmen, Kompetensi & Prestasi, Coaching Center (dosen/preseptor/kaprodi/admin — lencana kasus menunggu verifikasi), Konfigurasi (admin, mengikuti policy `has_role?("admin")`). Menu menyempit mengikuti **peran aktif**, bukan gabungan peran. Accordion yang memuat halaman aktif dirender terbuka dari server (bukan menunggu JS).
+
+**Pengaturan Saya** (`/pengaturan`): kolom `users.theme_preference` (light/dark/system) & `font_size_preference` (small/normal/large), `Settings::PreferencesController#update_appearance` melayani form HTML dan fetch JSON dari tombol tema topbar. Skrip bootstrap tema di `<head>` mencegah kedipan.
+
+**Perbaikan sampingan**: `config/locales/devise.id.yml` disalin dari jejak.pro — sebelumnya flash Devise tampil "Translation missing" karena `default_locale = :id` tanpa terjemahan Devise. Test lama `analytics_controller_test` dipersempit ke `<main>` karena `assert_no_match "/9"` tersandung kelas `bg-white/95` layout.
+
+8 test baru (184 total, hijau). Smoke HTTP: 8 akun demo × 26 halaman, nol 500. Screenshot headless Chrome (`tmp/shot_*.png`) dibandingkan langsung dengan cangkang jejak.pro.
+
+### ⏳ Fase 23 — Fondasi: prodi PSSK/PSPD eksplisit, enrolment tutorial, impor pengguna CSV, bahasa ID/EN
+### ⏳ Fase 24 — Pilar A: Privacy Mode + Break Glass, QR persetujuan pasien, master Diagnosis/ICD-10/Keterampilan, target kasus FKTP/FKRTL
+### ⏳ Fase 25 — Pilar B: Assessment Events + impor CSV berpemetaan kolom + percobaan berulang, CBD, Long Case, EPA entrustment, jadwal WBA, jurnal umpan balik penguji
+### ⏳ Fase 26 — Pilar C: Assessment Matrix per Learning Unit, kurva persentil kohort, Peta EPA
+
 ## Model Data (ringkas, akan detail per fase saat digarap)
 
 | Tabel | Fase | Status |

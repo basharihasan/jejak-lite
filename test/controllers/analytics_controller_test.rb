@@ -79,7 +79,10 @@ class AnalyticsControllerTest < ActionDispatch::IntegrationTest
     get analytics_path(academic_period_id: periode_lain.id)
 
     assert_response :success
-    assert_match users(:siti).full_name, response.body
-    assert_no_match "/9", response.body
+    # Dibatasi ke <main>: cangkang layout memuat kelas Tailwind seperti
+    # bg-white/95 yang ikut cocok dengan pola "/9".
+    main_text = css_select("main").text
+    assert_match users(:siti).full_name, main_text
+    assert_no_match "/9", main_text
   end
 end

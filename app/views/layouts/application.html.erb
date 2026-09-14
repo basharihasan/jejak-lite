@@ -1,35 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html class="h-full" lang="id"
+      data-theme-preference="<%= user_signed_in? ? current_user.theme_preference : 'system' %>"
+      data-font-size-preference="<%= user_signed_in? ? current_user.font_size_preference : 'normal' %>">
   <head>
-    <title><%= content_for(:title) || "Jejak Lite" %></title>
+    <title><%= content_for(:title) || "JEJAK — Jejak Lite" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Jejak Lite">
+    <meta name="application-name" content="JEJAK">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="Ekosistem Pendidikan Klinis Longitudinal — logbook kasus, asesmen, dan peta kompetensi">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <meta name="turbo-prefetch" content="false">
+
+    <%# Terapkan tema & ukuran huruf sebelum render pertama agar tidak ada
+        kedipan tampilan salah. Sinkron dengan window.applyAhsTheme/FontSize
+        yang dipakai tombol tema di topbar dan halaman Pengaturan. %>
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var darkMedia = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+
+        window.applyAhsTheme = function (preference) {
+          var isDark = preference === "dark" || (preference === "system" && !!(darkMedia && darkMedia.matches));
+          root.classList.toggle("dark", isDark);
+          root.dataset.themePreference = preference;
+        };
+
+        window.applyAhsFontSize = function (preference) {
+          root.classList.remove("text-size-small", "text-size-large");
+          if (preference === "small") root.classList.add("text-size-small");
+          if (preference === "large") root.classList.add("text-size-large");
+          root.dataset.fontSizePreference = preference;
+        };
+
+        window.applyAhsTheme(root.dataset.themePreference);
+        window.applyAhsFontSize(root.dataset.fontSizePreference);
+
+        if (darkMedia) {
+          darkMedia.addEventListener("change", function () {
+            if (root.dataset.themePreference === "system") window.applyAhsTheme("system");
+          });
+        }
+      })();
+    </script>
 
     <%= yield :head %>
 
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="preload" href="/vendor/fonts/inter/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+    <link href="/vendor/fonts/inter/inter.css" rel="stylesheet">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%# Chartkick (Portfolio, Dashboard Analitik) — dimuat lewat CDN, bukan
         importmap, karena Chartkick tidak menyediakan build ESM resmi. %>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartkick@5/dist/chartkick.js"></script>
     <%= javascript_importmap_tags %>
+
+    <style>
+      * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+      .mobile-bottom-nav { padding-bottom: max(0.625rem, env(safe-area-inset-bottom)); }
+      .mobile-bottom-nav .nav-item-active { color: #4f46e5; background-color: rgba(238, 242, 255, 0.85); border-radius: 0.75rem; }
+      .mobile-bottom-nav .nav-item-inactive { color: #64748b; }
+      .mobile-bottom-nav .nav-item-inactive:hover { color: #4f46e5; background-color: rgba(238, 242, 255, 0.5); border-radius: 0.75rem; }
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
   </head>
 
-  <body class="bg-gray-50 text-gray-900">
-    <%= render "shared/topbar" if user_signed_in? %>
+  <body class="h-full bg-slate-50 antialiased">
+    <% if user_signed_in? %>
+      <div class="flex h-full min-h-screen" data-controller="sidebar">
+        <%= render "shared/sidebar" %>
 
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <%= render "shared/flash" %>
-      <%= yield %>
-    </main>
+        <div class="flex flex-1 flex-col min-w-0 pb-20 lg:pb-0">
+          <%= render "shared/topbar" %>
+
+          <% if notice.present? || alert.present? %>
+            <%= render "shared/flash" %>
+          <% end %>
+
+          <main class="flex-1 min-h-0 overflow-y-auto">
+            <div class="mx-auto <%= content_for?(:container_class) ? yield(:container_class) : "max-w-7xl" %> px-4 py-6 sm:px-6 lg:px-8">
+              <%= yield %>
+            </div>
+          </main>
+
+          <%= render "shared/mobile_bottom_nav" %>
+        </div>
+      </div>
+    <% else %>
+      <% if notice.present? || alert.present? %>
+        <%= render "shared/flash" %>
+      <% end %>
+      <main>
+        <%= yield %>
+      </main>
+    <% end %>
+    <%= turbo_frame_tag "modal" %>
   </body>
 </html>

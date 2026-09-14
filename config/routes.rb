@@ -15,6 +15,10 @@ Rails.application.routes.draw do
   get "panduan", to: "panduan#index", as: :panduan
   get "brand", to: "brand#index", as: :brand
 
+  # Pengaturan Saya — tema & ukuran huruf (dipakai tombol tema topbar juga).
+  get   "pengaturan",          to: "settings/preferences#edit",              as: :my_settings
+  patch "pengaturan/tampilan", to: "settings/preferences#update_appearance", as: :update_appearance_settings
+
   resources :notifications, only: %i[index] do
     member do
       patch :mark_as_read

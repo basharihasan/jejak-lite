@@ -1,0 +1,12 @@
+<%# Butir navigasi sidebar: label, path, active, badge. Kelas `group` dipakai
+    sidebar_controller.js untuk menyaring menu lewat kotak pencarian. %>
+<% active ||= false %>
+<% badge  ||= nil %>
+
+<%= link_to path,
+    class: "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 #{active ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-900/50' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}" do %>
+  <span class="flex-1 truncate"><%= label %></span>
+  <% if badge %>
+    <span class="ml-auto inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-indigo-500 text-[10px] font-bold text-white"><%= badge %></span>
+  <% end %>
+<% end %>

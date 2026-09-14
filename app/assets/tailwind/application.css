@@ -1,1 +1,200 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-primary-50: oklch(0.97 0.01 271);
+  --color-primary-100: oklch(0.93 0.03 271);
+  --color-primary-200: oklch(0.86 0.05 271);
+  --color-primary-300: oklch(0.74 0.07 271);
+  --color-primary-400: oklch(0.61 0.09 271);
+  --color-primary-500: oklch(0.48 0.10 271);
+  --color-primary: oklch(0.28 0.10 271); /* rgb(26, 32, 91) */
+  --color-primary-600: oklch(0.28 0.10 271);
+  --color-primary-700: oklch(0.24 0.08 271);
+  --color-primary-800: oklch(0.20 0.07 271);
+  --color-primary-900: oklch(0.17 0.05 271);
+  --color-primary-950: oklch(0.13 0.04 271);
+}
+
+/* ============================================================
+   Ukuran huruf (Pengaturan Saya → Tampilan)
+   Tailwind's text utilities are rem-based, so scaling the root
+   font-size scales the whole UI proportionally without touching
+   individual views.
+   ============================================================ */
+html.text-size-small { font-size: 87.5%; }
+html.text-size-large { font-size: 112.5%; }
+
+/* ============================================================
+   Mode gelap (retrofit)
+   The app's views use literal Tailwind utility classes (bg-white,
+   text-slate-800, ...) without `dark:` variants throughout — adding
+   `dark:` to every view is impractical. Instead, when <html> carries
+   `.dark` (see the bootstrap script in layouts/application.html.erb)
+   we re-skin the handful of neutral surface/text/border classes that
+   make up the overwhelming majority of the UI's chrome. New views
+   should still prefer real `dark:` variants where practical; this is
+   the safety net for everything else.
+   ============================================================ */
+html.dark { color-scheme: dark; }
+
+html.dark body { background-color: #0b1120; }
+
+html.dark .bg-white,
+html.dark .bg-white\/95,
+html.dark .bg-white\/80,
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/40,
+html.dark .bg-slate-50\/5,
+html.dark .bg-gray-50,
+html.dark .bg-slate-100,
+html.dark .bg-gray-100 {
+  background-color: #111827;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700 {
+  color: #e2e8f0;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+  color: #94a3b8;
+}
+
+html.dark .text-slate-400,
+html.dark .text-gray-400 {
+  color: #64748b;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-100,
+html.dark .border-gray-200,
+html.dark .border-gray-100,
+html.dark .divide-slate-50 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1f2937;
+}
+
+html.dark .shadow-sm,
+html.dark .shadow,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* ------------------------------------------------------------
+   Kotak berwarna muda (retrofit, lanjutan)
+
+   Penimpaan TEKS di atas berlaku global: setiap .text-slate-900 /
+   .text-gray-800 menjadi terang. Penimpaan LATAR di atas hanya mencakup
+   putih dan abu netral. Akibatnya setiap kotak ber-latar tint muda
+   (bg-indigo-50, bg-amber-50, ...) tetap muda sementara teksnya sudah
+   terang — terang di atas terang, tidak terbaca. Ini bukan kasus pinggiran:
+   426 berkas view memakai bg-indigo-50 bersama teks netral gelap, dan
+   itulah laporan pengguna #148 ("text dalam box tidak terlihat").
+
+   Kerusakannya juga tidak berhenti di keterbacaan: laporan #189 salah
+   memilih program studi karena pilihan pada tabelnya tidak terlihat di
+   mode malam, lalu tidak punya cara membetulkannya sendiri.
+
+   Latar diturunkan ke tint gelap dengan rona yang sama (16%/26% warna
+   -500 di atas permukaan gelap) supaya makna warnanya tetap terbaca,
+   dan teks berwarna -600..-900 dinaikkan ke -300 agar kontras di atasnya.
+   Nilainya hex eksplisit, bukan color-mix(), supaya tidak bergantung pada
+   dukungan peramban yang lebih baru.
+   ------------------------------------------------------------ */
+
+html.dark .bg-indigo-50 { background-color: #1e2447; }
+html.dark .bg-blue-50 { background-color: #182948; }
+html.dark .bg-sky-50 { background-color: #112f46; }
+html.dark .bg-cyan-50 { background-color: #0f3143; }
+html.dark .bg-teal-50 { background-color: #11323b; }
+html.dark .bg-emerald-50 { background-color: #113235; }
+html.dark .bg-green-50 { background-color: #143430; }
+html.dark .bg-lime-50 { background-color: #233524; }
+html.dark .bg-yellow-50 { background-color: #343122; }
+html.dark .bg-amber-50 { background-color: #352d23; }
+html.dark .bg-orange-50 { background-color: #362724; }
+html.dark .bg-red-50 { background-color: #351f2c; }
+html.dark .bg-rose-50 { background-color: #351e30; }
+html.dark .bg-pink-50 { background-color: #342039; }
+html.dark .bg-fuchsia-50 { background-color: #311f47; }
+html.dark .bg-purple-50 { background-color: #292248; }
+html.dark .bg-violet-50 { background-color: #252348; }
+
+html.dark .bg-indigo-100 { background-color: #262c5c; }
+html.dark .bg-blue-100 { background-color: #1c345d; }
+html.dark .bg-sky-100 { background-color: #103d59; }
+html.dark .bg-cyan-100 { background-color: #0e4154; }
+html.dark .bg-teal-100 { background-color: #124248; }
+html.dark .bg-emerald-100 { background-color: #11423e; }
+html.dark .bg-green-100 { background-color: #154535; }
+html.dark .bg-lime-100 { background-color: #2f4723; }
+html.dark .bg-yellow-100 { background-color: #49401f; }
+html.dark .bg-amber-100 { background-color: #4c3b20; }
+html.dark .bg-orange-100 { background-color: #4d3023; }
+html.dark .bg-red-100 { background-color: #4b232f; }
+html.dark .bg-rose-100 { background-color: #4c2235; }
+html.dark .bg-pink-100 { background-color: #4a2445; }
+html.dark .bg-fuchsia-100 { background-color: #45245b; }
+html.dark .bg-purple-100 { background-color: #38285d; }
+html.dark .bg-violet-100 { background-color: #312a5d; }
+
+html.dark .border-indigo-100, html.dark .border-indigo-200, html.dark .border-indigo-300 { border-color: #363e76; }
+html.dark .border-blue-100, html.dark .border-blue-200, html.dark .border-blue-300 { border-color: #294778; }
+html.dark .border-sky-100, html.dark .border-sky-200, html.dark .border-sky-300 { border-color: #195374; }
+html.dark .border-cyan-100, html.dark .border-cyan-200, html.dark .border-cyan-300 { border-color: #16596c; }
+html.dark .border-teal-100, html.dark .border-teal-200, html.dark .border-teal-300 { border-color: #1b5a5d; }
+html.dark .border-emerald-100, html.dark .border-emerald-200, html.dark .border-emerald-300 { border-color: #1a5a50; }
+html.dark .border-green-100, html.dark .border-green-200, html.dark .border-green-300 { border-color: #205e44; }
+html.dark .border-lime-100, html.dark .border-lime-200, html.dark .border-lime-300 { border-color: #41602c; }
+html.dark .border-yellow-100, html.dark .border-yellow-200, html.dark .border-yellow-300 { border-color: #645827; }
+html.dark .border-amber-100, html.dark .border-amber-200, html.dark .border-amber-300 { border-color: #685128; }
+html.dark .border-orange-100, html.dark .border-orange-200, html.dark .border-orange-300 { border-color: #69422c; }
+html.dark .border-red-100, html.dark .border-red-200, html.dark .border-red-300 { border-color: #66323b; }
+html.dark .border-rose-100, html.dark .border-rose-200, html.dark .border-rose-300 { border-color: #673044; }
+html.dark .border-pink-100, html.dark .border-pink-200, html.dark .border-pink-300 { border-color: #653458; }
+html.dark .border-fuchsia-100, html.dark .border-fuchsia-200, html.dark .border-fuchsia-300 { border-color: #5e3376; }
+html.dark .border-purple-100, html.dark .border-purple-200, html.dark .border-purple-300 { border-color: #4e3878; }
+html.dark .border-violet-100, html.dark .border-violet-200, html.dark .border-violet-300 { border-color: #443a78; }
+
+html.dark .text-indigo-600, html.dark .text-indigo-700, html.dark .text-indigo-800, html.dark .text-indigo-900 { color: #a5b4fc; }
+html.dark .text-blue-600, html.dark .text-blue-700, html.dark .text-blue-800, html.dark .text-blue-900 { color: #93c5fd; }
+html.dark .text-sky-600, html.dark .text-sky-700, html.dark .text-sky-800, html.dark .text-sky-900 { color: #7dd3fc; }
+html.dark .text-cyan-600, html.dark .text-cyan-700, html.dark .text-cyan-800, html.dark .text-cyan-900 { color: #67e8f9; }
+html.dark .text-teal-600, html.dark .text-teal-700, html.dark .text-teal-800, html.dark .text-teal-900 { color: #5eead4; }
+html.dark .text-emerald-600, html.dark .text-emerald-700, html.dark .text-emerald-800, html.dark .text-emerald-900 { color: #6ee7b7; }
+html.dark .text-green-600, html.dark .text-green-700, html.dark .text-green-800, html.dark .text-green-900 { color: #86efac; }
+html.dark .text-lime-600, html.dark .text-lime-700, html.dark .text-lime-800, html.dark .text-lime-900 { color: #bef264; }
+html.dark .text-yellow-600, html.dark .text-yellow-700, html.dark .text-yellow-800, html.dark .text-yellow-900 { color: #fde047; }
+html.dark .text-amber-600, html.dark .text-amber-700, html.dark .text-amber-800, html.dark .text-amber-900 { color: #fcd34d; }
+html.dark .text-orange-600, html.dark .text-orange-700, html.dark .text-orange-800, html.dark .text-orange-900 { color: #fdba74; }
+html.dark .text-red-600, html.dark .text-red-700, html.dark .text-red-800, html.dark .text-red-900 { color: #fca5a5; }
+html.dark .text-rose-600, html.dark .text-rose-700, html.dark .text-rose-800, html.dark .text-rose-900 { color: #fda4af; }
+html.dark .text-pink-600, html.dark .text-pink-700, html.dark .text-pink-800, html.dark .text-pink-900 { color: #f9a8d4; }
+html.dark .text-fuchsia-600, html.dark .text-fuchsia-700, html.dark .text-fuchsia-800, html.dark .text-fuchsia-900 { color: #f0abfc; }
+html.dark .text-purple-600, html.dark .text-purple-700, html.dark .text-purple-800, html.dark .text-purple-900 { color: #d8b4fe; }
+html.dark .text-violet-600, html.dark .text-violet-700, html.dark .text-violet-800, html.dark .text-violet-900 { color: #c4b5fd; }
+
+/* ============================================================
+   Baris baru tunggal pada teks Markdown buatan pengguna
+   Sebagian catatan lapangan memakai satu baris baru sebagai pemisah
+   fakta ("Pasien hari ini: 3\nSatu di antaranya menolak dirujuk"),
+   bukan sebagai lipatan paragraf. Markdown menggabungkannya menjadi
+   satu baris, dan kramdown tanpa parser GFM tidak punya opsi hard
+   wrap — jadi baris barunya dipertahankan di sumber HTML dan
+   ditampilkan lewat aturan ini. Sengaja hanya menyasar <p>: memakai
+   pre-line pada wadahnya akan ikut merenggangkan jarak antar tag blok
+   yang dicetak kramdown.
+   ============================================================ */
+.md-linebreaks p { white-space: pre-line; }

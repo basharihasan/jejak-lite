@@ -38,6 +38,11 @@ class User < ApplicationRecord
 
   validates :full_name, presence: true
 
+  THEME_OPTIONS     = %w[light dark system].freeze
+  FONT_SIZE_OPTIONS = %w[small normal large].freeze
+  validates :theme_preference, inclusion: { in: THEME_OPTIONS }
+  validates :font_size_preference, inclusion: { in: FONT_SIZE_OPTIONS }
+
   # Akun yang masuk lewat Google tidak pernah mengisi form registrasi biasa,
   # jadi password acak + confirmed_at langsung diisi di sini (bukan lewat
   # alur konfirmasi email Devise) — konsisten dengan pola Google-login yang

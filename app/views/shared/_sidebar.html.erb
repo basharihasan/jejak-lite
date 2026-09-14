@@ -1,0 +1,132 @@
+<%# ── SIDEBAR — navigasi longitudinal (meniru cangkang jejak.pro) ──
+    Menu menyempit mengikuti PERAN AKTIF (Ganti Peran), bukan gabungan semua
+    peran, supaya seorang dosen yang juga admin melihat menu satu peran pada
+    satu waktu. Gerbang halaman tetap di controller/policy — sidebar hanya
+    memutuskan mana yang ditawarkan. %>
+<%
+  active_role  = current_user.active_role || current_user.roles.first
+  active_code  = active_role&.code
+  is_student   = active_code == "mahasiswa"
+  is_dosen     = active_code == "dosen"
+  is_preceptor = active_code == "preseptor"
+  is_kaprodi   = active_code == "kaprodi"
+  is_admin     = active_code == "admin"
+  # Menu konfigurasi mengikuti policy-nya: AcademicPeriodPolicy, ExamImportPolicy,
+  # AssessmentBlueprintPolicy, dan CompetencyFrameworkPolicy semua memeriksa
+  # has_role?("admin") — bukan peran aktif — jadi di sini pun begitu.
+  is_config_manager = current_user.has_role?("admin")
+  is_instructor = is_dosen || is_preceptor || is_kaprodi || is_admin
+  pending_verifications = is_instructor ? ClinicalCase.awaiting_verification.count : 0
+  brand_title    = "JEJAK"
+  brand_subtitle = current_user.study_program&.name || "Jejak Lite"
+  nav_locals = { is_student: is_student, is_instructor: is_instructor,
+                 is_config_manager: is_config_manager,
+                 pending_verifications: pending_verifications }
+%>
+
+<div>
+
+<aside id="sidebar"
+       class="hidden lg:flex lg:flex-col w-64 bg-slate-900 text-white shrink-0 min-h-screen overflow-y-auto transition-all duration-300">
+
+  <div class="px-5 py-5 border-b border-slate-700/60">
+    <%= link_to dashboard_path, class: "flex items-center gap-2.5 group" do %>
+      <div class="h-8 w-8 rounded-lg bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-900/50 flex-shrink-0">
+        <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-white leading-tight group-hover:text-indigo-300 transition-colors truncate"><%= brand_title %></p>
+        <p class="text-[10px] text-slate-400 leading-tight truncate mt-0.5" title="<%= brand_subtitle %>"><%= brand_subtitle %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="px-4 py-4 border-b border-slate-700/60">
+    <div class="flex items-center gap-3">
+      <div class="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow">
+        <%= current_user.full_name.first.upcase %>
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-semibold text-white truncate"><%= current_user.full_name %></p>
+        <p class="text-xs text-slate-400 truncate"><%= active_role&.name || "Belum ada peran" %></p>
+      </div>
+    </div>
+    <div class="mt-2.5">
+      <%= link_to "Edit Profil", edit_profile_path,
+            class: "block w-full text-center rounded-md px-2 py-1.5 text-[11px] font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white transition-colors" %>
+    </div>
+  </div>
+
+  <div class="px-4 py-3 border-b border-slate-700/60 bg-slate-900/50">
+    <input type="text"
+           data-sidebar-target="searchInput"
+           data-action="input->sidebar#search"
+           placeholder="Cari menu..."
+           class="block w-full px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all" />
+  </div>
+
+  <nav class="flex-1 px-3 py-4 space-y-6" data-sidebar-target="nav">
+    <%= render "shared/sidebar_nav", **nav_locals %>
+  </nav>
+
+  <div class="border-t border-slate-700/60 px-4 py-4 space-y-1">
+    <%= link_to "Panduan Penggunaan", panduan_path,
+        class: "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors" %>
+    <%= link_to "Pengaturan Akun", edit_user_registration_path,
+        class: "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors" %>
+    <%= link_to "Pengaturan Saya", my_settings_path,
+        class: "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors" %>
+  </div>
+</aside>
+
+<%# ── Sidebar geser untuk layar kecil ── %>
+<div data-sidebar-target="overlay"
+     data-action="click->sidebar#close"
+     class="fixed inset-0 z-40 hidden lg:hidden bg-black/30"></div>
+
+<aside data-sidebar-target="mobileSidebar"
+       class="fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 transform -translate-x-full transition-transform duration-300 lg:hidden overflow-y-auto">
+  <div class="px-5 py-5 border-b border-slate-700/60 flex items-center justify-between">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <div class="h-8 w-8 rounded-lg bg-indigo-500 flex items-center justify-center flex-shrink-0">
+        <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-white truncate"><%= brand_title %></p>
+        <p class="text-[10px] text-slate-400 leading-tight truncate mt-0.5"><%= brand_subtitle %></p>
+      </div>
+    </div>
+    <button type="button" data-action="click->sidebar#close" class="text-slate-400 hover:text-white px-2 py-1 text-sm font-bold">&#x2715;</button>
+  </div>
+
+  <div class="px-4 py-3 border-b border-slate-700/60 bg-slate-900/50">
+    <input type="text"
+           data-sidebar-target="mobileSearchInput"
+           data-action="input->sidebar#search"
+           placeholder="Cari menu..."
+           class="block w-full px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all" />
+  </div>
+
+  <nav class="px-3 py-4 space-y-6 overflow-y-auto" data-sidebar-target="mobileNav">
+    <%= render "shared/sidebar_nav", **nav_locals %>
+  </nav>
+
+  <div class="border-t border-slate-700/60 px-4 py-3 space-y-1">
+    <%= link_to "Panduan Penggunaan", panduan_path,
+        class: "block w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
+    <%= link_to "Edit Profil", edit_profile_path,
+        class: "block w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
+    <%= link_to "Pengaturan Akun", edit_user_registration_path,
+        class: "block w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
+    <%= link_to "Pengaturan Saya", my_settings_path,
+        class: "block w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
+    <%= button_to "Keluar", destroy_user_session_path, method: :delete,
+        class: "w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
+  </div>
+</aside>
+
+</div>

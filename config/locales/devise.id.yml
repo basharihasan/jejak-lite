@@ -1,0 +1,70 @@
+# Terjemahan Devise untuk locale bawaan (:id). Berpasangan dengan devise.en.yml.
+#
+# Sebelum ada berkas ini seluruh pesan autentikasi muncul dalam bahasa Inggris
+# di tengah halaman berbahasa Indonesia — "Invalid Email or password" pada form
+# masuk yang seluruhnya berbahasa Indonesia — karena default_locale aplikasi
+# masih :en. Lihat catatan i18n di config/application.rb.
+id:
+  devise:
+    confirmations:
+      confirmed: "Alamat email Anda berhasil dikonfirmasi."
+      send_instructions: "Dalam beberapa menit Anda akan menerima email berisi petunjuk untuk mengonfirmasi alamat email Anda."
+      send_paranoid_instructions: "Bila alamat email Anda terdaftar, dalam beberapa menit Anda akan menerima email berisi petunjuk untuk mengonfirmasinya."
+    failure:
+      account_archived: "Akun ini sudah dinonaktifkan atas permintaan pemiliknya. Hubungi admin bila perlu diaktifkan kembali."
+      already_authenticated: "Anda sudah masuk."
+      inactive: "Akun Anda belum diaktifkan."
+      invalid: "%{authentication_keys} atau kata sandi salah."
+      locked: "Akun Anda terkunci."
+      last_attempt: "Anda punya satu kesempatan lagi sebelum akun Anda terkunci."
+      not_found_in_database: "%{authentication_keys} atau kata sandi salah."
+      timeout: "Sesi Anda telah berakhir. Silakan masuk kembali untuk melanjutkan."
+      unauthenticated: "Anda harus masuk terlebih dahulu untuk melanjutkan."
+      unconfirmed: "Anda harus mengonfirmasi alamat email sebelum melanjutkan."
+    mailer:
+      confirmation_instructions:
+        subject: "Petunjuk Konfirmasi Akun"
+      reset_password_instructions:
+        subject: "Petunjuk Atur Ulang Kata Sandi"
+      unlock_instructions:
+        subject: "Petunjuk Membuka Kunci Akun"
+      email_changed:
+        subject: "Email Diubah"
+      password_change:
+        subject: "Kata Sandi Diubah"
+    omniauth_callbacks:
+      failure: "Kami tidak dapat memverifikasi Anda melalui %{kind} karena \"%{reason}\"."
+      success: "Berhasil masuk melalui akun %{kind}."
+    passwords:
+      no_token: "Halaman ini hanya bisa dibuka dari tautan pada email atur ulang kata sandi. Bila Anda memang datang dari email tersebut, pastikan seluruh tautannya tersalin utuh."
+      send_instructions: "Dalam beberapa menit Anda akan menerima email berisi petunjuk untuk mengatur ulang kata sandi."
+      send_paranoid_instructions: "Bila alamat email Anda terdaftar, dalam beberapa menit Anda akan menerima tautan pemulihan kata sandi."
+      updated: "Kata sandi Anda berhasil diubah dan Anda sekarang sudah masuk."
+      updated_not_active: "Kata sandi Anda berhasil diubah."
+    registrations:
+      destroyed: "Akun Anda sudah dinonaktifkan dan Anda telah keluar dari semua perangkat. Sampai jumpa kembali."
+      signed_up: "Selamat datang! Pendaftaran Anda berhasil."
+      signed_up_but_inactive: "Pendaftaran berhasil, tetapi Anda belum bisa masuk karena akun Anda belum diaktifkan."
+      signed_up_but_locked: "Pendaftaran berhasil, tetapi Anda belum bisa masuk karena akun Anda terkunci."
+      signed_up_but_unconfirmed: "Tautan konfirmasi sudah dikirim ke alamat email Anda. Silakan buka tautan itu untuk mengaktifkan akun."
+      update_needs_confirmation: "Akun Anda berhasil diperbarui, tetapi alamat email baru Anda masih perlu diverifikasi. Silakan periksa email Anda dan buka tautan konfirmasinya."
+      updated: "Akun Anda berhasil diperbarui."
+      updated_but_not_signed_in: "Akun Anda berhasil diperbarui. Karena kata sandi berubah, Anda perlu masuk kembali."
+    sessions:
+      signed_in: "Berhasil masuk."
+      signed_out: "Berhasil keluar."
+      already_signed_out: "Berhasil keluar."
+    unlocks:
+      send_instructions: "Dalam beberapa menit Anda akan menerima email berisi petunjuk untuk membuka kunci akun."
+      send_paranoid_instructions: "Bila akun Anda terdaftar, dalam beberapa menit Anda akan menerima email berisi petunjuk untuk membukanya."
+      unlocked: "Akun Anda berhasil dibuka. Silakan masuk untuk melanjutkan."
+  errors:
+    messages:
+      already_confirmed: "sudah pernah dikonfirmasi, silakan coba masuk"
+      confirmation_period_expired: "harus dikonfirmasi dalam %{period}, silakan minta tautan baru"
+      expired: "sudah kedaluwarsa, silakan minta yang baru"
+      not_found: "tidak ditemukan"
+      not_locked: "tidak sedang terkunci"
+      not_saved:
+        one: "1 galat membuat %{resource} ini gagal disimpan:"
+        other: "%{count} galat membuat %{resource} ini gagal disimpan:"
