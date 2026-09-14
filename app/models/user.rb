@@ -18,6 +18,8 @@ class User < ApplicationRecord
   has_many :verified_clinical_cases, class_name: "ClinicalCase", foreign_key: :verified_by_id, inverse_of: :verified_by, dependent: :nullify
   has_many :clinical_rotations, dependent: :destroy # sebagai mahasiswa
   has_many :precepted_rotations, class_name: "ClinicalRotation", foreign_key: :preceptor_id, inverse_of: :preceptor, dependent: :nullify
+  has_many :tutorial_enrollments, dependent: :destroy # sebagai mahasiswa (PSSK)
+  has_many :tutored_enrollments, class_name: "TutorialEnrollment", foreign_key: :tutor_id, inverse_of: :tutor, dependent: :nullify
   belongs_to :study_program, optional: true
   has_many :reflection_entries, dependent: :destroy
   has_many :dops_evaluations_as_student, class_name: "DopsEvaluation", foreign_key: :student_id, inverse_of: :student, dependent: :destroy
@@ -36,12 +38,18 @@ class User < ApplicationRecord
   end
   alias can_verify_clinical_cases? instructor?
 
+  # Kata sandi bawaan akun hasil impor CSV / reset admin — publik & lemah,
+  # jadi halaman Pengaturan Akun tetap satu-satunya tempat menggantinya.
+  DEFAULT_PASSWORD = "password123"
+
   validates :full_name, presence: true
 
   THEME_OPTIONS     = %w[light dark system].freeze
   FONT_SIZE_OPTIONS = %w[small normal large].freeze
+  LOCALE_OPTIONS    = %w[id en].freeze
   validates :theme_preference, inclusion: { in: THEME_OPTIONS }
   validates :font_size_preference, inclusion: { in: FONT_SIZE_OPTIONS }
+  validates :locale_preference, inclusion: { in: LOCALE_OPTIONS }
 
   # Akun yang masuk lewat Google tidak pernah mengisi form registrasi biasa,
   # jadi password acak + confirmed_at langsung diisi di sini (bukan lewat

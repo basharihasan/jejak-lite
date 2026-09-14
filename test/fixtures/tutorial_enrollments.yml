@@ -1,0 +1,7 @@
+siti_kardio:
+  user: siti
+  tutor: budi
+  academic_period: current_period
+  block_name: Sistem Kardiovaskular
+  group_name: Kelompok 3
+  active: true

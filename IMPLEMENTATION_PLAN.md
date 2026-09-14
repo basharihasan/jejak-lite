@@ -156,7 +156,14 @@ Layout diganti total meniru `app/views/layouts/application.html.erb` + `shared/_
 
 8 test baru (184 total, hijau). Smoke HTTP: 8 akun demo × 26 halaman, nol 500. Screenshot headless Chrome (`tmp/shot_*.png`) dibandingkan langsung dengan cangkang jejak.pro.
 
-### ⏳ Fase 23 — Fondasi: prodi PSSK/PSPD eksplisit, enrolment tutorial, impor pengguna CSV, bahasa ID/EN
+### ✅ Fase 23 — Fondasi: prodi PSSK/PSPD eksplisit, enrolment tutorial, pengguna & impor CSV, bahasa ID/EN
+- **StudyProgram** dapat `code` (pssk/pspd, unik, huruf kecil) & `level` (sarjana/profesi); dua baris seed dibackfill di migrasi; halaman **Konfigurasi → Program Studi** (`/study_programs`, admin) untuk daftar/tambah/sunting. Dasar pembeda instrumen asesmen PSSK vs PSPD di Fase 25.
+- **TutorialEnrollment** (`/tutorial_enrollments`) — padanan PSSK dari ClinicalRotation: mahasiswa ↔ blok/sistem (teks bebas) ↔ dosen tutor ↔ periode, unik per (mahasiswa, periode, blok), `active` bisa ditandai selesai. Admin CRUD; mahasiswa & tutor melihat miliknya (Pundit Scope). Tutee aktif kini ikut menjadi "mahasiswa bimbingan" tutor di Dashboard Analitik (`AnalyticsController#mentee_snapshots`).
+- **Konfigurasi → Pengguna** (`/admin/users`, gerbang `has_role?("admin")`): daftar berpenyaring (nama/email, peran, prodi, paginasi), sunting nama/prodi/peran (peran aktif ikut disesuaikan bila dicabut; minimal satu peran), **reset kata sandi ke bawaan** `User::DEFAULT_PASSWORD`, dan **Impor CSV** lewat `UserCsvImporter` (header `email,nama,peran,prodi`; alias header ID/EN, pemisah koma/titik koma, BOM dibuang; peran gabungan `dosen+preseptor`; prodi kode atau nama; akun baru terkonfirmasi dengan kata sandi bawaan, akun lama hanya diperbarui; setiap baris gagal dilaporkan dengan nomor barisnya).
+- **Bahasa ID/EN**: `users.locale_preference`, `around_action :switch_locale` (akun → cookie `locale` untuk halaman Devise pra-login → :id), tombol **EN/ID** di topbar (`PATCH /pengaturan/bahasa`, kembali ke halaman asal, pesan dalam bahasa baru), pilihan bahasa di Pengaturan Saya, `available_locales %i[id en]` + fallbacks dua arah. **Cakupan sengaja seperti jejak.pro: hanya cangkang** (sidebar, topbar, bilah bawah, Pengaturan Saya, Devise) — isi halaman konten tetap Indonesia; kunci di `config/locales/chrome.{id,en}.yml`.
+
+21 test baru (205 total, hijau). Smoke HTTP: 8 akun × 32 halaman, nol 500. Screenshot: daftar Pengguna dalam EN (cangkang berbahasa Inggris, isi tetap Indonesia).
+
 ### ⏳ Fase 24 — Pilar A: Privacy Mode + Break Glass, QR persetujuan pasien, master Diagnosis/ICD-10/Keterampilan, target kasus FKTP/FKRTL
 ### ⏳ Fase 25 — Pilar B: Assessment Events + impor CSV berpemetaan kolom + percobaan berulang, CBD, Long Case, EPA entrustment, jadwal WBA, jurnal umpan balik penguji
 ### ⏳ Fase 26 — Pilar C: Assessment Matrix per Learning Unit, kurva persentil kohort, Peta EPA

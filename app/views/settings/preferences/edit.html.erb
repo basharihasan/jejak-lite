@@ -1,9 +1,10 @@
-<% content_for :title, "Pengaturan Saya" %>
+<% content_for :title, t("settings.title") %>
+<% input_class = "flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm cursor-pointer hover:bg-slate-50 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50" %>
 
 <div class="max-w-2xl space-y-6">
   <div>
-    <h1 class="text-2xl font-bold text-slate-900">Pengaturan Saya</h1>
-    <p class="mt-1 text-sm text-slate-500">Preferensi tampilan berlaku untuk akun Anda di semua perangkat.</p>
+    <h1 class="text-2xl font-bold text-slate-900"><%= t("settings.title") %></h1>
+    <p class="mt-1 text-sm text-slate-500"><%= t("settings.subtitle") %></p>
   </div>
 
   <%= form_with model: current_user, url: update_appearance_settings_path, method: :patch,
@@ -15,40 +16,55 @@
     <% end %>
 
     <fieldset>
-      <legend class="text-sm font-semibold text-slate-800">Mode warna</legend>
-      <p class="text-xs text-slate-500 mb-3">Tombol matahari di topbar juga mengganti ini secara langsung.</p>
+      <legend class="text-sm font-semibold text-slate-800"><%= t("settings.theme") %></legend>
+      <p class="text-xs text-slate-500 mb-3"><%= t("settings.theme_hint") %></p>
       <div class="grid grid-cols-3 gap-3">
-        <% { "light" => "Terang", "dark" => "Gelap", "system" => "Ikuti sistem" }.each do |value, label| %>
-          <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm cursor-pointer hover:bg-slate-50 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
-            <%= f.radio_button :theme_preference, value, class: "text-indigo-600 focus:ring-indigo-500",
-                  onchange: "window.applyAhsTheme(this.value)" %>
-            <span><%= label %></span>
+        <% User::THEME_OPTIONS.each do |value| %>
+          <label class="<%= input_class %>">
+            <%= f.radio_button :theme_preference, value, class: "text-indigo-600 focus:ring-indigo-500", onchange: "window.applyAhsTheme(this.value)" %>
+            <span><%= t("settings.theme_#{value}") %></span>
           </label>
         <% end %>
       </div>
     </fieldset>
 
     <fieldset>
-      <legend class="text-sm font-semibold text-slate-800">Ukuran huruf</legend>
-      <p class="text-xs text-slate-500 mb-3">Seluruh antarmuka ikut membesar atau mengecil secara proporsional.</p>
+      <legend class="text-sm font-semibold text-slate-800"><%= t("settings.font_size") %></legend>
+      <p class="text-xs text-slate-500 mb-3"><%= t("settings.font_size_hint") %></p>
       <div class="grid grid-cols-3 gap-3">
-        <% { "small" => "Kecil", "normal" => "Normal", "large" => "Besar" }.each do |value, label| %>
-          <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm cursor-pointer hover:bg-slate-50 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
-            <%= f.radio_button :font_size_preference, value, class: "text-indigo-600 focus:ring-indigo-500",
-                  onchange: "window.applyAhsFontSize(this.value)" %>
-            <span><%= label %></span>
+        <% User::FONT_SIZE_OPTIONS.each do |value| %>
+          <label class="<%= input_class %>">
+            <%= f.radio_button :font_size_preference, value, class: "text-indigo-600 focus:ring-indigo-500", onchange: "window.applyAhsFontSize(this.value)" %>
+            <span><%= t("settings.font_#{value}") %></span>
+          </label>
+        <% end %>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend class="text-sm font-semibold text-slate-800"><%= t("settings.language") %></legend>
+      <p class="text-xs text-slate-500 mb-3"><%= t("settings.language_hint") %></p>
+      <div class="grid grid-cols-2 gap-3">
+        <% User::LOCALE_OPTIONS.each do |value| %>
+          <label class="<%= input_class %>">
+            <%= f.radio_button :locale_preference, value, class: "text-indigo-600 focus:ring-indigo-500" %>
+            <span><%= t("settings.language_#{value}") %></span>
           </label>
         <% end %>
       </div>
     </fieldset>
 
     <div class="flex justify-end">
-      <%= f.submit "Simpan Preferensi", class: "inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+      <%= f.submit t("settings.save"), class: "inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
     </div>
   <% end %>
 
   <div class="bg-white rounded-2xl ring-1 ring-slate-200 shadow-sm p-6">
-    <h2 class="text-sm font-semibold text-slate-800">Akun</h2>
-    <p class="mt-1 text-xs text-slate-500">Ganti email atau kata sandi di <%= link_to "Pengaturan Akun", edit_user_registration_path, class: "text-indigo-600 font-medium" %>; data profil di <%= link_to "Edit Profil", edit_profile_path, class: "text-indigo-600 font-medium" %>.</p>
+    <h2 class="text-sm font-semibold text-slate-800"><%= t("settings.account") %></h2>
+    <p class="mt-1 text-xs text-slate-500">
+      <%= t("settings.account_hint_html",
+            account_link: link_to(t("chrome.account_settings"), edit_user_registration_path, class: "text-indigo-600 font-medium"),
+            profile_link: link_to(t("chrome.edit_profile"), edit_profile_path, class: "text-indigo-600 font-medium")) %>
+    </p>
   </div>
 </div>

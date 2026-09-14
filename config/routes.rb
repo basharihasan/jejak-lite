@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   # Pengaturan Saya — tema & ukuran huruf (dipakai tombol tema topbar juga).
   get   "pengaturan",          to: "settings/preferences#edit",              as: :my_settings
   patch "pengaturan/tampilan", to: "settings/preferences#update_appearance", as: :update_appearance_settings
+  patch "pengaturan/bahasa",   to: "settings/preferences#update_locale",     as: :update_locale_settings
 
   resources :notifications, only: %i[index] do
     member do
@@ -52,7 +53,22 @@ Rails.application.routes.draw do
   end
 
   resources :clinical_rotations, except: %i[show]
+  # Enrolment Tutorial (PSSK) — padanan rotasi klinik untuk blok/sistem.
+  resources :tutorial_enrollments, except: %i[show] do
+    member { patch :toggle_active }
+  end
   resources :academic_periods, except: %i[show]
+  resources :study_programs, only: %i[index new create edit update]
+
+  namespace :admin do
+    resources :users, only: %i[index edit update] do
+      member { patch :reset_password }
+      collection do
+        get  :import
+        post :import, action: :import_create
+      end
+    end
+  end
 
   resources :reflection_entries
 

@@ -14,78 +14,81 @@
 
 <%# ── 1. IKHTISAR ── %>
 <div>
-  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Ikhtisar</p>
+  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.overview") %></p>
 
-  <%= render "shared/nav_item", label: "Beranda", path: dashboard_path,
+  <%= render "shared/nav_item", label: t("nav.home"), path: dashboard_path,
       active: request.path == "/dashboard" || request.path == "/" %>
 
   <% if is_student %>
-    <%= render "shared/nav_item", label: "Longitudinal Portfolio", path: portfolio_path,
+    <%= render "shared/nav_item", label: t("nav.portfolio"), path: portfolio_path,
         active: active_class.call("/portfolio") %>
   <% end %>
 
-  <%= render "shared/nav_item", label: "Profil Saya", path: profile_path,
+  <%= render "shared/nav_item", label: t("nav.my_profile"), path: profile_path,
       active: active_class.call("/profile") %>
 
-  <%= render "shared/nav_item", label: "Notifikasi", path: notifications_path,
+  <%= render "shared/nav_item", label: t("nav.notifications"), path: notifications_path,
       active: active_class.call("/notifications"),
       badge: (unread.positive? ? (unread > 9 ? "9+" : unread) : nil) %>
 </div>
 
 <%# ── 2. PERJALANAN BELAJAR ── %>
 <div>
-  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Perjalanan Belajar</p>
+  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.learning_journey") %></p>
 
   <% logbook_active = active_class.call(%w[/clinical_cases /activity_logs /kalender]) %>
   <div data-controller="accordion" data-accordion-open-value="<%= logbook_active ? 'true' : 'false' %>" class="mb-1">
     <button type="button" data-action="click->accordion#toggle"
             class="w-full group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer select-none">
-      <span class="flex-1 text-left truncate">Logbook</span>
+      <span class="flex-1 text-left truncate"><%= t("nav.logbook") %></span>
       <svg data-accordion-target="icon" class="h-4 w-4 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
       </svg>
     </button>
 
     <div data-accordion-target="content" class="mt-1 pl-3 space-y-1 <%= "hidden" unless logbook_active %> border-l border-slate-800/80 ml-5">
-      <%= render "shared/nav_item", label: "Kasus Klinis", path: clinical_cases_path,
+      <%= render "shared/nav_item", label: t("nav.clinical_cases"), path: clinical_cases_path,
           active: active_class.call("/clinical_cases") && params[:scope] != "to_verify" %>
-      <%= render "shared/nav_item", label: "Logbook Kegiatan", path: activity_logs_path,
+      <%= render "shared/nav_item", label: t("nav.activity_logs"), path: activity_logs_path,
           active: active_class.call("/activity_logs") %>
-      <%= render "shared/nav_item", label: "Kalender", path: activity_logs_calendar_path,
+      <%= render "shared/nav_item", label: t("nav.calendar"), path: activity_logs_calendar_path,
           active: active_class.call("/kalender") %>
     </div>
   </div>
 
-  <%= render "shared/nav_item", label: "Rotasi Klinik", path: clinical_rotations_path,
+  <%= render "shared/nav_item", label: t("nav.clinical_rotations"), path: clinical_rotations_path,
       active: active_class.call("/clinical_rotations") %>
 
-  <%= render "shared/nav_item", label: "Refleksi", path: reflection_entries_path,
+  <%= render "shared/nav_item", label: t("nav.tutorial_enrollments"), path: tutorial_enrollments_path,
+      active: active_class.call("/tutorial_enrollments") %>
+
+  <%= render "shared/nav_item", label: t("nav.reflections"), path: reflection_entries_path,
       active: active_class.call("/reflection_entries") %>
 
-  <%= render "shared/nav_item", label: "Tugas Akhir", path: final_projects_path,
+  <%= render "shared/nav_item", label: t("nav.final_projects"), path: final_projects_path,
       active: active_class.call("/final_projects") %>
 </div>
 
 <%# ── 3. ASESMEN ── %>
 <div>
-  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Asesmen</p>
+  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.assessment") %></p>
 
   <% assessment_active = active_class.call(%w[/nilai-ujian /asesmen /dops_evaluations /mini_cex_evaluations /assessment_form_templates /assessment_form_submissions]) %>
   <div data-controller="accordion" data-accordion-open-value="<%= assessment_active ? 'true' : 'false' %>" class="mb-1">
     <button type="button" data-action="click->accordion#toggle"
             class="w-full group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer select-none">
-      <span class="flex-1 text-left truncate">Asesmen &amp; Evaluasi</span>
+      <span class="flex-1 text-left truncate"><%= t("nav.assessment_accordion") %></span>
       <svg data-accordion-target="icon" class="h-4 w-4 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
       </svg>
     </button>
 
     <div data-accordion-target="content" class="mt-1 pl-3 space-y-1 <%= "hidden" unless assessment_active %> border-l border-slate-800/80 ml-5">
-      <%= render "shared/nav_item", label: "Evaluasi Akademik", path: exam_scores_path,
+      <%= render "shared/nav_item", label: t("nav.academic_assessments"), path: exam_scores_path,
           active: active_class.call("/nilai-ujian") %>
-      <%= render "shared/nav_item", label: "Workplace Assessment", path: assessments_path,
+      <%= render "shared/nav_item", label: t("nav.workplace_assessment"), path: assessments_path,
           active: active_class.call(%w[/asesmen /dops_evaluations /mini_cex_evaluations]) %>
-      <%= render "shared/nav_item", label: "Rubric-based Assessment", path: assessment_form_templates_path,
+      <%= render "shared/nav_item", label: t("nav.rubric_assessment"), path: assessment_form_templates_path,
           active: active_class.call(%w[/assessment_form_templates /assessment_form_submissions]) %>
     </div>
   </div>
@@ -93,21 +96,21 @@
 
 <%# ── 4. KOMPETENSI & PRESTASI ── %>
 <div>
-  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Kompetensi &amp; Prestasi</p>
-  <%= render "shared/nav_item", label: "Peta Kompetensi", path: academic_assessments_path,
+  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.competency") %></p>
+  <%= render "shared/nav_item", label: t("nav.competency_map"), path: academic_assessments_path,
       active: active_class.call("/capaian-belajar") %>
 </div>
 
 <%# ── 5. COACHING CENTER — dosen, preseptor, kaprodi, admin ── %>
 <% if is_instructor %>
   <div>
-    <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Coaching Center</p>
-    <%= render "shared/nav_item", label: "Validasi Kasus Klinis", path: clinical_cases_path(scope: "to_verify"),
+    <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.coaching") %></p>
+    <%= render "shared/nav_item", label: t("nav.case_validation"), path: clinical_cases_path(scope: "to_verify"),
         active: active_class.call("/clinical_cases") && params[:scope] == "to_verify",
         badge: (pending_verifications.positive? ? (pending_verifications > 9 ? "9+" : pending_verifications) : nil) %>
-    <%= render "shared/nav_item", label: "Dashboard Analitik", path: analytics_path,
+    <%= render "shared/nav_item", label: t("nav.analytics"), path: analytics_path,
         active: active_class.call("/analitik") %>
-    <%= render "shared/nav_item", label: "Daftar Mahasiswa", path: search_path,
+    <%= render "shared/nav_item", label: t("nav.student_directory"), path: search_path,
         active: active_class.call("/cari") %>
   </div>
 <% end %>
@@ -115,14 +118,18 @@
 <%# ── 6. KONFIGURASI — admin ── %>
 <% if is_config_manager %>
   <div>
-    <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500">Konfigurasi</p>
-    <%= render "shared/nav_item", label: "Tahun/Periode Akademik", path: academic_periods_path,
+    <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.configuration") %></p>
+    <%= render "shared/nav_item", label: t("nav.academic_periods"), path: academic_periods_path,
         active: active_class.call("/academic_periods") %>
-    <%= render "shared/nav_item", label: "Impor Nilai Ujian", path: exam_imports_path,
+    <%= render "shared/nav_item", label: t("nav.study_programs"), path: study_programs_path,
+        active: active_class.call("/study_programs") %>
+    <%= render "shared/nav_item", label: t("nav.users"), path: admin_users_path,
+        active: active_class.call("/admin/users") %>
+    <%= render "shared/nav_item", label: t("nav.exam_imports"), path: exam_imports_path,
         active: active_class.call("/exam_imports") %>
-    <%= render "shared/nav_item", label: "Kerangka Kompetensi", path: competency_frameworks_path,
+    <%= render "shared/nav_item", label: t("nav.competency_frameworks"), path: competency_frameworks_path,
         active: active_class.call(%w[/competency_frameworks /competency_items]) %>
-    <%= render "shared/nav_item", label: "Blueprint Asesmen", path: assessment_blueprints_path,
+    <%= render "shared/nav_item", label: t("nav.assessment_blueprints"), path: assessment_blueprints_path,
         active: active_class.call("/assessment_blueprints") %>
   </div>
 <% end %>

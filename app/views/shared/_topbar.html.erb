@@ -19,7 +19,7 @@
   <% if current_user.roles.size > 1 %>
     <div class="hidden md:flex items-center gap-3">
       <%= form_with url: switch_roles_path, method: :patch, class: "flex items-center space-x-2" do %>
-        <label for="role_code" class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Peran aktif:</label>
+        <label for="role_code" class="text-[10px] font-bold uppercase tracking-widest text-slate-400"><%= t("chrome.topbar.active_role") %></label>
         <select name="role_code" id="role_code" onchange="this.form.requestSubmit();"
                 class="text-xs font-medium rounded-md border-slate-300 py-1.5 pl-3 pr-8 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50 text-slate-700 shadow-sm cursor-pointer">
           <% current_user.roles.each do |role| %>
@@ -31,7 +31,7 @@
   <% end %>
 
   <div class="flex items-center gap-1 sm:gap-3 ml-auto sm:ml-0">
-    <%= link_to search_path, title: "Pencarian",
+    <%= link_to search_path, title: t("chrome.topbar.search"),
           class: "inline-flex items-center gap-2 rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors" do %>
       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -42,14 +42,26 @@
             data-controller="theme-toggle"
             data-action="click->theme-toggle#cycle"
             data-url="<%= update_appearance_settings_path %>"
-            title="Ganti mode warna (terang / gelap / ikuti sistem)"
+            title="<%= t("chrome.topbar.toggle_theme") %>"
             class="inline-flex items-center justify-center rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer border-0 bg-transparent">
       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
       </svg>
     </button>
 
-    <%= link_to panduan_path, target: "_blank", rel: "noopener", title: "Panduan penggunaan",
+    <%# Ganti bahasa — tombol menampilkan kode bahasa TUJUAN ("EN" saat
+        antarmuka berbahasa Indonesia). Form biasa, bukan fetch: mengganti
+        bahasa harus memuat ulang halaman. %>
+    <% other_locale = (I18n.locale.to_s == "en" ? "id" : "en") %>
+    <%= form_with url: update_locale_settings_path, method: :patch, class: "contents" do %>
+      <%= hidden_field_tag :locale, other_locale %>
+      <button type="submit" title="<%= t("chrome.topbar.switch_language") %>" aria-label="<%= t("chrome.topbar.switch_language") %>"
+              class="inline-flex items-center justify-center rounded-xl px-2.5 py-2 text-xs font-bold tracking-wide text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer border-0 bg-transparent">
+        <%= other_locale.upcase %>
+      </button>
+    <% end %>
+
+    <%= link_to panduan_path, target: "_blank", rel: "noopener", title: t("chrome.topbar.page_help"),
           class: "inline-flex items-center justify-center rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors" do %>
       <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
@@ -74,9 +86,9 @@
       <div data-notification-dropdown-target="menu"
            class="hidden absolute right-0 mt-2 w-80 origin-top-right rounded-2xl border border-slate-100 bg-white/95 backdrop-blur-md shadow-2xl z-50 overflow-hidden transition-all duration-200 transform scale-95 opacity-0">
         <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-800">Notifikasi</span>
+          <span class="text-xs font-bold text-slate-800"><%= t("chrome.topbar.notifications") %></span>
           <% if unread_count > 0 %>
-            <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700"><%= unread_count %> belum dibaca</span>
+            <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700"><%= t("chrome.topbar.unread_count", count: unread_count) %></span>
           <% end %>
         </div>
         <div class="max-h-64 overflow-y-auto divide-y divide-slate-50">
@@ -88,15 +100,15 @@
                   <% if n.message.present? %>
                     <p class="text-[10px] text-slate-500 font-light line-clamp-2 mt-0.5"><%= n.message %></p>
                   <% end %>
-                  <p class="mt-1 text-[9px] text-slate-400"><%= time_ago_in_words(n.created_at) %> yang lalu</p>
+                  <p class="mt-1 text-[9px] text-slate-400"><%= t("chrome.topbar.time_ago", time: time_ago_in_words(n.created_at)) %></p>
                 </div>
               </div>
             <% end %>
           <% else %>
-            <p class="text-xs text-slate-400 px-4 py-6 text-center">Belum ada notifikasi.</p>
+            <p class="text-xs text-slate-400 px-4 py-6 text-center"><%= t("chrome.topbar.no_notifications") %></p>
           <% end %>
         </div>
-        <%= link_to "Lihat semua notifikasi", notifications_path,
+        <%= link_to t("chrome.topbar.see_all_notifications"), notifications_path,
               class: "block text-center text-xs text-indigo-600 font-bold py-2.5 border-t border-slate-100 hover:bg-slate-50" %>
       </div>
     </div>
@@ -113,9 +125,9 @@
           <p class="text-xs font-bold text-slate-800 truncate"><%= current_user.full_name %></p>
           <p class="text-[10px] text-slate-400 truncate"><%= current_user.email %></p>
         </div>
-        <%= link_to "Profil Saya", profile_path, class: "block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
-        <%= link_to "Pengaturan Saya", my_settings_path, class: "block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
-        <%= button_to "Keluar", destroy_user_session_path, method: :delete,
+        <%= link_to t("chrome.my_profile"), profile_path, class: "block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
+        <%= link_to t("chrome.my_settings"), my_settings_path, class: "block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50" %>
+        <%= button_to t("chrome.sign_out"), destroy_user_session_path, method: :delete,
               class: "w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50" %>
       </div>
     </div>

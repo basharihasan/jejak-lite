@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_155311) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_14_170003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -389,10 +389,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_155311) do
   end
 
   create_table "study_programs", force: :cascade do |t|
+    t.string "code"
     t.datetime "created_at", null: false
+    t.string "level"
     t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_study_programs_on_code", unique: true
     t.index ["name"], name: "index_study_programs_on_name", unique: true
+  end
+
+  create_table "tutorial_enrollments", force: :cascade do |t|
+    t.bigint "academic_period_id", null: false
+    t.boolean "active", default: true, null: false
+    t.string "block_name", null: false
+    t.datetime "created_at", null: false
+    t.date "end_date"
+    t.string "group_name"
+    t.date "start_date"
+    t.bigint "tutor_id"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["academic_period_id"], name: "index_tutorial_enrollments_on_academic_period_id"
+    t.index ["tutor_id"], name: "index_tutorial_enrollments_on_tutor_id"
+    t.index ["user_id", "academic_period_id", "block_name"], name: "idx_tutorial_enrollments_unique_block", unique: true
+    t.index ["user_id"], name: "index_tutorial_enrollments_on_user_id"
   end
 
   create_table "user_roles", force: :cascade do |t|
@@ -420,6 +440,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_155311) do
     t.string "full_name", default: "", null: false
     t.datetime "last_sign_in_at"
     t.string "last_sign_in_ip"
+    t.string "locale_preference", default: "id", null: false
     t.string "provider"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
@@ -484,6 +505,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_155311) do
   add_foreign_key "reflection_entries", "activity_logs"
   add_foreign_key "reflection_entries", "clinical_cases"
   add_foreign_key "reflection_entries", "users"
+  add_foreign_key "tutorial_enrollments", "academic_periods"
+  add_foreign_key "tutorial_enrollments", "users"
+  add_foreign_key "tutorial_enrollments", "users", column: "tutor_id"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
   add_foreign_key "users", "roles", column: "active_role_id"

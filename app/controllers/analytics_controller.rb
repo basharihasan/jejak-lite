@@ -72,7 +72,11 @@ class AnalyticsController < ApplicationController
       mini_cex_evaluator_scope = mini_cex_evaluator_scope.joins(:clinical_rotation).where(clinical_rotations: { academic_period_id: @selected_period.id })
     end
 
+    tutee_scope = current_user.tutored_enrollments.active
+    tutee_scope = tutee_scope.where(academic_period_id: @selected_period.id) if @selected_period
+
     student_ids = current_user.supervised_final_projects.pluck(:student_id) +
+                  tutee_scope.pluck(:user_id) +
                   dops_evaluator_scope.pluck(:student_id) +
                   mini_cex_evaluator_scope.pluck(:student_id)
 

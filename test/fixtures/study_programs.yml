@@ -1,5 +1,9 @@
 sarjana_kedokteran:
   name: Sarjana Kedokteran
+  code: pssk
+  level: sarjana
 
 profesi_dokter:
   name: Profesi Dokter
+  code: pspd
+  level: profesi

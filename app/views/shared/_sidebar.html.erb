@@ -18,7 +18,7 @@
   is_instructor = is_dosen || is_preceptor || is_kaprodi || is_admin
   pending_verifications = is_instructor ? ClinicalCase.awaiting_verification.count : 0
   brand_title    = "JEJAK"
-  brand_subtitle = current_user.study_program&.name || "Jejak Lite"
+  brand_subtitle = current_user.study_program&.name || t("chrome.brand_subtitle_default")
   nav_locals = { is_student: is_student, is_instructor: is_instructor,
                  is_config_manager: is_config_manager,
                  pending_verifications: pending_verifications }
@@ -50,11 +50,11 @@
       </div>
       <div class="min-w-0 flex-1">
         <p class="text-sm font-semibold text-white truncate"><%= current_user.full_name %></p>
-        <p class="text-xs text-slate-400 truncate"><%= active_role&.name || "Belum ada peran" %></p>
+        <p class="text-xs text-slate-400 truncate"><%= active_role&.name || t("chrome.no_role") %></p>
       </div>
     </div>
     <div class="mt-2.5">
-      <%= link_to "Edit Profil", edit_profile_path,
+      <%= link_to t("chrome.edit_profile"), edit_profile_path,
             class: "block w-full text-center rounded-md px-2 py-1.5 text-[11px] font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white transition-colors" %>
     </div>
   </div>
@@ -63,7 +63,7 @@
     <input type="text"
            data-sidebar-target="searchInput"
            data-action="input->sidebar#search"
-           placeholder="Cari menu..."
+           placeholder="<%= t("chrome.search_menu") %>"
            class="block w-full px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all" />
   </div>
 
@@ -72,11 +72,11 @@
   </nav>
 
   <div class="border-t border-slate-700/60 px-4 py-4 space-y-1">
-    <%= link_to "Panduan Penggunaan", panduan_path,
+    <%= link_to t("chrome.user_guide"), panduan_path,
         class: "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors" %>
-    <%= link_to "Pengaturan Akun", edit_user_registration_path,
+    <%= link_to t("chrome.account_settings"), edit_user_registration_path,
         class: "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors" %>
-    <%= link_to "Pengaturan Saya", my_settings_path,
+    <%= link_to t("chrome.my_settings"), my_settings_path,
         class: "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors" %>
   </div>
 </aside>
@@ -107,7 +107,7 @@
     <input type="text"
            data-sidebar-target="mobileSearchInput"
            data-action="input->sidebar#search"
-           placeholder="Cari menu..."
+           placeholder="<%= t("chrome.search_menu") %>"
            class="block w-full px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all" />
   </div>
 
@@ -116,15 +116,15 @@
   </nav>
 
   <div class="border-t border-slate-700/60 px-4 py-3 space-y-1">
-    <%= link_to "Panduan Penggunaan", panduan_path,
+    <%= link_to t("chrome.user_guide"), panduan_path,
         class: "block w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
-    <%= link_to "Edit Profil", edit_profile_path,
+    <%= link_to t("chrome.edit_profile"), edit_profile_path,
         class: "block w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
-    <%= link_to "Pengaturan Akun", edit_user_registration_path,
+    <%= link_to t("chrome.account_settings"), edit_user_registration_path,
         class: "block w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
-    <%= link_to "Pengaturan Saya", my_settings_path,
+    <%= link_to t("chrome.my_settings"), my_settings_path,
         class: "block w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
-    <%= button_to "Keluar", destroy_user_session_path, method: :delete,
+    <%= button_to t("chrome.sign_out"), destroy_user_session_path, method: :delete,
         class: "w-full text-left text-sm font-medium text-slate-400 hover:text-white px-3 py-2 rounded-lg hover:bg-slate-800" %>
   </div>
 </aside>

@@ -9,10 +9,20 @@ class ApplicationController < ActionController::Base
 
   before_action :configure_permitted_parameters, if: :devise_controller?
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  around_action :switch_locale
 
   helper_method :unread_notifications_count, :latest_notifications
 
   protected
+
+  # Bahasa antarmuka: preferensi akun bila sudah login, lalu cookie (dipakai
+  # halaman Devise sebelum login — cookie, bukan session, karena sign-out
+  # Devise membuang session), lalu bawaan aplikasi (:id).
+  def switch_locale(&action)
+    locale = user_signed_in? ? current_user.locale_preference : cookies[:locale]
+    locale = I18n.default_locale unless User::LOCALE_OPTIONS.include?(locale.to_s)
+    I18n.with_locale(locale, &action)
+  end
 
   # Dipakai topbar (lonceng notifikasi) di setiap halaman yang sudah login —
   # dihitung di sini, bukan tiap view, supaya query-nya satu tempat.

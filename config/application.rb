@@ -23,6 +23,10 @@ module JejakLite
     #
     config.time_zone = "Asia/Jakarta"
     config.i18n.default_locale = :id
+    config.i18n.available_locales = %i[id en]
+    # Kunci yang belum diterjemahkan ke :en jatuh ke :id (dan sebaliknya), jadi
+    # halaman tidak pernah menampilkan "translation missing".
+    config.i18n.fallbacks = { en: :id, id: :en }
     # config.eager_load_paths << Rails.root.join("extras")
   end
 end

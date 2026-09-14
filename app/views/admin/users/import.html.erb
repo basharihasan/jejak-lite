@@ -1,0 +1,50 @@
+<% content_for :title, "Impor Pengguna (CSV)" %>
+<div class="max-w-2xl space-y-5">
+  <div>
+    <%= link_to "← Pengguna", admin_users_path, class: "text-xs text-gray-500 hover:text-indigo-600" %>
+    <h1 class="text-xl font-bold text-gray-900 mt-1">Impor Pengguna dari CSV</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Akun baru dibuat dengan kata sandi bawaan <code class="bg-gray-100 px-1 rounded"><%= User::DEFAULT_PASSWORD %></code> dan langsung terkonfirmasi; akun yang sudah ada hanya diperbarui nama, peran, dan prodinya.</p>
+  </div>
+
+  <% if defined?(@result) && @result %>
+    <div class="rounded-2xl ring-1 p-5 space-y-2 <%= @result.errors.any? ? 'bg-amber-50 ring-amber-200' : 'bg-emerald-50 ring-emerald-200' %>">
+      <p class="text-sm font-semibold text-gray-800">
+        Hasil: <%= @result.created.size %> akun baru, <%= @result.updated.size %> diperbarui, <%= @result.errors.size %> baris gagal.
+      </p>
+      <% if @result.created.any? %>
+        <p class="text-xs text-gray-600"><strong>Baru:</strong> <%= @result.created.join(", ") %></p>
+      <% end %>
+      <% if @result.updated.any? %>
+        <p class="text-xs text-gray-600"><strong>Diperbarui:</strong> <%= @result.updated.join(", ") %></p>
+      <% end %>
+      <% if @result.errors.any? %>
+        <ul class="text-xs text-rose-700 list-disc pl-5 space-y-0.5">
+          <% @result.errors.each do |e| %><li><%= e %></li><% end %>
+        </ul>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= form_with url: import_admin_users_path, method: :post, multipart: true,
+        class: "bg-white rounded-2xl ring-1 ring-gray-200 p-6 space-y-4" do |f| %>
+    <div>
+      <%= f.label :file, "Berkas CSV", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.file_field :file, accept: ".csv,text/csv", required: true,
+            class: "block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100" %>
+    </div>
+    <%= f.submit "Impor", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+  <% end %>
+
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+    <h2 class="text-sm font-semibold text-gray-800">Format berkas</h2>
+    <p class="text-xs text-gray-500 mt-1">Baris pertama = header. Pemisah koma atau titik koma. Urutan kolom bebas.</p>
+    <pre class="mt-3 text-xs bg-slate-900 text-slate-100 rounded-xl p-4 overflow-x-auto">email,nama,peran,prodi
+andi@kampus.ac.id,Andi Pratama,mahasiswa,pssk
+dr.budi@kampus.ac.id,dr. Budi Santoso,dosen+preseptor,pspd
+wati@kampus.ac.id,dr. Wati,kaprodi,</pre>
+    <ul class="mt-3 text-xs text-gray-600 space-y-1 list-disc pl-5">
+      <li><strong>peran</strong>: <code>mahasiswa</code>, <code>dosen</code>, <code>preseptor</code>, <code>kaprodi</code>, <code>admin</code> — gabungkan dengan <code>+</code>; kosong = mahasiswa.</li>
+      <li><strong>prodi</strong>: kode (<code>pssk</code>/<code>pspd</code>) atau nama prodi; kosong = tidak diubah.</li>
+    </ul>
+  </div>
+</div>

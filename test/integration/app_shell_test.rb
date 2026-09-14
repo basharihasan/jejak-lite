@@ -102,4 +102,35 @@ class AppShellTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_equal "system", users(:siti).reload.theme_preference
   end
+test "tombol EN di topbar mengganti bahasa cangkang dan tersimpan di akun" do
+  sign_in users(:siti)
+
+  patch update_locale_settings_path, params: { locale: "en" }, headers: { "HTTP_REFERER" => dashboard_path }
+  assert_redirected_to dashboard_path
+  assert_equal "en", users(:siti).reload.locale_preference
+
+  get dashboard_path
+  assert_select "html[lang=en]"
+  assert_select "aside#sidebar p", text: "Learning Journey"
+  assert_select "header button", text: "ID"
+
+  patch update_locale_settings_path, params: { locale: "id" }, headers: { "HTTP_REFERER" => dashboard_path }
+  get dashboard_path
+  assert_select "aside#sidebar p", text: "Perjalanan Belajar"
+end
+
+test "bahasa yang tidak didukung ditolak" do
+  sign_in users(:siti)
+  patch update_locale_settings_path, params: { locale: "fr" }, headers: { "HTTP_REFERER" => dashboard_path }
+  assert_equal "id", users(:siti).reload.locale_preference
+end
+
+test "halaman masuk mengikuti bahasa session setelah keluar" do
+  sign_in users(:siti)
+  patch update_locale_settings_path, params: { locale: "en" }, headers: { "HTTP_REFERER" => dashboard_path }
+  delete destroy_user_session_path
+
+  get new_user_session_path
+  assert_select "html[lang=en]"
+end
 end

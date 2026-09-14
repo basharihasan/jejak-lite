@@ -13,9 +13,13 @@
 end
 
 # Persis 2 prodi tetap — bukan hierarki Faculty/University (lihat
-# IMPLEMENTATION_PLAN.md § Keputusan Arsitektur Kunci).
-[ "Sarjana Kedokteran", "Profesi Dokter" ].each do |name|
-  StudyProgram.find_or_create_by!(name: name)
+# IMPLEMENTATION_PLAN.md § Keputusan Arsitektur Kunci). Kode & jenjang
+# mengikuti JEJAK (pssk = Sarjana, pspd = Profesi).
+{ "Sarjana Kedokteran" => %w[pssk sarjana], "Profesi Dokter" => %w[pspd profesi] }.each do |name, (code, level)|
+  sp = StudyProgram.find_or_initialize_by(name: name)
+  sp.code  ||= code
+  sp.level ||= level
+  sp.save!
 end
 
 # Fase 10 — Formulir Evaluasi baku: tutor evaluation, evaluasi blok,
