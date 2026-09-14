@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_010001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -623,7 +623,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_000001) do
 
   create_table "users", force: :cascade do |t|
     t.bigint "active_role_id"
+    t.text "address"
+    t.date "birth_date"
+    t.string "birth_place"
     t.string "calendar_feed_token"
+    t.integer "cohort_year"
     t.datetime "confirmation_sent_at"
     t.string "confirmation_token"
     t.datetime "confirmed_at"
@@ -634,23 +638,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_000001) do
     t.string "encrypted_password", default: "", null: false
     t.string "font_size_preference", default: "normal", null: false
     t.string "full_name", default: "", null: false
+    t.string "gender"
+    t.string "identifier_number"
     t.datetime "last_sign_in_at"
     t.string "last_sign_in_ip"
     t.string "locale_preference", default: "id", null: false
+    t.string "phone"
+    t.string "position"
+    t.string "profession_category"
     t.string "provider"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.integer "sign_in_count", default: 0, null: false
+    t.string "specialization"
     t.bigint "study_program_id"
     t.string "theme_preference", default: "system", null: false
     t.string "uid"
     t.string "unconfirmed_email"
     t.datetime "updated_at", null: false
+    t.string "work_unit"
     t.index ["active_role_id"], name: "index_users_on_active_role_id"
     t.index ["calendar_feed_token"], name: "index_users_on_calendar_feed_token", unique: true
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["identifier_number"], name: "index_users_on_identifier_number"
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["study_program_id"], name: "index_users_on_study_program_id"

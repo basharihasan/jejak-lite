@@ -47,6 +47,58 @@ class User < ApplicationRecord
 
   validates :full_name, presence: true
 
+  GENDERS = { "Laki-laki" => "Laki-laki", "Perempuan" => "Perempuan" }.freeze
+  PROFESSION_CATEGORIES = [
+    "Dokter Umum", "Dokter Spesialis", "Dokter Gigi", "Dokter Gigi Spesialis",
+    "Perawat", "Bidan", "Apoteker", "Tenaga Kesehatan Lain", "Non-Tenaga Kesehatan"
+  ].freeze
+
+  validates :gender, inclusion: { in: GENDERS.keys }, allow_blank: true
+  validates :profession_category, inclusion: { in: PROFESSION_CATEGORIES }, allow_blank: true
+  validates :cohort_year, numericality: { only_integer: true, greater_than: 1950, less_than_or_equal_to: ->(_u) { Date.current.year + 1 } }, allow_nil: true
+  validates :phone, format: { with: /\A[0-9+().\- ]{6,25}\z/, message: "hanya boleh angka, spasi, dan tanda + ( ) - ." }, allow_blank: true
+  validate :birth_date_not_in_future
+
+  # Label nomor identitas mengikuti peran: mahasiswa memakai NPM/NIM,
+  # selainnya NIP/NIDN — satu kolom, dua sebutan (seperti jejak.pro).
+  def identifier_label
+    has_role?("mahasiswa") ? "NPM / NIM" : "NIP / NIDN"
+  end
+
+  def age
+    return nil if birth_date.blank?
+
+    years = Date.current.year - birth_date.year
+    years -= 1 if Date.current < birth_date + years.years
+    years
+  end
+
+  def birth_place_and_date
+    [ birth_place.presence, (birth_date ? I18n.l(birth_date, format: :long) : nil) ].compact.join(", ").presence
+  end
+
+  # Kelengkapan profil — dipakai kartu pengingat di halaman Profil. Isian yang
+  # diminta berbeda per peran, jadi daftar ini dihitung, bukan tetap.
+  def profile_required_fields
+    common = { identifier_number: identifier_label, phone: "Nomor telepon", gender: "Jenis kelamin", birth_date: "Tanggal lahir" }
+    if has_role?("mahasiswa")
+      common.merge(study_program_id: "Program studi", cohort_year: "Angkatan")
+    else
+      common.merge(work_unit: "Unit kerja", position: "Jabatan")
+    end
+  end
+
+  def missing_profile_fields
+    profile_required_fields.reject { |attr, _| public_send(attr).present? }.values
+  end
+
+  def profile_completeness
+    fields = profile_required_fields.keys
+    filled = fields.count { |attr| public_send(attr).present? }
+    ((filled / fields.size.to_f) * 100).round
+  end
+
+
   THEME_OPTIONS     = %w[light dark system].freeze
   FONT_SIZE_OPTIONS = %w[small normal large].freeze
   LOCALE_OPTIONS    = %w[id en].freeze
@@ -104,5 +156,12 @@ class User < ApplicationRecord
 
     update!(calendar_feed_token: SecureRandom.urlsafe_base64(24))
     calendar_feed_token
+  end
+  private
+
+  def birth_date_not_in_future
+    return if birth_date.blank?
+
+    errors.add(:birth_date, "tidak boleh di masa depan") if birth_date > Date.current
   end
 end

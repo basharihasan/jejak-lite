@@ -1,25 +1,116 @@
-<div class="max-w-lg bg-white rounded-2xl ring-1 ring-gray-200 p-6">
-  <div class="flex items-center gap-4">
-    <% if @user.avatar.attached? %>
-      <%= image_tag @user.avatar, class: "h-16 w-16 rounded-full object-cover" %>
-    <% else %>
-      <span class="h-16 w-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xl font-semibold">
-        <%= @user.full_name.first.upcase %>
-      </span>
-    <% end %>
-    <div>
-      <p class="font-bold text-lg"><%= @user.full_name %></p>
-      <p class="text-sm text-gray-500"><%= @user.email %></p>
+<% content_for :title, "Profil Saya" %>
+<%
+  is_student = @user.has_role?("mahasiswa")
+  missing = @user.missing_profile_fields
+  completeness = @user.profile_completeness
+%>
+
+<div class="max-w-3xl space-y-5">
+  <%# ── Kepala profil ── %>
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+    <div class="flex items-start gap-5 flex-wrap">
+      <% if @user.avatar.attached? %>
+        <%= image_tag @user.avatar, class: "h-20 w-20 rounded-full object-cover ring-1 ring-gray-200" %>
+      <% else %>
+        <span class="h-20 w-20 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-2xl font-bold"><%= @user.full_name.first.upcase %></span>
+      <% end %>
+      <div class="flex-1 min-w-56">
+        <p class="text-xl font-bold text-gray-900"><%= @user.full_name %></p>
+        <p class="text-sm text-gray-500"><%= @user.email %></p>
+        <div class="mt-2 flex flex-wrap gap-1.5">
+          <% @user.roles.each do |role| %>
+            <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= role == @user.active_role ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600' %>"><%= role.name %></span>
+          <% end %>
+          <% if @user.roles.empty? %><span class="text-xs text-gray-400">Belum ada peran</span><% end %>
+        </div>
+      </div>
+      <%= link_to "Sunting Profil", edit_profile_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
     </div>
   </div>
 
-  <p class="mt-4 text-sm text-gray-600">
-    Peran: <%= @user.roles.map(&:name).join(", ").presence || "Belum ada" %>
-  </p>
-  <% if @user.study_program.present? %>
-    <p class="mt-1 text-sm text-gray-600">Program Studi: <%= @user.study_program.name %></p>
+  <%# ── Pengingat kelengkapan ── %>
+  <% if missing.any? %>
+    <div class="bg-amber-50 rounded-2xl ring-1 ring-amber-200 p-5">
+      <div class="flex items-baseline justify-between flex-wrap gap-2">
+        <p class="text-sm font-semibold text-amber-900">Profil terisi <%= completeness %>%</p>
+        <p class="text-xs text-amber-800">Belum diisi: <%= missing.join(", ") %></p>
+      </div>
+      <div class="mt-2 h-2 rounded-full bg-amber-100 overflow-hidden">
+        <div class="h-full rounded-full bg-amber-500" style="width: <%= completeness %>%"></div>
+      </div>
+      <%= link_to "Lengkapi sekarang →", edit_profile_path, class: "mt-3 inline-block text-xs font-semibold text-amber-900 hover:underline" %>
+    </div>
+  <% else %>
+    <div class="bg-emerald-50 rounded-2xl ring-1 ring-emerald-200 p-4 text-sm text-emerald-800">Profil Anda sudah lengkap.</div>
   <% end %>
 
-  <%= link_to "Sunting Profil", edit_profile_path,
-        class: "mt-6 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+  <%# ── Biodata ── %>
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+    <h2 class="text-base font-semibold text-gray-900 mb-4">Biodata Pribadi</h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+      <% [
+           [ @user.identifier_label, @user.identifier_number ],
+           [ "Nomor telepon", @user.phone ],
+           [ "Jenis kelamin", @user.gender ],
+           [ "Tempat, tanggal lahir", @user.birth_place_and_date ],
+           [ "Usia", (@user.age ? "#{@user.age} tahun" : nil) ],
+           [ "Alamat", @user.address ]
+         ].each do |label, value| %>
+        <div>
+          <dt class="text-xs text-gray-400"><%= label %></dt>
+          <dd class="text-sm <%= value.present? ? 'text-gray-800 font-medium' : 'text-gray-300' %>"><%= value.presence || "belum diisi" %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+
+  <%# ── Akademik / Kepegawaian ── %>
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+    <h2 class="text-base font-semibold text-gray-900 mb-4"><%= is_student ? "Akademik" : "Informasi Kepegawaian" %></h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+      <% rows = if is_student
+                  [ [ "Program studi", @user.study_program&.name ], [ "Angkatan", @user.cohort_year ] ]
+                else
+                  [ [ "Unit kerja / departemen", @user.work_unit ], [ "Jabatan", @user.position ],
+                    [ "Kategori profesi", @user.profession_category ], [ "Spesialisasi", @user.specialization ],
+                    [ "Program studi binaan", @user.study_program&.name ] ]
+                end %>
+      <% rows.each do |label, value| %>
+        <div>
+          <dt class="text-xs text-gray-400"><%= label %></dt>
+          <dd class="text-sm <%= value.present? ? 'text-gray-800 font-medium' : 'text-gray-300' %>"><%= value.presence || "belum diisi" %></dd>
+        </div>
+      <% end %>
+    </dl>
+
+    <% if is_student %>
+      <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
+        <%# Bisa lebih dari satu: mahasiswa boleh menjalani beberapa blok/stase
+            sekaligus, jadi semuanya ditampilkan — bukan hanya yang pertama. %>
+        <% enrollments = @user.tutorial_enrollments.active.includes(:tutor).ordered %>
+        <% rotations = @user.clinical_rotations.ongoing.includes(:preceptor) %>
+        <div>
+          <dt class="text-xs text-gray-400">Blok tutorial aktif</dt>
+          <dd class="text-sm <%= enrollments.any? ? 'text-gray-800 font-medium' : 'text-gray-300' %>">
+            <% if enrollments.any? %>
+              <% enrollments.each do |e| %>
+                <span class="block"><%= e.block_name %><%= " · tutor #{e.tutor.full_name}" if e.tutor %></span>
+              <% end %>
+            <% else %>belum ada<% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-xs text-gray-400">Rotasi berjalan</dt>
+          <dd class="text-sm <%= rotations.any? ? 'text-gray-800 font-medium' : 'text-gray-300' %>">
+            <% if rotations.any? %>
+              <% rotations.each do |r| %>
+                <span class="block"><%= r.station_name %><%= " · preseptor #{r.preceptor.full_name}" if r.preceptor %></span>
+              <% end %>
+            <% else %>belum ada<% end %>
+          </dd>
+        </div>
+      </div>
+      <p class="text-[11px] text-gray-400 mt-3">Enrolment tutorial &amp; rotasi diatur admin — hubungi admin prodi bila tidak sesuai.</p>
+    <% end %>
+  </div>
 </div>

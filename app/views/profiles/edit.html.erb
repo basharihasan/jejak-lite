@@ -1,33 +1,140 @@
-<div class="max-w-lg bg-white rounded-2xl ring-1 ring-gray-200 p-6">
-  <h1 class="text-lg font-bold mb-4">Sunting Profil</h1>
+<% content_for :title, "Sunting Profil" %>
+<%
+  cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm"
+  lbl = "block text-sm font-semibold text-gray-700 mb-1"
+  # Form bercabang atas PERAN (bukan persona): mahasiswa mengisi Akademik,
+  # dosen/preseptor/tendik mengisi Informasi Kepegawaian — meniru percabangan
+  # halaman Profil jejak.pro.
+  is_student = @user.has_role?("mahasiswa")
+%>
 
-  <%= form_with model: @user, url: profile_path, method: :patch, html: { class: "space-y-4" } do |f| %>
+<div class="max-w-3xl space-y-5">
+  <div>
+    <%= link_to "← Profil Saya", profile_path, class: "text-xs text-gray-500 hover:text-indigo-600" %>
+    <h1 class="text-xl font-bold text-gray-900 mt-1">Sunting Profil</h1>
+    <p class="text-sm text-gray-500 mt-0.5">Data ini dipakai pada logbook, asesmen, dan rekap program studi. Email dan peran diatur admin.</p>
+  </div>
+
+  <%= form_with model: @user, url: profile_path, method: :patch, html: { class: "space-y-5" } do |f| %>
     <% if @user.errors.any? %>
       <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
         <%= @user.errors.full_messages.to_sentence %>
       </div>
     <% end %>
 
-    <div>
-      <%= f.label :full_name, "Nama Lengkap", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.text_field :full_name,
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    <%# ── Foto & identitas akun ── %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+      <h2 class="text-base font-semibold text-gray-900 mb-4">Foto &amp; Akun</h2>
+      <div class="flex items-start gap-5 flex-wrap">
+        <% if @user.avatar.attached? %>
+          <%= image_tag @user.avatar, class: "h-20 w-20 rounded-full object-cover ring-1 ring-gray-200" %>
+        <% else %>
+          <span class="h-20 w-20 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-2xl font-bold"><%= @user.full_name.first.upcase %></span>
+        <% end %>
+        <div class="flex-1 min-w-56 space-y-4">
+          <div>
+            <%= f.label :avatar, "Ganti foto profil", class: lbl %>
+            <%= f.file_field :avatar, accept: "image/*", class: "block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-indigo-700" %>
+          </div>
+          <div>
+            <%= f.label :full_name, "Nama Lengkap", class: lbl %>
+            <%= f.text_field :full_name, class: cls %>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="<%= lbl %>">Email</label>
+              <p class="rounded-xl bg-gray-50 py-2.5 px-3.5 text-sm text-gray-500 ring-1 ring-inset ring-gray-200"><%= @user.email %></p>
+              <p class="text-[11px] text-gray-400 mt-1">Ganti lewat <%= link_to "Pengaturan Akun", edit_user_registration_path, class: "text-indigo-600" %>.</p>
+            </div>
+            <div>
+              <label class="<%= lbl %>">Peran</label>
+              <p class="rounded-xl bg-gray-50 py-2.5 px-3.5 text-sm text-gray-500 ring-1 ring-inset ring-gray-200"><%= @user.roles.map(&:name).join(", ").presence || "Belum ada peran" %></p>
+              <p class="text-[11px] text-gray-400 mt-1">Hanya admin yang dapat mengubah peran.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div>
-      <%= f.label :avatar, "Foto Profil", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.file_field :avatar, accept: "image/*", class: "text-sm" %>
+    <%# ── Biodata pribadi ── %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+      <h2 class="text-base font-semibold text-gray-900 mb-4">Biodata Pribadi</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :identifier_number, @user.identifier_label, class: lbl %>
+          <%= f.text_field :identifier_number, placeholder: (is_student ? "1301..." : "19850101..."), class: cls %>
+        </div>
+        <div>
+          <%= f.label :phone, "Nomor Telepon / WhatsApp", class: lbl %>
+          <%= f.telephone_field :phone, placeholder: "08xxxxxxxxxx", class: cls %>
+        </div>
+        <div>
+          <%= f.label :gender, "Jenis Kelamin", class: lbl %>
+          <%= f.select :gender, User::GENDERS.keys, { include_blank: "Pilih..." }, class: cls %>
+        </div>
+        <div>
+          <%= f.label :birth_place, "Tempat Lahir", class: lbl %>
+          <%= f.text_field :birth_place, placeholder: "Bandung", class: cls %>
+        </div>
+        <div>
+          <%= f.label :birth_date, "Tanggal Lahir", class: lbl %>
+          <%= f.date_field :birth_date, max: Date.current, class: cls %>
+        </div>
+        <div class="sm:col-span-2">
+          <%= f.label :address, "Alamat Domisili", class: lbl %>
+          <%= f.text_area :address, rows: 2, class: cls %>
+        </div>
+      </div>
     </div>
 
-    <% if @user.has_role?("mahasiswa") %>
-      <div>
-        <%= f.label :study_program_id, "Program Studi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-        <%= f.collection_select :study_program_id, StudyProgram.order(:name), :id, :name, { include_blank: "Pilih program studi..." },
-              class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    <% if is_student %>
+      <%# ── Akademik (mahasiswa) ── %>
+      <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-900 mb-4">Akademik</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :study_program_id, "Program Studi", class: lbl %>
+            <%= f.collection_select :study_program_id, StudyProgram.ordered, :id, :name, { include_blank: "Pilih program studi..." }, class: cls %>
+          </div>
+          <div>
+            <%= f.label :cohort_year, "Angkatan", class: lbl %>
+            <%= f.number_field :cohort_year, min: 1951, max: Date.current.year + 1, placeholder: Date.current.year, class: cls %>
+          </div>
+        </div>
+        <p class="text-[11px] text-gray-400 mt-2">Program studi menentukan event asesmen yang tampil untuk Anda; blok/stase diatur lewat Enrolment Tutorial &amp; Rotasi Klinik oleh admin.</p>
+      </div>
+    <% else %>
+      <%# ── Kepegawaian (dosen/preseptor/kaprodi/admin) ── %>
+      <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
+        <h2 class="text-base font-semibold text-gray-900 mb-4">Informasi Kepegawaian</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :work_unit, "Unit Kerja / Departemen", class: lbl %>
+            <%= f.text_field :work_unit, placeholder: "Departemen Ilmu Penyakit Dalam", class: cls %>
+          </div>
+          <div>
+            <%= f.label :position, "Jabatan", class: lbl %>
+            <%= f.text_field :position, placeholder: "Dosen / Preseptor / Kepala Bagian", class: cls %>
+          </div>
+          <div>
+            <%= f.label :profession_category, "Kategori Profesi", class: lbl %>
+            <%= f.select :profession_category, User::PROFESSION_CATEGORIES, { include_blank: "Pilih..." }, class: cls %>
+          </div>
+          <div>
+            <%= f.label :specialization, "Spesialisasi / Bidang Keahlian", class: lbl %>
+            <%= f.text_field :specialization, placeholder: "Kardiologi", class: cls %>
+          </div>
+          <div>
+            <%= f.label :study_program_id, "Program Studi Binaan (opsional)", class: lbl %>
+            <%= f.collection_select :study_program_id, StudyProgram.ordered, :id, :name, { include_blank: "—" }, class: cls %>
+          </div>
+        </div>
       </div>
     <% end %>
 
-    <%= f.submit "Simpan",
-          class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm cursor-pointer" %>
+    <div class="flex items-center gap-3">
+      <%= f.submit "Simpan Profil", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+      <%= link_to "Batal", profile_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+    </div>
   <% end %>
 </div>
