@@ -11,8 +11,8 @@
 
     <% if @template.requires_subject_user? %>
       <div>
-        <%= f.label :subject_user_id, "Dosen yang Dinilai", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-        <%= f.collection_select :subject_user_id, @subject_candidates, :id, :full_name, { include_blank: "Pilih dosen..." },
+        <%= f.label :subject_user_id, (params[:subject_role].to_s == "mahasiswa" ? "Mahasiswa yang Dinilai" : "Dosen yang Dinilai"), class: "block text-sm font-semibold text-gray-700 mb-1" %>
+        <%= f.collection_select :subject_user_id, @subject_candidates, :id, :full_name, { include_blank: "Pilih..." },
               class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
       </div>
     <% else %>
@@ -23,14 +23,18 @@
       </div>
     <% end %>
 
-    <% @template.assessment_form_fields.each do |field| %>
+    <% @template.assessment_form_fields.ordered.each do |field| %>
       <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-4">
-        <label class="block text-sm font-semibold text-gray-700 mb-2"><%= field.label %><%= " *" if field.required? %></label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">
+          <%= field.label %><%= " *" if field.required? %>
+          <% if field.scorable? %><span class="ml-1 text-[10px] font-normal text-gray-400">skala <%= field.min_value %>–<%= field.max_score %> · bobot <%= field.weight.to_f.round(2) %></span><% end %>
+        </label>
+        <% if field.help_text.present? %><p class="text-xs text-gray-400 mb-2"><%= field.help_text %></p><% end %>
 
         <% case field.field_type %>
         <% when "rating" %>
           <div class="flex items-center gap-3">
-            <% (1..5).each do |n| %>
+            <% (1..field.max_score).each do |n| %>
               <label class="flex flex-col items-center text-xs text-gray-500 gap-1 cursor-pointer">
                 <%= radio_button_tag "answers[#{field.id}]", n, false, class: "text-indigo-600" %>
                 <%= n %>
@@ -45,6 +49,12 @@
             <label class="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
               <%= radio_button_tag "answers[#{field.id}]", "tidak", false %> Tidak
             </label>
+          </div>
+        <% when "score" %>
+          <div class="flex items-center gap-2">
+            <%= number_field_tag "answers[#{field.id}]", nil, min: 0, max: field.max_score, step: "0.01",
+                  class: "w-28 rounded-xl border-0 py-2 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+            <span class="text-xs text-gray-400">/ <%= field.max_score %></span>
           </div>
         <% when "textarea" %>
           <%= text_area_tag "answers[#{field.id}]", nil, rows: 3,

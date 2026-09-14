@@ -3,7 +3,7 @@
 class AssessmentFormFieldsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_template
-  before_action :set_field, only: %i[edit update destroy]
+  before_action :set_field, only: %i[edit update destroy move_up move_down]
 
   def new
     authorize @template, :manage?
@@ -40,6 +40,18 @@ class AssessmentFormFieldsController < ApplicationController
     redirect_to @template, notice: "Pertanyaan dihapus.", status: :see_other
   end
 
+  def move_up
+    authorize @template, :manage?
+    @field.move_up!
+    redirect_to @template, notice: "Urutan pertanyaan diperbarui.", status: :see_other
+  end
+
+  def move_down
+    authorize @template, :manage?
+    @field.move_down!
+    redirect_to @template, notice: "Urutan pertanyaan diperbarui.", status: :see_other
+  end
+
   private
 
   def set_template
@@ -51,6 +63,6 @@ class AssessmentFormFieldsController < ApplicationController
   end
 
   def field_params
-    params.require(:assessment_form_field).permit(:label, :field_type, :required)
+    params.require(:assessment_form_field).permit(:label, :field_type, :required, :max_score, :weight, :help_text)
   end
 end

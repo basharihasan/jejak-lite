@@ -112,7 +112,12 @@ Rails.application.routes.draw do
   get "asesmen", to: "assessments#index", as: :assessments
 
   resources :assessment_form_templates do
-    resources :assessment_form_fields, only: %i[new create edit update destroy]
+    resources :assessment_form_fields, only: %i[new create edit update destroy] do
+      member do
+        patch :move_up
+        patch :move_down
+      end
+    end
     resources :assessment_form_submissions, only: %i[new create], shallow: true
   end
   resources :assessment_form_submissions, only: %i[index show]

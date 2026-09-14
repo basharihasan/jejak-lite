@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_010001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_020001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -145,10 +145,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_010001) do
     t.bigint "assessment_form_template_id", null: false
     t.datetime "created_at", null: false
     t.string "field_type", null: false
+    t.string "help_text"
     t.string "label", null: false
+    t.integer "max_score", default: 5, null: false
     t.integer "position", default: 0, null: false
     t.boolean "required", default: true, null: false
     t.datetime "updated_at", null: false
+    t.decimal "weight", precision: 6, scale: 2, default: "1.0", null: false
     t.index ["assessment_form_template_id"], name: "index_assessment_form_fields_on_assessment_form_template_id"
   end
 

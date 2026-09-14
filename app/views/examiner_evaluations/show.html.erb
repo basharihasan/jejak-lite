@@ -1,5 +1,6 @@
 <% content_for :title, "Menilai — #{@instance.student.full_name}" %>
 <% e = @instance.assessment_event %>
+<% rubric_scored = @template&.assessment_form_fields&.any?(&:scorable?) %>
 <div class="max-w-2xl space-y-4">
   <div>
     <%= link_to "← Lembar Penguji", examiner_evaluations_path, class: "text-xs text-gray-500 hover:text-indigo-600" %>
@@ -27,34 +28,106 @@
     </div>
   <% end %>
 
-  <% if e.assessment_form_template %>
-    <div class="bg-indigo-50/60 rounded-2xl ring-1 ring-indigo-100 p-4 text-sm text-gray-700">
-      Rubrik terstruktur: <strong><%= e.assessment_form_template.name %></strong> —
-      <%= link_to "isi lembar rubrik", new_assessment_form_template_assessment_form_submission_path(e.assessment_form_template, subject_user_id: @instance.student_id), class: "text-indigo-600 font-semibold hover:underline" %>,
-      lalu masukkan nilai akhirnya di bawah.
-    </div>
-  <% end %>
+  <%= form_with url: examiner_evaluation_path(@instance), method: :patch, class: "space-y-4" do |f| %>
+    <% if @template %>
+      <%# ── Rubrik dari Assessment Form Builder — diisi di sini, nilainya
+             dihitung otomatis dari jawaban (tidak diketik ulang). ── %>
+      <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5 space-y-4">
+        <div class="flex items-baseline justify-between flex-wrap gap-2">
+          <div>
+            <p class="text-sm font-semibold text-gray-800">Rubrik: <%= @template.name %></p>
+            <% if @template.description.present? %><p class="text-xs text-gray-500 mt-0.5"><%= @template.description %></p><% end %>
+          </div>
+          <% if rubric_scored %>
+            <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Nilai dihitung otomatis</span>
+          <% else %>
+            <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Rubrik naratif — nilai diisi manual</span>
+          <% end %>
+        </div>
 
-  <%= form_with model: @instance, url: examiner_evaluation_path(@instance), method: :patch, class: "bg-white rounded-2xl ring-1 ring-gray-200 p-5 space-y-4" do |f| %>
-    <div class="flex items-end gap-3">
-      <div>
-        <%= f.label :score, "Nilai", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-        <%= f.number_field :score, step: "0.01", min: 0, max: @instance.max_score, required: true,
-              class: "w-32 rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+        <% if @submission %>
+          <p class="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">Rubrik sudah pernah diisi <%= l(@submission.submitted_at, format: :short) %><%= " (#{@submission.score_percentage}%)" if @submission.score_percentage %>. Mengisi ulang akan menggantikan lembar sebelumnya.</p>
+        <% end %>
+
+        <% @template.assessment_form_fields.ordered.each do |field| %>
+          <% previous = @submission&.answer_for(field)&.value %>
+          <div class="border-t border-gray-100 pt-4 first:border-0 first:pt-0">
+            <label class="block text-sm font-semibold text-gray-700">
+              <%= field.label %><%= " *" if field.required? %>
+              <% if field.scorable? %>
+                <span class="ml-1 text-[10px] font-normal text-gray-400">skala 0–<%= field.max_score %><%= field.field_type == "rating" ? " (mulai 1)" : "" %> · bobot <%= field.weight.to_f.round(2) %></span>
+              <% end %>
+            </label>
+            <% if field.help_text.present? %><p class="text-xs text-gray-400 mt-0.5"><%= field.help_text %></p><% end %>
+
+            <div class="mt-2">
+              <% case field.field_type %>
+              <% when "rating" %>
+                <div class="flex items-center gap-3">
+                  <% (1..field.max_score).each do |n| %>
+                    <label class="flex flex-col items-center text-xs text-gray-500 gap-1 cursor-pointer">
+                      <%= radio_button_tag "answers[#{field.id}]", n, previous.to_s == n.to_s, class: "text-indigo-600" %>
+                      <%= n %>
+                    </label>
+                  <% end %>
+                </div>
+              <% when "score" %>
+                <div class="flex items-center gap-2">
+                  <%= number_field_tag "answers[#{field.id}]", previous, min: 0, max: field.max_score, step: "0.01",
+                        class: "w-28 rounded-xl border-0 py-2 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+                  <span class="text-xs text-gray-400">/ <%= field.max_score %></span>
+                </div>
+              <% when "yes_no" %>
+                <div class="flex items-center gap-4">
+                  <label class="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer"><%= radio_button_tag "answers[#{field.id}]", "ya", previous == "ya" %> Ya</label>
+                  <label class="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer"><%= radio_button_tag "answers[#{field.id}]", "tidak", previous == "tidak" %> Tidak</label>
+                </div>
+              <% when "textarea" %>
+                <%= text_area_tag "answers[#{field.id}]", previous, rows: 3,
+                      class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+              <% else %>
+                <%= text_field_tag "answers[#{field.id}]", previous,
+                      class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @template.assessment_form_fields.empty? %>
+          <p class="text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2">Rubrik ini belum punya pertanyaan. Minta admin melengkapinya di Assessment Form Builder, atau isi nilai manual di bawah.</p>
+        <% end %>
       </div>
-      <p class="text-sm text-gray-500 pb-2.5">/ <%= @instance.max_score %></p>
+    <% end %>
+
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5 space-y-4">
+      <% if rubric_scored %>
+        <p class="text-sm text-gray-600">Nilai akhir dihitung dari rubrik di atas (rata-rata terbobot × <%= @instance.max_score %>). Anda cukup menambahkan umpan balik.</p>
+      <% else %>
+        <div class="flex items-end gap-3">
+          <div>
+            <%= label_tag "assessment_instance[score]", "Nilai", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+            <%= number_field_tag "assessment_instance[score]", @instance.score, step: "0.01", min: 0, max: @instance.max_score,
+                  class: "w-32 rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+          </div>
+          <p class="text-sm text-gray-500 pb-2.5">/ <%= @instance.max_score %></p>
+        </div>
+      <% end %>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <%= label_tag "assessment_instance[feedback_keep]", "Hal yang patut dipertahankan", class: "block text-sm font-semibold text-emerald-700 mb-1" %>
+          <%= text_area_tag "assessment_instance[feedback_keep]", @instance.feedback_keep, rows: 4,
+                class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 text-sm" %>
+        </div>
+        <div>
+          <%= label_tag "assessment_instance[feedback_improve]", "Hal yang perlu ditingkatkan", class: "block text-sm font-semibold text-amber-700 mb-1" %>
+          <%= text_area_tag "assessment_instance[feedback_improve]", @instance.feedback_improve, rows: 4,
+                class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-500 text-sm" %>
+        </div>
+      </div>
+      <p class="text-[11px] text-gray-400">Umpan balik tertulis masuk ke Jurnal Umpan Balik mahasiswa dan mengirim notifikasi.</p>
+      <%= submit_tag (@instance.status == "scored" ? "Perbarui penilaian" : "Simpan penilaian"),
+            class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <%= f.label :feedback_keep, "Hal yang patut dipertahankan", class: "block text-sm font-semibold text-emerald-700 mb-1" %>
-        <%= f.text_area :feedback_keep, rows: 4, class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-emerald-500 text-sm" %>
-      </div>
-      <div>
-        <%= f.label :feedback_improve, "Hal yang perlu ditingkatkan", class: "block text-sm font-semibold text-amber-700 mb-1" %>
-        <%= f.text_area :feedback_improve, rows: 4, class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-amber-500 text-sm" %>
-      </div>
-    </div>
-    <p class="text-[11px] text-gray-400">Umpan balik tertulis masuk ke Jurnal Umpan Balik mahasiswa dan mengirim notifikasi.</p>
-    <%= f.submit (@instance.status == "scored" ? "Perbarui nilai" : "Simpan nilai"), class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
   <% end %>
 </div>

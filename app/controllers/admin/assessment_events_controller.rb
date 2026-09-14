@@ -6,6 +6,7 @@ class Admin::AssessmentEventsController < ApplicationController
   before_action :authenticate_user!
   before_action :require_admin!
   before_action :set_event, only: %i[show edit update destroy import import_preview import_create add_instance]
+  before_action :require_importable_event!, only: %i[import import_preview import_create]
 
   def index
     @events = AssessmentEvent.includes(:academic_period, :study_program).ordered.page(params[:page]).per(30)
@@ -37,7 +38,9 @@ class Admin::AssessmentEventsController < ApplicationController
   end
 
   def update
+    previous_max = @event.max_score
     if @event.update(event_params)
+      sync_max_score!(previous_max)
       redirect_to admin_assessment_event_path(@event), notice: "Assessment Event diperbarui."
     else
       load_collections
@@ -45,9 +48,17 @@ class Admin::AssessmentEventsController < ApplicationController
     end
   end
 
+  # Menghapus event membuang nilai yang sudah keluar — termasuk yang sudah
+  # dipakai Assessment Matrix & kurva kohort. Event bernilai ditutup, bukan dihapus.
   def destroy
+    if @event.assessment_instances.scored.exists?
+      redirect_to admin_assessment_event_path(@event),
+                  alert: "Event ini sudah punya nilai, jadi tidak dapat dihapus. Ubah statusnya menjadi Ditutup bila tidak dipakai lagi."
+      return
+    end
+
     @event.destroy
-    redirect_to admin_assessment_events_path, notice: "Assessment Event dihapus beserta seluruh nilainya.", status: :see_other
+    redirect_to admin_assessment_events_path, notice: "Assessment Event dihapus.", status: :see_other
   end
 
   # Daftarkan percobaan (baru) untuk seorang mahasiswa — juga dipakai untuk
@@ -103,6 +114,24 @@ class Admin::AssessmentEventsController < ApplicationController
 
   def set_event
     @event = AssessmentEvent.find(params[:id])
+  end
+
+  # Impor CSV hanya masuk akal untuk ujian tulis/praktik. Sebelumnya tombolnya
+  # memang disembunyikan, tetapi alamatnya tetap dapat dibuka langsung.
+  def require_importable_event!
+    return if @event.importable?
+
+    redirect_to admin_assessment_event_path(@event),
+                alert: "Impor CSV hanya untuk ujian tulis/praktik. #{@event.type_label} dinilai lewat lembar penguji atau dari kasus."
+  end
+
+  # Nilai maksimum event berubah → percobaan yang BELUM dinilai ikut berubah.
+  # Yang sudah dinilai sengaja dibiarkan: mengubah penyebut nilai yang sudah
+  # keluar akan menggeser persentase mahasiswa tanpa ada yang tahu.
+  def sync_max_score!(previous_max)
+    return if previous_max == @event.max_score
+
+    @event.assessment_instances.where.not(status: "scored").update_all(max_score: @event.max_score)
   end
 
   def load_collections

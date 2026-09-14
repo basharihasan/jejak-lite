@@ -9,6 +9,11 @@ class AssessmentFormTemplatesController < ApplicationController
   end
 
   def show
+    # Template nonaktif hanya untuk pengelola; yang aktif boleh dilihat siapa pun
+    # yang mungkin mengisinya.
+    return if @template.is_active? || policy(@template).manage?
+
+    redirect_to assessment_form_templates_path, alert: "Formulir ini sudah tidak aktif."
   end
 
   def new
@@ -41,8 +46,19 @@ class AssessmentFormTemplatesController < ApplicationController
     end
   end
 
+  # Menghapus template ikut menghapus seluruh jawaban & memutus nilai asesmen
+  # yang berangkat darinya. Bila sudah dipakai, arahkan ke nonaktifkan.
   def destroy
     authorize @template
+    if @template.assessment_form_submissions.exists?
+      redirect_to @template, alert: "Formulir ini sudah punya jawaban, jadi tidak dapat dihapus. Nonaktifkan saja lewat Sunting agar tidak dipakai lagi."
+      return
+    end
+    if AssessmentEvent.exists?(assessment_form_template: @template)
+      redirect_to @template, alert: "Formulir ini dipakai sebagai rubrik pada Assessment Event. Lepaskan dulu dari event tersebut."
+      return
+    end
+
     @template.destroy
     redirect_to assessment_form_templates_path, notice: "Formulir dihapus.", status: :see_other
   end

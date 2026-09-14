@@ -35,8 +35,12 @@ class AssessmentFormSubmissionsController < ApplicationController
 
   private
 
+  # Kandidat subjek mengikuti konteks, bukan selalu dosen: rubrik yang dipakai
+  # menilai mahasiswa (mis. dari lembar penguji) harus bisa memilih mahasiswa.
   def load_subject_candidates
-    @subject_candidates = User.joins(:roles).where(roles: { code: "dosen" }).distinct.order(:full_name)
+    codes = params[:subject_role].to_s == "mahasiswa" ? %w[mahasiswa] : %w[dosen preseptor]
+    @subject_candidates = User.joins(:roles).where(roles: { code: codes }).distinct.order(:full_name)
+    @subject_candidates = User.where(id: params[:subject_user_id]).or(@subject_candidates) if params[:subject_user_id].present?
   end
 
   def submission_params
@@ -46,9 +50,13 @@ class AssessmentFormSubmissionsController < ApplicationController
   # Jawaban dikirim sebagai answers[field_id] = value dari form, bukan
   # nested_attributes standar (field_id tidak diketahui sebelumnya karena
   # pertanyaan dinamis per template).
+  # Jawaban dibangun untuk SETIAP pertanyaan template, bukan hanya yang
+  # parameternya terkirim: radio yang tidak dipilih tidak mengirim apa pun,
+  # dan dulu itu membuat pertanyaan wajib lolos tanpa jawaban.
   def build_answers
-    (params[:answers] || {}).each do |field_id, value|
-      @submission.assessment_form_answers.build(assessment_form_field_id: field_id, value: value)
+    submitted = params[:answers] || {}
+    @template.assessment_form_fields.ordered.each do |field|
+      @submission.assessment_form_answers.build(assessment_form_field: field, value: submitted[field.id.to_s])
     end
   end
 end

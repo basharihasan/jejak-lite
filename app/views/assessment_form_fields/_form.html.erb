@@ -1,3 +1,4 @@
+<% cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
 <%= form_with model: [ @template, field ], class: "space-y-4" do |f| %>
   <% if field.errors.any? %>
     <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
@@ -7,14 +8,41 @@
 
   <div>
     <%= f.label :label, "Pertanyaan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <%= f.text_field :label, placeholder: "Contoh: Dosen menjelaskan materi dengan jelas",
-          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    <%= f.text_field :label, placeholder: "Contoh: Ketepatan penalaran klinis", class: cls %>
+  </div>
+
+  <div>
+    <%= f.label :help_text, "Petunjuk pengisian (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+    <%= f.text_field :help_text, placeholder: "Contoh: nilai 5 bila diagnosis banding lengkap dan beralasan", class: cls %>
   </div>
 
   <div>
     <%= f.label :field_type, "Jenis Jawaban", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <%= f.select :field_type, AssessmentFormField::FIELD_TYPES.invert, {},
-          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    <% locked = field.persisted? && field.answered? %>
+    <%= f.select :field_type, AssessmentFormField::FIELD_TYPES.invert, {}, class: cls, disabled: locked %>
+    <% if locked %>
+      <%= f.hidden_field :field_type %>
+      <p class="text-[11px] text-amber-700 mt-1">Jenis jawaban terkunci karena pertanyaan ini sudah punya jawaban — mengubahnya akan menggeser nilai yang sudah keluar. Buat pertanyaan baru bila perlu jenis lain.</p>
+    <% end %>
+  </div>
+
+  <%# Skala & bobot hanya berlaku untuk pertanyaan bertipe skor; untuk jenis
+      lain isian ini diabaikan model (dikembalikan ke bawaan). %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl bg-indigo-50/60 ring-1 ring-indigo-100 p-4">
+    <div class="sm:col-span-2">
+      <p class="text-sm font-semibold text-gray-800">Penilaian</p>
+      <p class="text-[11px] text-gray-500">Berlaku untuk jenis <strong>Skala Penilaian</strong> dan <strong>Skor Angka</strong>. Nilai akhir asesmen = rata-rata terbobot seluruh pertanyaan skor.</p>
+    </div>
+    <div>
+      <%= f.label :max_score, "Skala maksimum", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.number_field :max_score, min: 1, max: 100, class: cls %>
+      <p class="text-[11px] text-gray-400 mt-1">Skala Penilaian selalu 1–5; Skor Angka 0–nilai ini.</p>
+    </div>
+    <div>
+      <%= f.label :weight, "Bobot", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.number_field :weight, min: 0.01, max: 100, step: "0.01", class: cls %>
+      <p class="text-[11px] text-gray-400 mt-1">Bobot relatif antar pertanyaan (mis. 2 = dua kali lebih berpengaruh).</p>
+    </div>
   </div>
 
   <label class="flex items-center gap-2 text-sm text-gray-700">
