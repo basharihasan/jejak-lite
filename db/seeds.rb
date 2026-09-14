@@ -215,3 +215,40 @@ if (period = AcademicPeriod.order(:start_date).last) && (sp = StudyProgram.find_
     AssessmentMapping.find_or_create_by!(learning_unit: unit, assessment_event: event) { |m| m.weight = weight }
   end
 end
+
+# Dimensi asesmen contoh + pemetaannya ke ranah kompetensi: mata uji CBT dan
+# station OSCE. Inilah yang membuat Peta Kompetensi terisi dari hasil ujian.
+if (period = AcademicPeriod.order(:start_date).last) && (framework = CompetencyFramework.order(:id).first)
+  domain = framework.domains.index_by(&:title)
+  find_domain = ->(keyword) { domain.keys.find { |title| title.include?(keyword) }&.then { |title| domain[title] } }
+
+  osce = AssessmentEvent.find_or_create_by!(name: "OSCE Akhir Blok Kardiovaskular", academic_period: period) do |e|
+    e.assessment_type = "osce"
+    e.study_program = StudyProgram.find_by(code: "pssk")
+    e.status = "published"
+    e.max_score = 100
+    e.exam_date = 2.days.ago.to_date
+  end
+  [
+    [ "Station 1 — Anamnesis", "ST1", "Keterampilan" ],
+    [ "Station 2 — Pemeriksaan Fisik", "ST2", "Keterampilan" ],
+    [ "Station 3 — Komunikasi Efektif", "ST3", "Komunikasi" ],
+    [ "Station 4 — Tata Laksana", "ST4", "Pengelolaan" ]
+  ].each do |name, code, keyword|
+    dimension = osce.assessment_dimensions.find_or_initialize_by(name: name)
+    dimension.assign_attributes(code: code, max_score: 10, weight: 1, competency_item: find_domain.call(keyword))
+    dimension.save!
+  end
+
+  if (cbt = AssessmentEvent.find_by(name: "CBT Blok Demo"))
+    [
+      [ "Penalaran Klinis", "PK", 40, 2, "Pengelolaan" ],
+      [ "Literasi Sains", "LS", 30, 1, "Landasan" ],
+      [ "Keterampilan Klinis (tertulis)", "KK", 30, 1, "Keterampilan" ]
+    ].each do |name, code, max, weight, keyword|
+      dimension = cbt.assessment_dimensions.find_or_initialize_by(name: name)
+      dimension.assign_attributes(code: code, max_score: max, weight: weight, competency_item: find_domain.call(keyword))
+      dimension.save!
+    end
+  end
+end

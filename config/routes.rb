@@ -84,6 +84,9 @@ Rails.application.routes.draw do
         post :add_instance
       end
       resources :assessment_instances, only: %i[update destroy], shallow: true
+      resources :assessment_dimensions, only: %i[create update destroy], shallow: true do
+        collection { patch :bulk_map }
+      end
     end
     resources :evaluation_schedules, except: %i[show]
     resources :learning_units do

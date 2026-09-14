@@ -22,6 +22,17 @@
     </div>
   </div>
 
+  <%# ── Tab: Peserta & Nilai / Dimensi & Kompetensi ── %>
+  <div class="flex items-center gap-2">
+    <%= link_to "Peserta & Nilai", admin_assessment_event_path(@event),
+          class: "text-xs px-3 py-1.5 rounded-full font-medium #{@tab == 'peserta' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+    <%= link_to "Dimensi & Pemetaan Kompetensi (#{@dimensions.size})", admin_assessment_event_path(@event, tab: "dimensi"),
+          class: "text-xs px-3 py-1.5 rounded-full font-medium #{@tab == 'dimensi' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+  </div>
+
+  <% if @tab == "dimensi" %>
+    <%= render "dimensions", event: @event, dimensions: @dimensions, competency_items: @competency_items %>
+  <% else %>
   <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
     <p class="text-sm font-semibold text-gray-800 mb-3">Daftarkan mahasiswa <span class="text-gray-400 font-normal">(percobaan baru / ujian ulang)</span></p>
     <%= form_with url: add_instance_admin_assessment_event_path(@event), method: :post, class: "flex flex-wrap items-end gap-3" do |f| %>
@@ -86,4 +97,5 @@
       </tbody>
     </table>
   </div>
+  <% end %>
 </div>

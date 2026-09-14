@@ -35,6 +35,8 @@ class AcademicAssessmentsController < ApplicationController
                                     .map { |u| { unit: u, score: u.score_for(current_user), components: u.components_for(current_user) } }
                                     .select { |row| row[:score] }
       @percentiles = CohortPercentileCalculator.new(student: current_user, period: @selected_period).call
+      # Capaian per ranah kompetensi dari dimensi ujian yang sudah dipetakan.
+      @competency_rows = CompetencyAchievementCalculator.new(student: current_user, period: @selected_period).call
     else
       @dops_evaluations = DopsEvaluation.none
       @mini_cex_evaluations = MiniCexEvaluation.none
@@ -42,6 +44,7 @@ class AcademicAssessmentsController < ApplicationController
       @milestones = CompetencyMilestone.none
       @learning_units = []
       @percentiles = []
+      @competency_rows = []
     end
   end
 

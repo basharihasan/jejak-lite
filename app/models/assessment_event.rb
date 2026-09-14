@@ -31,6 +31,8 @@ class AssessmentEvent < ApplicationRecord
   belongs_to :assessment_form_template, optional: true
   belongs_to :created_by, class_name: "User", optional: true
   has_many :assessment_instances, dependent: :destroy
+  # Mata uji CBT / station OSCE beserta pemetaannya ke ranah kompetensi.
+  has_many :assessment_dimensions, -> { ordered }, dependent: :destroy, inverse_of: :assessment_event
 
   validates :name, presence: true
   validates :assessment_type, inclusion: { in: TYPES.keys }
@@ -62,6 +64,15 @@ class AssessmentEvent < ApplicationRecord
   # Nilai masuk lewat impor CSV massal (ujian tulis/praktik).
   def importable?
     %i[written practical].include?(family)
+  end
+
+  # Event berdimensi: nilainya disusun dari nilai per mata uji/station.
+  def dimension_based?
+    assessment_dimensions.any?
+  end
+
+  def mapped_dimension_count
+    assessment_dimensions.count(&:mapped?)
   end
 
   def submission_open?

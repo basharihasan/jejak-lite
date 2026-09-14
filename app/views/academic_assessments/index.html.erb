@@ -102,6 +102,38 @@
     </div>
   <% end %>
 
+  <%# ── Capaian per ranah kompetensi, dari dimensi ujian yang dipetakan ── %>
+  <% if @competency_rows.any? %>
+    <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <div class="flex items-baseline justify-between flex-wrap gap-2 mb-3">
+        <p class="text-sm font-semibold text-gray-700">Capaian per Ranah Kompetensi</p>
+        <p class="text-[11px] text-gray-400">Dari nilai per mata uji/station yang dipetakan ke ranah kompetensi — bukan proksi rata-rata.</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+        <div data-controller="radar-chart"
+             data-radar-chart-labels-value="<%= @competency_rows.map { |r| r.item.title }.to_json %>"
+             data-radar-chart-datasets-value="<%= [ { label: "Capaian (%)", data: @competency_rows.map(&:percentage), borderColor: "#7c3aed", backgroundColor: "rgba(124,58,237,0.15)" } ].to_json %>">
+          <canvas data-radar-chart-target="canvas" height="240"></canvas>
+        </div>
+        <div class="space-y-3">
+          <% @competency_rows.each do |row| %>
+            <div>
+              <div class="flex items-baseline justify-between gap-2">
+                <p class="text-sm font-semibold text-gray-800"><%= row.item.title %></p>
+                <p class="text-sm font-bold text-violet-600"><%= row.percentage %>%
+                  <span class="text-[11px] font-normal text-gray-400"><%= pluralize(row.dimension_count, "dimensi") %></span></p>
+              </div>
+              <div class="mt-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+                <div class="h-full rounded-full bg-violet-500" style="width: <%= [ row.percentage, 100 ].min %>%"></div>
+              </div>
+              <p class="text-[10px] text-gray-400 mt-1"><%= row.sources.first(3).join(" · ") %><%= " · +#{row.sources.size - 3} lagi" if row.sources.size > 3 %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
   <%# ── Pilar C: nilai blok dari Assessment Matrix ── %>
   <% if @learning_units.any? %>
     <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">

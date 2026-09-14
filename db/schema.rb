@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_020001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_030001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -106,6 +106,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_020001) do
     t.jsonb "learning_outcomes", default: [], null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "assessment_dimension_scores", force: :cascade do |t|
+    t.bigint "assessment_dimension_id", null: false
+    t.bigint "assessment_instance_id", null: false
+    t.datetime "created_at", null: false
+    t.decimal "score", precision: 6, scale: 2, null: false
+    t.datetime "updated_at", null: false
+    t.index ["assessment_dimension_id"], name: "index_assessment_dimension_scores_on_assessment_dimension_id"
+    t.index ["assessment_instance_id", "assessment_dimension_id"], name: "idx_dimension_scores_unique", unique: true
+    t.index ["assessment_instance_id"], name: "index_assessment_dimension_scores_on_assessment_instance_id"
+  end
+
+  create_table "assessment_dimensions", force: :cascade do |t|
+    t.bigint "assessment_event_id", null: false
+    t.string "code"
+    t.bigint "competency_item_id"
+    t.datetime "created_at", null: false
+    t.decimal "max_score", precision: 6, scale: 2, default: "100.0", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.decimal "weight", precision: 6, scale: 2, default: "1.0", null: false
+    t.index ["assessment_event_id", "name"], name: "idx_assessment_dimensions_unique_name", unique: true
+    t.index ["assessment_event_id"], name: "index_assessment_dimensions_on_assessment_event_id"
+    t.index ["competency_item_id"], name: "index_assessment_dimensions_on_competency_item_id"
   end
 
   create_table "assessment_events", force: :cascade do |t|
@@ -679,6 +705,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_020001) do
   add_foreign_key "app_settings", "users", column: "updated_by_id"
   add_foreign_key "assessment_blueprint_mappings", "assessment_blueprints"
   add_foreign_key "assessment_blueprint_mappings", "competency_items"
+  add_foreign_key "assessment_dimension_scores", "assessment_dimensions"
+  add_foreign_key "assessment_dimension_scores", "assessment_instances"
+  add_foreign_key "assessment_dimensions", "assessment_events"
+  add_foreign_key "assessment_dimensions", "competency_items"
   add_foreign_key "assessment_events", "academic_periods"
   add_foreign_key "assessment_events", "assessment_form_templates"
   add_foreign_key "assessment_events", "study_programs"

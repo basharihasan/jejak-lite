@@ -13,7 +13,11 @@ class Admin::AssessmentEventsController < ApplicationController
   end
 
   def show
-    @instances = @event.assessment_instances.includes(:student, :examiner).joins(:student).order("users.full_name", :attempt_number)
+    @tab = params[:tab] == "dimensi" ? "dimensi" : "peserta"
+    @dimensions = @event.assessment_dimensions.includes(:competency_item, :assessment_dimension_scores)
+    @competency_items = competency_item_choices
+    @instances = @event.assessment_instances.includes(:student, :examiner, assessment_dimension_scores: :assessment_dimension)
+                       .joins(:student).order("users.full_name", :attempt_number)
     @students = User.joins(:roles).where(roles: { code: "mahasiswa" }).distinct.order(:full_name)
     @examiners = User.joins(:roles).where(roles: { code: %w[dosen preseptor kaprodi] }).distinct.order(:full_name)
   end
@@ -96,11 +100,20 @@ class Admin::AssessmentEventsController < ApplicationController
     end
 
     @suggested = suggest_mapping(@headers)
+    @dimensions = @event.assessment_dimensions.includes(:competency_item)
+    @suggested_dimensions = suggest_dimension_mapping(@headers)
     render :import_preview
   end
 
   def import_create
-    @result = AssessmentScoreImporter.new(event: @event, csv_text: params[:csv_text], mapping: params.fetch(:mapping, {}).permit(:email, :score, :max_score, :attempt).to_h).call
+    create_dimensions_from_columns! if params[:create_dimensions].present?
+
+    @result = AssessmentScoreImporter.new(
+      event: @event,
+      csv_text: params[:csv_text],
+      mapping: params.fetch(:mapping, {}).permit(:email, :score, :max_score, :attempt).to_h,
+      dimension_mapping: params.fetch(:dimension_mapping, {}).permit!.to_h
+    ).call
     render :import_result
   end
 
@@ -145,6 +158,36 @@ class Admin::AssessmentEventsController < ApplicationController
       :name, :assessment_type, :academic_period_id, :study_program_id, :block_name, :exam_date, :status,
       :max_score, :allow_multiple_attempts, :submission_close_at, :assessment_form_template_id, :description
     )
+  end
+
+  # Pilihan ranah kompetensi untuk pemetaan dimensi — ranah beserta
+  # sub-kompetensinya, ditampilkan bertingkat.
+  def competency_item_choices
+    CompetencyItem.includes(:competency_framework, :children).where(parent_id: nil).order(:position).flat_map do |domain|
+      [ [ domain.title, domain.id ] ] + domain.children.map { |child| [ "— #{child.title}", child.id ] }
+    end
+  end
+
+  # Kolom yang belum dipetakan dapat langsung dijadikan dimensi baru, supaya
+  # admin tidak perlu mengetik ulang 12 nama station OSCE satu per satu.
+  def create_dimensions_from_columns!
+    reserved = params.fetch(:mapping, {}).values.map(&:to_s)
+    Array(params[:create_dimensions]).reject(&:blank?).each do |column|
+      next if reserved.include?(column)
+      next if @event.assessment_dimensions.where("LOWER(name) = ?", column.downcase).exists?
+
+      @event.assessment_dimensions.create!(name: column, max_score: @event.max_score)
+    end
+    @event.reload
+  end
+
+  # Kolom yang namanya sama dengan nama/kode dimensi langsung dicocokkan.
+  def suggest_dimension_mapping(headers)
+    normalized = headers.index_by { |h| h.to_s.strip.downcase }
+    @event.assessment_dimensions.each_with_object({}) do |dimension, acc|
+      match = normalized[dimension.name.to_s.downcase] || normalized[dimension.code.to_s.downcase]
+      acc[dimension.id] = match if match
+    end
   end
 
   # Tebakan awal pemetaan dari nama header (admin tetap bisa mengubah).

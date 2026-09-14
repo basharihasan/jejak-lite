@@ -14,6 +14,9 @@ class AssessmentInstance < ApplicationRecord
   belongs_to :clinical_case, optional: true
   belongs_to :assessment_form_submission, optional: true
 
+  has_many :assessment_dimension_scores, dependent: :destroy
+  has_many :assessment_dimensions, through: :assessment_dimension_scores
+
   has_one_attached :document
 
   validates :attempt_number, numericality: { only_integer: true, greater_than: 0 }
@@ -70,6 +73,34 @@ class AssessmentInstance < ApplicationRecord
       recipient: student, sender: examiner, notifiable: self,
       title: "Nilai #{type_label} sudah keluar", message: "#{assessment_event.name}: #{score}/#{max_score}"
     )
+  end
+
+  # Nilai total dari nilai per dimensi: rata-rata TERBOBOT persentase tiap
+  # dimensi yang terisi × nilai maksimum event. Dimensi yang tidak diimpor
+  # tidak ikut menjadi penyebut.
+  def recalculate_from_dimensions!
+    rows = assessment_dimension_scores.includes(:assessment_dimension).to_a
+    return nil if rows.empty?
+
+    weighted = 0.0
+    total_weight = 0.0
+    rows.each do |row|
+      percentage = row.percentage
+      next if percentage.nil?
+
+      weight = row.weight.to_f
+      weighted += percentage * weight
+      total_weight += weight
+    end
+    return nil if total_weight.zero?
+
+    update!(score: ((weighted / total_weight) / 100.0 * max_score).round(2))
+  end
+
+  def dimension_scores_by_competency
+    assessment_dimension_scores.includes(assessment_dimension: :competency_item)
+                               .select { |row| row.competency_item.present? }
+                               .group_by(&:competency_item)
   end
 
   def has_feedback?

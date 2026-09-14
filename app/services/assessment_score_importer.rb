@@ -3,15 +3,19 @@
 require "csv"
 
 # Impor nilai massal ke satu AssessmentEvent dengan PEMETAAN KOLOM (Flexible
-# Column Mapper ala jejak.pro): admin memilih kolom mana yang berisi email
-# mahasiswa, skor, nilai maksimum (opsional), dan nomor percobaan (opsional).
+# Column Mapper ala jejak.pro). Dua bentuk berkas didukung:
+#
+#   1. Nilai total saja — kolom email + skor (+ nilai maks / percobaan).
+#   2. **Nilai per dimensi** — satu kolom per mata uji CBT atau per station
+#      OSCE. Nilai total dihitung dari dimensi (rata-rata terbobot × nilai
+#      maksimum event) kecuali kolom skor total ikut dipetakan.
 #
 # Aturan percobaan:
 #   - event tanpa percobaan berulang → selalu percobaan 1 (nilai lama ditimpa);
 #   - event berpercobaan-ulang → pakai kolom percobaan bila dipetakan, kalau
 #     tidak, percobaan berikutnya untuk mahasiswa itu.
 class AssessmentScoreImporter
-  Result = Struct.new(:created, :updated, :unmatched, :errors, keyword_init: true) do
+  Result = Struct.new(:created, :updated, :unmatched, :errors, :dimension_scores, keyword_init: true) do
     def imported = created + updated
   end
 
@@ -28,16 +32,26 @@ class AssessmentScoreImporter
     first.count(";") > first.count(",") ? ";" : ","
   end
 
-  # mapping: { "email" => "kolom", "score" => "kolom", "max_score" => "kolom"|nil, "attempt" => "kolom"|nil }
-  def initialize(event:, csv_text:, mapping:)
+  # mapping: { "email" => kolom, "score" => kolom|nil, "max_score" => kolom|nil, "attempt" => kolom|nil }
+  # dimension_mapping: { dimension_id => kolom }
+  def initialize(event:, csv_text:, mapping:, dimension_mapping: {})
     @event = event
     @csv_text = csv_text.to_s.force_encoding("UTF-8").delete_prefix("﻿")
     @mapping = mapping.to_h.transform_keys(&:to_s).transform_values { |v| v.to_s.presence }
+    @dimension_mapping = dimension_mapping.to_h.transform_keys(&:to_i).transform_values { |v| v.to_s.presence }.compact
+    @dimensions = event.assessment_dimensions.index_by(&:id)
   end
 
   def call
-    result = Result.new(created: 0, updated: 0, unmatched: [], errors: [])
-    return result.tap { |r| r.errors << "Kolom email dan skor wajib dipetakan." } if @mapping["email"].blank? || @mapping["score"].blank?
+    result = Result.new(created: 0, updated: 0, unmatched: [], errors: [], dimension_scores: 0)
+    if @mapping["email"].blank?
+      result.errors << "Kolom email wajib dipetakan."
+      return result
+    end
+    if @mapping["score"].blank? && @dimension_mapping.empty?
+      result.errors << "Petakan kolom skor total, atau minimal satu kolom dimensi (mata uji / station)."
+      return result
+    end
 
     sep = self.class.detect_separator(@csv_text)
     CSV.parse(@csv_text, headers: true, col_sep: sep).each_with_index do |row, idx|
@@ -51,26 +65,64 @@ class AssessmentScoreImporter
         next
       end
 
-      score = row[@mapping["score"]].to_s.strip.tr(",", ".")
-      max_score = @mapping["max_score"] ? row[@mapping["max_score"]].to_s.strip.tr(",", ".").presence : nil
       attempt = resolve_attempt(row, student)
-
       instance = AssessmentInstance.find_or_initialize_by(assessment_event: @event, student: student, attempt_number: attempt)
       new_record = instance.new_record?
-      instance.assign_attributes(score: score, max_score: max_score || @event.max_score, status: "scored",
-                                 source: "import", scored_at: @event.exam_date&.to_time || Time.current)
-      if instance.save
+      instance.max_score = numeric(row, @mapping["max_score"]) || @event.max_score
+      instance.status = "scored"
+      instance.source = "import"
+      instance.scored_at = @event.exam_date&.to_time || Time.current
+      instance.score = numeric(row, @mapping["score"]) || 0
+
+      begin
+        AssessmentInstance.transaction do
+          instance.save!
+          written = write_dimension_scores(instance, row, line, result)
+          # Nilai total dihitung dari dimensi kecuali kolom total dipetakan.
+          instance.recalculate_from_dimensions! if written.positive? && @mapping["score"].blank?
+        end
         result.public_send(new_record ? :created= : :updated=, result.public_send(new_record ? :created : :updated) + 1)
-      else
-        result.errors << "Baris #{line} (#{email}): #{instance.errors.full_messages.to_sentence}"
+      rescue ActiveRecord::RecordInvalid => e
+        result.errors << "Baris #{line} (#{email}): #{e.record.errors.full_messages.to_sentence}"
       end
     end
     result
   rescue CSV::MalformedCSVError => e
-    Result.new(created: 0, updated: 0, unmatched: [], errors: [ "CSV tidak dapat dibaca: #{e.message}" ])
+    Result.new(created: 0, updated: 0, unmatched: [], errors: [ "CSV tidak dapat dibaca: #{e.message}" ], dimension_scores: 0)
   end
 
   private
+
+  def write_dimension_scores(instance, row, line, result)
+    written = 0
+    @dimension_mapping.each do |dimension_id, column|
+      dimension = @dimensions[dimension_id]
+      next if dimension.nil?
+
+      value = numeric(row, column)
+      next if value.nil?
+
+      record = AssessmentDimensionScore.find_or_initialize_by(assessment_instance: instance, assessment_dimension: dimension)
+      record.score = value
+      if record.save
+        written += 1
+        result.dimension_scores += 1
+      else
+        result.errors << "Baris #{line}, #{dimension.label}: #{record.errors.full_messages.to_sentence}"
+      end
+    end
+    written
+  end
+
+  def numeric(row, column)
+    return nil if column.blank?
+
+    raw = row[column].to_s.strip.tr(",", ".")
+    return nil if raw.blank?
+    return nil unless raw.match?(/\A\d+(\.\d+)?\z/)
+
+    raw.to_f
+  end
 
   def resolve_attempt(row, student)
     return 1 unless @event.allow_multiple_attempts?
