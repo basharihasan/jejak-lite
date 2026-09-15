@@ -196,6 +196,16 @@ Layout diganti total meniru `app/views/layouts/application.html.erb` + `shared/_
 **Paket Dasar (🟢) `DAFTAR_FITUR_JEJAK.md` v2.0 kini tertutup penuh di jejak-lite.** Yang tersisa dari tabel gap Fase 22: CDSS Fornas pada resep (sengaja ditunda — butuh katalog obat nasional yang tidak ada di tier ini).
 
 
+## Fase 27 — Jalur pindah ke jejak.pro
+
+### ✅ Fase 27 — Paket migrasi jejak-lite → jejak.pro
+- `bin/rails migration:check` (hanya membaca) dan `bin/rails migration:export` (`MigrationExporter`) → paket berisi `manifest.json` (jumlah baris + SHA-256), `data/*.json` salinan lengkap semua tabel (tanpa kata sandi/token), `jejak_pro/*.csv` yang kolomnya adalah **kontrak** dengan importer jejak.pro, dan `lampiran/`.
+- Identitas pasien tidak ikut kecuali `INCLUDE_PATIENT_IDENTITY=true` (dicatat di manifest; lampiran kasus/persetujuan dilewati bila tidak).
+- Nilai dibawa sebagai persen + persen per ranah kompetensi (`kompetensi:<id>`), dengan hitungan yang sama seperti Peta Kompetensi (dimensi ujian + pertanyaan rubrik terpetakan).
+- Sisi jejak.pro (repo PFKV2): `bin/rails jejak_lite:import` (`JejakLiteBundleImporter`) — uji coba bawaan, `COMMIT=1` semua-atau-tidak, idempoten; pengguna & rotasi lewat importer bawaan jejak.pro (`CsvUserImporter`, `ClinicalRotationImporter`); periode dipadankan lewat nama semester/tahun atau tumpang-tindih ≥ separuh (bukan tanggal mulai); bentrok NPM/NIDN dilaporkan dan ditautkan lewat `padanan_email.csv`; `bin/rails jejak_lite:referensi` menampilkan kode yang perlu diisi.
+- Diuji ujung-ke-ujung: paket data demo → uji coba ke DB dev jejak.pro → galat terarah → isi kode periode & padanan email → uji coba bersih.
+- Panduan lengkap: [`MIGRASI_KE_JEJAK_PRO.md`](MIGRASI_KE_JEJAK_PRO.md).
+
 ## Model Data (ringkas, akan detail per fase saat digarap)
 
 | Tabel | Fase | Status |
@@ -224,7 +234,7 @@ Layout diganti total meniru `app/views/layouts/application.html.erb` + `shared/_
 ```bash
 bin/rails db:setup   # create + migrate + seed peran dasar
 bin/dev              # server + Tailwind watcher
-bin/rails test       # 176 test lulus per Fase 21
+bin/rails test       # 309 test lulus per Fase 27
 ```
 
 ## Yang Sengaja Disederhanakan/Ditunda

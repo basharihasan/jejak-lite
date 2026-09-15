@@ -81,6 +81,17 @@ Membuat 8 akun contoh (password sama semua: `password123`, sengaja lemah — **h
 
 Task ini idempoten (aman dijalankan berkali-kali) dan terpisah dari `db/seeds.rb` karena isinya akun contoh berpassword publik, bukan data rujukan aplikasi.
 
+## Pindah ke jejak.pro
+
+Data jejak-lite bisa dipindahkan utuh ke jejak.pro tanpa ketik ulang:
+
+```bash
+bin/rails migration:check     # periksa kesiapan data (hanya membaca)
+bin/rails migration:export    # buat paket migrasi di tmp/migrasi-jejak-pro-<waktu>/
+```
+
+Paket lalu diimpor di jejak.pro dengan `bin/rails jejak_lite:import` (uji coba dulu, `COMMIT=1` untuk menyimpan). Langkah lengkap, pemetaan data, dan penanganan data pasien ada di [MIGRASI_KE_JEJAK_PRO.md](MIGRASI_KE_JEJAK_PRO.md).
+
 ## Test
 
 ```bash
