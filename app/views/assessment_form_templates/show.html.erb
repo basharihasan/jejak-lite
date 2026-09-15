@@ -29,7 +29,8 @@
       <% scorable = fields.select(&:scorable?) %>
       <% if scorable.any? %>
         <p class="text-[11px] text-gray-500 mb-2 bg-indigo-50/60 rounded-lg px-3 py-2">
-          Rubrik bernilai: <%= scorable.size %> pertanyaan skor, total bobot <%= scorable.sum { |f| f.weight.to_f }.round(2) %>.
+          Rubrik bernilai: <%= scorable.size %> pertanyaan skor, total bobot <%= scorable.sum { |f| f.weight.to_f }.round(2) %>,
+          <%= scorable.count(&:mapped?) %> dipetakan ke ranah kompetensi.
           Nilai asesmen dihitung otomatis dari jawaban penguji (rata-rata terbobot).
         </p>
       <% elsif fields.any? %>
@@ -46,7 +47,17 @@
               <span class="text-xs text-gray-400 ml-2">
                 (<%= field.field_type_label %><%= field.required? ? ", wajib" : "" %><%= field.scorable? ? ", bobot #{field.weight.to_f.round(2)}" : "" %>)
               </span>
+              <% if field.competency_item %>
+                <span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-50 text-violet-700"><%= field.competency_item.title %></span>
+              <% elsif field.scorable? %>
+                <span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">belum dipetakan</span>
+              <% end %>
               <% if field.help_text.present? %><span class="block text-[11px] text-gray-400 mt-0.5"><%= field.help_text %></span><% end %>
+              <% if field.option_based? %>
+                <span class="block text-[11px] text-gray-500 mt-0.5">
+                  <%= field.option_rows.map { |row| field.field_type == "select" ? row[:label] : "#{row[:label]} (#{row[:score]})" }.join(" · ") %>
+                </span>
+              <% end %>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <% unless index.zero? %>

@@ -6,6 +6,7 @@ class AssessmentFormAnswer < ApplicationRecord
 
   validate :required_field_answered
   validate :value_within_scale
+  validate :value_within_options
 
   delegate :scorable?, to: :assessment_form_field
 
@@ -22,9 +23,20 @@ class AssessmentFormAnswer < ApplicationRecord
     errors.add(:base, "#{assessment_form_field.label} wajib diisi")
   end
 
+  # Jawaban di luar daftar pilihan/jenjang = rubrik salah hitung tanpa ada
+  # yang tahu, jadi ditolak, bukan disimpan apa adanya.
+  def value_within_options
+    return unless assessment_form_field&.option_based?
+    return if value.blank?
+    return if assessment_form_field.option_values.include?(value.to_s)
+
+    errors.add(:base, "#{assessment_form_field.label}: pilihan \"#{value}\" tidak ada dalam daftar")
+  end
+
   # Nilai skor di luar skala berarti rubrik salah hitung tanpa ada yang tahu.
   def value_within_scale
     return unless assessment_form_field&.scorable?
+    return if assessment_form_field.option_based?
     return if value.blank?
 
     number = value.to_s.tr(",", ".")

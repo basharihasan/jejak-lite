@@ -7,7 +7,8 @@ class AssessmentFormFieldsController < ApplicationController
 
   def new
     authorize @template, :manage?
-    @field = @template.assessment_form_fields.build
+    @field = @template.assessment_form_fields.build(field_type: "rating")
+    load_competency_choices
   end
 
   def create
@@ -17,12 +18,14 @@ class AssessmentFormFieldsController < ApplicationController
     if @field.save
       redirect_to @template, notice: "Pertanyaan ditambahkan."
     else
+      load_competency_choices
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
     authorize @template, :manage?
+    load_competency_choices
   end
 
   def update
@@ -30,6 +33,7 @@ class AssessmentFormFieldsController < ApplicationController
     if @field.update(field_params)
       redirect_to @template, notice: "Pertanyaan diperbarui."
     else
+      load_competency_choices
       render :edit, status: :unprocessable_entity
     end
   end
@@ -54,6 +58,13 @@ class AssessmentFormFieldsController < ApplicationController
 
   private
 
+  # Ranah kompetensi beserta sub-kompetensinya, ditampilkan bertingkat.
+  def load_competency_choices
+    @competency_choices = CompetencyItem.includes(:children).where(parent_id: nil).order(:position).flat_map do |domain|
+      [ [ domain.title, domain.id ] ] + domain.children.map { |child| [ "— #{child.title}", child.id ] }
+    end
+  end
+
   def set_template
     @template = AssessmentFormTemplate.find(params[:assessment_form_template_id])
   end
@@ -63,6 +74,6 @@ class AssessmentFormFieldsController < ApplicationController
   end
 
   def field_params
-    params.require(:assessment_form_field).permit(:label, :field_type, :required, :max_score, :weight, :help_text)
+    params.require(:assessment_form_field).permit(:label, :field_type, :required, :max_score, :weight, :help_text, :options_text, :competency_item_id)
   end
 end

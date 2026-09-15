@@ -1,42 +1,62 @@
 <% cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
-<%= form_with model: [ @template, field ], class: "space-y-4" do |f| %>
+<% locked = field.persisted? && field.answered? %>
+<%= form_with model: [ @template, field ], class: "space-y-5" do |f| %>
   <% if field.errors.any? %>
     <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
       <%= field.errors.full_messages.to_sentence %>
     </div>
   <% end %>
 
-  <div>
-    <%= f.label :label, "Pertanyaan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <%= f.text_field :label, placeholder: "Contoh: Ketepatan penalaran klinis", class: cls %>
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5 space-y-4">
+    <div>
+      <%= f.label :label, "Pertanyaan / kriteria", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :label, placeholder: "Contoh: Ketepatan penalaran klinis", class: cls %>
+    </div>
+
+    <div>
+      <%= f.label :help_text, "Petunjuk pengisian (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.text_field :help_text, placeholder: "Contoh: nilai tertinggi bila diagnosis banding lengkap dan beralasan", class: cls %>
+    </div>
+
+    <div>
+      <%= f.label :field_type, "Jenis jawaban", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.select :field_type, AssessmentFormField::FIELD_TYPES.invert, {}, class: cls, disabled: locked %>
+      <% if locked %>
+        <%= f.hidden_field :field_type %>
+        <p class="text-[11px] text-amber-700 mt-1">Jenis jawaban terkunci karena pertanyaan ini sudah punya jawaban — mengubahnya akan menggeser nilai yang sudah keluar. Buat pertanyaan baru bila perlu jenis lain.</p>
+      <% end %>
+      <ul class="mt-2 text-[11px] text-gray-500 space-y-0.5">
+        <li><strong>Skala Penilaian</strong> — angka 1–5, cepat diisi, tanpa deskriptor.</li>
+        <li><strong>Skor Angka</strong> — 0 sampai skala yang Anda tentukan (mis. 0–10).</li>
+        <li><strong>Rubrik Berjenjang</strong> — penguji memilih satu jenjang yang <em>ada deskripsinya</em>; inilah rubrik yang menyamakan persepsi antar-penguji.</li>
+        <li><strong>Pilihan Ganda</strong> — pilihan tanpa nilai (mis. jenis kasus), tidak ikut menghitung.</li>
+      </ul>
+    </div>
   </div>
 
-  <div>
-    <%= f.label :help_text, "Petunjuk pengisian (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <%= f.text_field :help_text, placeholder: "Contoh: nilai 5 bila diagnosis banding lengkap dan beralasan", class: cls %>
+  <%# ── Jenjang rubrik / pilihan ── %>
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <p class="text-sm font-semibold text-gray-800">Jenjang rubrik / pilihan</p>
+    <p class="text-[11px] text-gray-500 mb-2">
+      Diperlukan untuk <strong>Rubrik Berjenjang</strong> dan <strong>Pilihan Ganda</strong>; diabaikan untuk jenis lain.
+      Satu baris per jenjang: <code>label | deskriptor | skor</code>. Skor boleh dikosongkan — akan diisi urutan barisnya (1, 2, 3, …).
+    </p>
+    <%= f.text_area :options_text, value: field.options_text, rows: 5,
+          placeholder: "Belum kompeten | Belum mampu tanpa arahan penuh | 1\nCukup | Mampu dengan bimbingan | 2\nBaik | Mandiri dengan supervisi tidak langsung | 3\nSangat baik | Mandiri dan mampu menjelaskan alasannya | 4",
+          class: "#{cls} font-mono resize-y" %>
+    <p class="text-[11px] text-gray-400 mt-1">Dikosongkan saat memilih Rubrik Berjenjang → terisi empat jenjang bawaan yang dapat Anda sunting.</p>
   </div>
 
-  <div>
-    <%= f.label :field_type, "Jenis Jawaban", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <% locked = field.persisted? && field.answered? %>
-    <%= f.select :field_type, AssessmentFormField::FIELD_TYPES.invert, {}, class: cls, disabled: locked %>
-    <% if locked %>
-      <%= f.hidden_field :field_type %>
-      <p class="text-[11px] text-amber-700 mt-1">Jenis jawaban terkunci karena pertanyaan ini sudah punya jawaban — mengubahnya akan menggeser nilai yang sudah keluar. Buat pertanyaan baru bila perlu jenis lain.</p>
-    <% end %>
-  </div>
-
-  <%# Skala & bobot hanya berlaku untuk pertanyaan bertipe skor; untuk jenis
-      lain isian ini diabaikan model (dikembalikan ke bawaan). %>
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl bg-indigo-50/60 ring-1 ring-indigo-100 p-4">
+  <%# ── Penilaian ── %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl bg-indigo-50/60 ring-1 ring-indigo-100 p-5">
     <div class="sm:col-span-2">
       <p class="text-sm font-semibold text-gray-800">Penilaian</p>
-      <p class="text-[11px] text-gray-500">Berlaku untuk jenis <strong>Skala Penilaian</strong> dan <strong>Skor Angka</strong>. Nilai akhir asesmen = rata-rata terbobot seluruh pertanyaan skor.</p>
+      <p class="text-[11px] text-gray-500">Berlaku untuk Skala Penilaian, Skor Angka, dan Rubrik Berjenjang. Nilai akhir asesmen = rata-rata terbobot seluruh pertanyaan bernilai.</p>
     </div>
     <div>
       <%= f.label :max_score, "Skala maksimum", class: "block text-sm font-semibold text-gray-700 mb-1" %>
       <%= f.number_field :max_score, min: 1, max: 100, class: cls %>
-      <p class="text-[11px] text-gray-400 mt-1">Skala Penilaian selalu 1–5; Skor Angka 0–nilai ini.</p>
+      <p class="text-[11px] text-gray-400 mt-1">Skala Penilaian selalu 1–5. Rubrik Berjenjang mengikuti skor jenjang tertinggi secara otomatis.</p>
     </div>
     <div>
       <%= f.label :weight, "Bobot", class: "block text-sm font-semibold text-gray-700 mb-1" %>
@@ -45,9 +65,29 @@
     </div>
   </div>
 
+  <%# ── Pemetaan ke kompetensi ── %>
+  <div class="bg-white rounded-2xl ring-1 ring-violet-200 p-5">
+    <p class="text-sm font-semibold text-gray-800">Pemetaan ke ranah kompetensi</p>
+    <p class="text-[11px] text-gray-500 mb-2">
+      Menentukan ranah mana yang naik di <strong>Peta Kompetensi</strong> mahasiswa ketika penguji mengisi pertanyaan ini —
+      sejajar dengan pemetaan dimensi ujian CBT/OSCE. Pertanyaan yang tidak dipetakan tetap menghitung nilai asesmen,
+      tetapi tidak menyumbang ke peta kompetensi.
+    </p>
+    <% if @competency_choices.blank? %>
+      <p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">Belum ada Kerangka Kompetensi. Buat dulu di <%= link_to "Konfigurasi → Kerangka Kompetensi", competency_frameworks_path, class: "underline" %>.</p>
+    <% else %>
+      <%= f.select :competency_item_id, options_for_select(@competency_choices, field.competency_item_id),
+            { include_blank: "— tidak dipetakan —" }, class: cls %>
+      <p class="text-[11px] text-gray-400 mt-1">Pertanyaan naratif (teks / pilihan ganda) tidak bernilai, jadi pemetaannya diabaikan.</p>
+    <% end %>
+  </div>
+
   <label class="flex items-center gap-2 text-sm text-gray-700">
     <%= f.check_box :required, class: "rounded border-gray-300" %> Wajib diisi
   </label>
 
-  <%= f.submit "Simpan Pertanyaan", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+  <div class="flex items-center gap-3">
+    <%= f.submit "Simpan Pertanyaan", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+    <%= link_to "Batal", assessment_form_template_path(@template), class: "text-sm text-gray-500 hover:text-gray-700" %>
+  </div>
 <% end %>

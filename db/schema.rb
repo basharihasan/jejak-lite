@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_040001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -169,16 +169,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_040001) do
 
   create_table "assessment_form_fields", force: :cascade do |t|
     t.bigint "assessment_form_template_id", null: false
+    t.bigint "competency_item_id"
     t.datetime "created_at", null: false
     t.string "field_type", null: false
     t.string "help_text"
     t.string "label", null: false
     t.integer "max_score", default: 5, null: false
+    t.jsonb "options", default: [], null: false
     t.integer "position", default: 0, null: false
     t.boolean "required", default: true, null: false
     t.datetime "updated_at", null: false
     t.decimal "weight", precision: 6, scale: 2, default: "1.0", null: false
     t.index ["assessment_form_template_id"], name: "index_assessment_form_fields_on_assessment_form_template_id"
+    t.index ["competency_item_id"], name: "index_assessment_form_fields_on_competency_item_id"
   end
 
   create_table "assessment_form_submissions", force: :cascade do |t|
@@ -743,6 +746,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_040001) do
   add_foreign_key "assessment_form_answers", "assessment_form_fields"
   add_foreign_key "assessment_form_answers", "assessment_form_submissions"
   add_foreign_key "assessment_form_fields", "assessment_form_templates"
+  add_foreign_key "assessment_form_fields", "competency_items", validate: false
   add_foreign_key "assessment_form_submissions", "assessment_form_templates"
   add_foreign_key "assessment_form_submissions", "users", column: "respondent_id"
   add_foreign_key "assessment_form_submissions", "users", column: "subject_user_id"
