@@ -206,6 +206,21 @@ Layout diganti total meniru `app/views/layouts/application.html.erb` + `shared/_
 - Diuji ujung-ke-ujung: paket data demo → uji coba ke DB dev jejak.pro → galat terarah → isi kode periode & padanan email → uji coba bersih.
 - Panduan lengkap: [`MIGRASI_KE_JEJAK_PRO.md`](MIGRASI_KE_JEJAK_PRO.md).
 
+### ✅ Audit Paket Dasar 15 September 2026 — 4 celah PERILAKU ditutup (bukan cuma render error)
+
+Diminta pengguna: "cek kembali semua fitur 🟢, pastikan tersedia & berfungsi, pelan-pelan, bertahap." Metode: cocokkan tiap baris `DAFTAR_FITUR_JEJAK.md` v2.0 dengan kode, crawl HTTP ~50 pola URL × 8 akun demo (nol error di tiap tahap), lalu baca controller/model/view untuk fitur yang secara render 200 OK tapi perilakunya belum lengkap. Fase 22–26 menutup *keberadaan halaman*; audit ini menemukan 4 tempat yang halamannya ada tapi **alurnya tidak lengkap**:
+
+1. **Wizard Kasus Klinis cuma 4 langkah**, bukan 6 — Pemeriksaan Penunjang (lab/radiologi/lainnya) tidak ada kolom sama sekali; Terapi & Resep bercampur di langkah Diagnosis & Tatalaksana. Simpan Draf cuma muncul di langkah terakhir (wizard klien murni, jadi mahasiswa yang berhenti di langkah 1 tidak bisa simpan tanpa mengisi semua). Galat validasi ditumpuk jadi satu kalimat tanpa menunjuk langkah — pada form 6-langkah ini berarti mahasiswa harus menerka langkah mana yang salah.
+2. **Verifikasi kasus cuma punya 2 aksi** (Verifikasi, Minta Revisi) — tidak ada Tolak (untuk kasus yang memang tidak layak, beda dari "perlu revisi"), tidak ada Batalkan Verifikasi (verifier salah pilih kasus, tidak ada jalan mundur — level EPA yang sudah ditulis pun ikut tersangkut), tidak ada komentar diskusi di luar siklus status.
+3. **Mini-CEX/DOPS cuma bisa dibuat dosen dari nol** — `DAFTAR_FITUR_JEJAK.md` §Pilar B eksplisit: "diinisiasi dari kasus, dinilai penguji" (pola sama dengan CBD/Long Case yang SUDAH ada). Sebelum audit, mahasiswa tidak ada jalan meminta Mini-CEX/DOPS dari kasus yang sudah ditulisnya.
+4. **Logbook Kegiatan (ActivityLog) tanpa mekanisme verifikasi APA PUN** — tidak ada kolom status, tidak ada policy, controller-nya scoped mutlak ke `current_user.activity_logs` (tidak ada cara pengajar membuka log siswa lain). `DAFTAR_FITUR_JEJAK.md` M02 eksplisit menyebut "penanda terverifikasi" sebagai 🟢.
+
+**Ditutup**: migrasi kolom (`laboratory_results`/`radiology_results`/`other_investigations`, `dops_evaluations.clinical_case_id`/`mini_cex_evaluations.clinical_case_id`, `activity_logs.verified_at`/`verified_by_id`); `ClinicalCase#reject!`/`#cancel_verification!`/`#add_verification_comment!`; status `requested` di `DimensionScorable` (dimensi wajib tidak berlaku sebelum penilai mulai mengisi); `ActivityLogPolicy` baru + scope "Perlu Diverifikasi" + nav "Validasi Kegiatan" + penanda warna Kalender. Juga ditambah pengingat pencatatan kasus di Beranda (mahasiswa berotasi, 2 hari tanpa kasus baru — pola sama `CASE_LOGGING_GAP_DAYS` jejak.pro).
+
+28 test baru (336 total, hijau). Smoke HTTP ulang setiap tahap perubahan: 8 akun × ~50 pola URL, nol error di semua tahap. Verifikasi visual: screenshot headless Chrome tiap alur baru (wizard 6 langkah, panel Tolak/Batalkan Verifikasi, kartu WBA dari kasus, halaman Validasi Kegiatan, Kalender berpenanda).
+
+**Belum diperiksa mendalam di audit ini** (halaman render 200 OK & test lulus, tapi belum ditelusuri sedalam 4 poin di atas): impor CSV Assessment Event ujung-ke-ujung dengan berkas nyata, Assessment Form Builder → rubrik SOCA/MSP end-to-end, kurva persentil kohort dengan data >3 mahasiswa sungguhan, Assessment Matrix dengan bobot campuran. **Gap arsitektur yang TIDAK ditutup** (di luar cakupan audit, butuh keputusan produk): "Pilihan Academic Club pada asesmen" (🟢 M05) — jejak-lite sengaja tanpa modul komunitas sejak awal (lihat "Yang Sengaja Disederhanakan/Ditunda"), jadi field `academic_club_id` semacam ini tidak punya tempat berlabuh tanpa membangun ulang sebagian modul komunitas.
+
 ## Model Data (ringkas, akan detail per fase saat digarap)
 
 | Tabel | Fase | Status |
