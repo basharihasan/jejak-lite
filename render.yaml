@@ -31,6 +31,28 @@ services:
         value: "1"
       - key: JOB_CONCURRENCY
         value: "1"
+      # Menjalankan Solid Queue di dalam proses Puma (bukan worker terpisah)
+      # — satu-satunya cara jalan di plan free Render, yang cuma mengizinkan
+      # satu proses web. Tanpa ini notifikasi/job latar belakang tidak
+      # pernah diproses, diam-diam (lihat solid-queue-paused-two-days di
+      # memori PFKV2 — kelas kegagalan yang sama).
+      - key: SOLID_QUEUE_IN_PUMA
+        value: "true"
+      # Wajib di production (lihat config/initializers/active_record_encryption.rb)
+      # — kolom identitas pasien di ClinicalCase dienkripsi dengan kunci ini.
+      # Isi manual di dashboard, hasil `bin/rails db:encryption:init`.
+      - key: AR_ENCRYPTION_PRIMARY_KEY
+        sync: false
+      - key: AR_ENCRYPTION_DETERMINISTIC_KEY
+        sync: false
+      - key: AR_ENCRYPTION_KEY_DERIVATION_SALT
+        sync: false
+      # Dipakai config.action_mailer.default_url_options — tautan di email
+      # (konfirmasi akun, reset password) akan pakai domain ini. Render
+      # blueprint memberi domain otomatis <service-name>.onrender.com;
+      # ganti isinya di dashboard bila service-name lain atau custom domain.
+      - key: APP_HOST
+        value: jejak-lite.onrender.com
       # Opsional, isi kalau ingin login Google aktif:
       # - key: GOOGLE_CLIENT_ID
       #   sync: false
