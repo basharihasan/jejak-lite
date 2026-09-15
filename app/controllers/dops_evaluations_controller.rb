@@ -44,7 +44,10 @@ class DopsEvaluationsController < ApplicationController
 
   def destroy
     authorize @dops_evaluation
+    clinical_case = @dops_evaluation.clinical_case
     @dops_evaluation.destroy
+    return redirect_to(clinical_case_path(clinical_case), notice: "Permintaan DOPS dibatalkan.", status: :see_other) if clinical_case && @dops_evaluation.student_id == current_user.id
+
     redirect_to assessments_path, notice: "Evaluasi DOPS dihapus.", status: :see_other
   end
 

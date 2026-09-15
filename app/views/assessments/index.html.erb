@@ -10,18 +10,32 @@
 
 <% if @draft_dops_evaluations.any? || @draft_mini_cex_evaluations.any? %>
   <div class="mt-6 bg-amber-50/60 ring-1 ring-amber-100 rounded-2xl p-4">
-    <h2 class="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-2">Menunggu Diselesaikan (Draf Anda)</h2>
+    <h2 class="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-2">Menunggu Diselesaikan (Permintaan & Draf Anda)</h2>
     <div class="space-y-2">
       <% @draft_dops_evaluations.each do |ev| %>
         <%= link_to dops_evaluation_path(ev), class: "flex items-center justify-between bg-white rounded-xl ring-1 ring-amber-200 p-3 hover:ring-amber-400 transition" do %>
           <span class="text-sm font-medium text-gray-800">DOPS · <%= ev.procedure_name %> · <%= ev.student.full_name %></span>
-          <span class="text-xs font-bold uppercase text-amber-600">Draf</span>
+          <span class="text-xs font-bold uppercase text-amber-600"><%= ev.requested? ? "Diminta mahasiswa" : "Draf" %></span>
         <% end %>
       <% end %>
       <% @draft_mini_cex_evaluations.each do |ev| %>
         <%= link_to mini_cex_evaluation_path(ev), class: "flex items-center justify-between bg-white rounded-xl ring-1 ring-amber-200 p-3 hover:ring-amber-400 transition" do %>
           <span class="text-sm font-medium text-gray-800">Mini-CEX · <%= ev.case_description %> · <%= ev.student.full_name %></span>
-          <span class="text-xs font-bold uppercase text-amber-600">Draf</span>
+          <span class="text-xs font-bold uppercase text-amber-600"><%= ev.requested? ? "Diminta mahasiswa" : "Draf" %></span>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @my_requests.any? %>
+  <div class="mt-6 bg-sky-50/60 ring-1 ring-sky-100 rounded-2xl p-4">
+    <h2 class="text-sm font-semibold text-sky-700 uppercase tracking-wide mb-2">Permintaan Anda — Menunggu Penilai</h2>
+    <div class="space-y-2">
+      <% @my_requests.each do |ev| %>
+        <%= link_to ev, class: "flex items-center justify-between bg-white rounded-xl ring-1 ring-sky-200 p-3 hover:ring-sky-400 transition" do %>
+          <span class="text-sm font-medium text-gray-800"><%= ev.is_a?(DopsEvaluation) ? "DOPS · #{ev.procedure_name}" : "Mini-CEX · #{ev.case_description}" %> · <%= ev.evaluator.full_name %></span>
+          <span class="text-xs font-bold uppercase text-sky-600">Diminta</span>
         <% end %>
       <% end %>
     </div>

@@ -31,7 +31,7 @@ class MiniCexEvaluation < ApplicationRecord
   belongs_to :clinical_rotation
 
   validates :case_description, presence: true
-  validates :global_rating, inclusion: { in: GLOBAL_RATING_OPTIONS.keys }
+  validates :global_rating, inclusion: { in: GLOBAL_RATING_OPTIONS.keys }, unless: :requested?
 
   scope :recent, -> { order(evaluated_at: :desc) }
 

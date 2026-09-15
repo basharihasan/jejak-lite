@@ -8,10 +8,17 @@
   </div>
 </div>
 
+<% if current_user.can_verify_clinical_cases? %>
+  <div class="mt-4 flex items-center gap-2">
+    <%= link_to "Punya Saya", activity_logs_path, class: "text-xs px-3 py-1.5 rounded-full font-medium #{@scope == 'mine' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+    <%= link_to "Perlu Diverifikasi", activity_logs_path(scope: "to_verify"), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@scope == 'to_verify' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+  </div>
+<% end %>
+
 <div class="mt-4 flex flex-wrap items-center gap-2">
-  <%= link_to "Semua", activity_logs_path, class: "text-xs px-3 py-1.5 rounded-full font-medium #{@category.nil? ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+  <%= link_to "Semua", activity_logs_path(scope: @scope), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@category.nil? ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
   <% ActivityLog::CATEGORIES.each do |code, label| %>
-    <%= link_to label, activity_logs_path(category: code), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@category == code ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+    <%= link_to label, activity_logs_path(category: code, scope: @scope), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@category == code ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
   <% end %>
 </div>
 
@@ -34,7 +41,7 @@
       <div>
         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2"><%= l(date, format: :long) %></p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <%= render partial: "activity_log_card", collection: logs, as: :activity_log %>
+          <%= render partial: "activity_log_card", collection: logs, as: :activity_log, locals: { show_owner: @scope == "to_verify" } %>
         </div>
       </div>
     <% end %>

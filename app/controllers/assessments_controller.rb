@@ -10,8 +10,10 @@ class AssessmentsController < ApplicationController
     dops_scope = policy_scope(DopsEvaluation).includes(:student, :evaluator)
     mini_cex_scope = policy_scope(MiniCexEvaluation).includes(:student, :evaluator)
 
-    @draft_dops_evaluations = dops_scope.draft.where(evaluator: current_user).recent
-    @draft_mini_cex_evaluations = mini_cex_scope.draft.where(evaluator: current_user).recent
+    @draft_dops_evaluations = dops_scope.pending_for_evaluator.where(evaluator: current_user).recent
+    @draft_mini_cex_evaluations = mini_cex_scope.pending_for_evaluator.where(evaluator: current_user).recent
+    @my_requests = (dops_scope.requested.where(student: current_user).to_a +
+                    mini_cex_scope.requested.where(student: current_user).to_a).sort_by(&:created_at).reverse
 
     @dops_evaluations = dops_scope.submitted.recent.limit(10)
     @mini_cex_evaluations = mini_cex_scope.submitted.recent.limit(10)

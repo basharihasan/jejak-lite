@@ -35,6 +35,7 @@ Rails.application.routes.draw do
   resources :activity_logs do
     member do
       post :generate_patient_code
+      patch :verify
     end
   end
   get "kalender", to: "activity_logs#calendar", as: :activity_logs_calendar
@@ -49,10 +50,14 @@ Rails.application.routes.draw do
       patch :submit
       patch :verify
       patch :request_revision
+      patch :reject
+      patch :cancel_verification
+      post  :comment
       post  :break_glass
       post  :issue_consent
       patch :revoke_consent
       post  :initiate_assessment   # CBD / Long Case dari kasus
+      post  :initiate_workplace_assessment # Mini-CEX / DOPS dari kasus
     end
   end
   # Lembar persetujuan pasien — publik, tanpa login, bertoken 32 karakter.

@@ -1,6 +1,6 @@
 id:
   chrome:
-    brand_subtitle_default: "Jejak Lite"
+    brand_subtitle_default: "JEJAK Essential"
     no_role: "Belum ada peran"
     edit_profile: "Edit Profil"
     search_menu: "Cari menu..."
@@ -47,6 +47,7 @@ id:
     competency_map: "Peta Kompetensi"
     epa_map: "Peta EPA & Entrustment"
     case_validation: "Validasi Kasus Klinis"
+    activity_validation: "Validasi Kegiatan"
     analytics: "Dashboard Analitik"
     student_directory: "Daftar Mahasiswa"
     academic_periods: "Tahun/Periode Akademik"

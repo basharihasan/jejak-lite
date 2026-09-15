@@ -1,0 +1,185 @@
+<%# Narasi peningkatan ke jejak.pro — tetap bernada tenang (latar netral, satu
+    aksen navy, tanpa tombol besar), tetapi interaktif: tiap fitur jadi tab yang
+    berganti sendiri (upgrade_showcase_controller.js) dan kartu bisa diciutkan.
+    Isinya menyesuaikan PERAN AKTIF agar yang ditawarkan relevan dengan pekerjaan
+    pengguna saat itu. Semua fitur yang disebut memang ada di jejak.pro dan
+    sengaja tidak dibawa ke paket Essential. Kelas warna dipilih dari yang sudah
+    ditangani retrofit mode gelap (application.css), bukan varian dark:. %>
+<%
+  upgrade_copy = {
+    "mahasiswa" => {
+      lead: "Catatan yang Anda kumpulkan di sini sudah menjadi fondasi yang baik. Di jejak.pro, fondasi yang sama bisa bekerja lebih keras untuk Anda:",
+      points: [
+        { icon: :mic, title: "Dikte suara & asisten AI", text: "Menulis kasus lebih cepat dengan dikte suara dan asisten penyempurna narasi berbasis AI." },
+        { icon: :checklist, title: "Latihan MCQ bertinjauan dosen", text: "Latihan soal MCQ dari bank soal yang ditinjau dosen, lengkap dengan umpan balik." },
+        { icon: :chat, title: "Konsultasi kasus klinis", text: "Konsultasi kasus dengan konsultan klinis, langsung dari Logbook Kasus Anda." }
+      ]
+    },
+    "dosen" => {
+      lead: "Waktu Anda untuk membimbing itu berharga. Di jejak.pro, sebagian pekerjaan administratifnya ikut diringankan:",
+      points: [
+        { icon: :checklist, title: "Bank soal prodi", text: "Menyusun dan meninjau butir soal bersama tim dalam bank soal prodi." },
+        { icon: :bell, title: "Peringatan dini mahasiswa", text: "Mengikuti perkembangan mahasiswa bimbingan lewat sistem peringatan dini." },
+        { icon: :chart, title: "Jejak kontribusi dosen", text: "Mencatat kontribusi pengajaran, riset, dan pengabdian dalam satu jejak dosen." }
+      ]
+    },
+    "preseptor" => {
+      lead: "Bimbingan Anda di lahan praktik membentuk dokter masa depan. jejak.pro membantu bimbingan itu lebih terlihat dan terhubung:",
+      points: [
+        { icon: :building, title: "Profil wahana & kerja sama", text: "Profil wahana pendidikan dan kerja sama institusi dalam satu tempat." },
+        { icon: :users, title: "Rekap kehadiran & kinerja", text: "Rekap kehadiran dan kinerja preseptor yang bisa ditinjau bersama prodi." },
+        { icon: :chat, title: "Konsultasi kasus klinis", text: "Konsultasi kasus klinis dengan mahasiswa tanpa keluar dari aplikasi." }
+      ]
+    },
+    "kaprodi" => {
+      lead: "Gambaran yang Anda lihat di sini adalah awal. jejak.pro memperluasnya menjadi alat pengambilan keputusan program studi:",
+      points: [
+        { icon: :calendar, title: "Cetak biru kurikulum", text: "Cetak biru kurikulum dan penjadwalan blok yang tersambung ke capaian mahasiswa." },
+        { icon: :bell, title: "Peringatan dini & konseling", text: "Sistem peringatan dini beserta jalur tindak lanjut tim konseling prodi." },
+        { icon: :folder, title: "Bahan bukti akreditasi", text: "Bahan bukti akreditasi yang terkumpul dari aktivitas sehari-hari." }
+      ]
+    },
+    "admin" => {
+      lead: "Konfigurasi yang Anda rawat di sini tetap berguna saat kebutuhan institusi bertambah. jejak.pro menyiapkan lapisan berikutnya:",
+      points: [
+        { icon: :layers, title: "Kurikulum, wahana & mitra", text: "Penjadwalan kurikulum, wahana pendidikan, dan pengelolaan kerja sama mitra." },
+        { icon: :globe, title: "Alumni, komunitas & hibah", text: "Pelacakan alumni, komunitas, serta pengelolaan hibah dan riset." },
+        { icon: :shield, title: "Tata kelola multi-prodi", text: "Tata kelola data dan pembagian peran untuk skala multi-program studi." }
+      ]
+    }
+  }
+  copy = upgrade_copy.fetch(@active_role&.code, upgrade_copy["mahasiswa"])
+
+  icon_shapes = {
+    mic:       '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8.5 21h7"/>',
+    checklist: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="m8 9 1.5 1.5L12 8M8 15l1.5 1.5L12 14M14.5 9.5h2M14.5 15.5h2"/>',
+    chat:      '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>',
+    bell:      '<path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9M10.3 20.5a1.9 1.9 0 0 0 3.4 0"/>',
+    chart:     '<path d="M3.5 3.5v17h17"/><path d="m7.5 15 4-4 3 3 5-6"/>',
+    building:  '<path d="M3 21h18M5 21V8l7-4.5L19 8v13M9.5 21v-4h5v4M9 11h.01M15 11h.01M9 14h.01M15 14h.01"/>',
+    users:     '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>',
+    calendar:  '<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7.5 13.5h3M7.5 17h6"/>',
+    folder:    '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="m9 13.5 2 2 4-4"/>',
+    layers:    '<path d="m12 3 9 5-9 5-9-5Z"/><path d="m3 12.5 9 5 9-5M3 16.5l9 5 9-5"/>',
+    globe:     '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    shield:    '<path d="M12 3 4.5 6v6c0 4.6 3.2 7.8 7.5 9 4.3-1.2 7.5-4.4 7.5-9V6Z"/><path d="m9 12 2 2 4-4"/>'
+  }
+  icon = ->(name, css) {
+    tag.svg(icon_shapes.fetch(name).html_safe, class: css, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+            "stroke-width": 1.75, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": true)
+  }
+%>
+
+<section class="mt-10 border-t border-gray-200 pt-6" aria-labelledby="jejak-pro-upgrade-title">
+  <div class="relative overflow-hidden rounded-2xl bg-white ring-1 ring-gray-200 shadow-sm"
+       data-controller="upgrade-showcase"
+       data-upgrade-showcase-active-class="bg-indigo-50 ring-indigo-200 text-gray-900"
+       data-upgrade-showcase-inactive-class="ring-transparent text-gray-600 hover:bg-gray-50"
+       data-action="mouseenter->upgrade-showcase#pause mouseleave->upgrade-showcase#resume focusin->upgrade-showcase#pause focusout->upgrade-showcase#resume">
+    <div class="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute -bottom-24 -left-10 h-48 w-48 rounded-full bg-sky-400/10 blur-3xl" aria-hidden="true"></div>
+
+    <div class="relative p-5 sm:p-6">
+      <%# Kepala kartu %>
+      <div class="flex items-start gap-3">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-[#fff] shadow-sm" aria-hidden="true">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+          </svg>
+        </span>
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Tumbuh bersama JEJAK</p>
+          <h2 id="jejak-pro-upgrade-title" class="mt-0.5 text-base font-semibold text-gray-900 sm:text-lg">Dari Essential ke jejak.pro</h2>
+        </div>
+        <button type="button"
+                class="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
+                aria-controls="jejak-pro-upgrade-body" aria-expanded="false"
+                data-action="upgrade-showcase#toggle">
+          <span data-upgrade-showcase-target="toggleLabel">Tampilkan</span>
+          <svg class="h-4 w-4 rotate-180 transition-transform duration-200" data-upgrade-showcase-target="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 15 6-6 6 6" />
+          </svg>
+        </button>
+      </div>
+
+      <%# Tertutup secara bawaan agar tidak mencolok; controller membukanya bila
+          pengguna pernah memilih "Tampilkan" di peramban ini. %>
+      <div id="jejak-pro-upgrade-body" data-upgrade-showcase-target="body" hidden>
+        <%# Lintasan paket: posisi pengguna sekarang → langkah berikutnya %>
+        <div class="mt-5 flex items-center gap-3" aria-hidden="true">
+          <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            JEJAK Essential <span class="hidden text-gray-400 sm:inline">· Anda di sini</span>
+          </span>
+          <span class="relative h-px flex-1 border-t-2 border-dashed border-gray-200">
+            <span class="absolute -top-[5px] h-2 w-2 -translate-x-1/2 rounded-full bg-indigo-500 opacity-0 shadow-[0_0_0_3px_rgb(99_102_241/0.2)]" data-upgrade-showcase-target="dot"></span>
+          </span>
+          <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-[#fff]">
+            jejak.pro
+          </span>
+        </div>
+
+        <p class="mt-4 text-sm leading-relaxed text-gray-600">
+          <span class="font-medium text-gray-700">JEJAK Essential</span> memuat hal-hal yang paling esensial.
+          <%= copy[:lead] %>
+        </p>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-5">
+          <%# Daftar tab fitur %>
+          <div class="flex flex-col gap-1.5 md:col-span-2" role="tablist" aria-label="Fitur jejak.pro"
+               data-action="keydown->upgrade-showcase#navigate">
+            <% copy[:points].each_with_index do |point, i| %>
+              <button type="button" role="tab" id="jejak-pro-tab-<%= i %>" aria-controls="jejak-pro-panel-<%= i %>"
+                      aria-selected="<%= i.zero? %>" tabindex="<%= i.zero? ? 0 : -1 %>"
+                      class="group relative flex w-full items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-left ring-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 <%= i.zero? ? 'bg-indigo-50 ring-indigo-200 text-gray-900' : 'ring-transparent text-gray-600 hover:bg-gray-50' %>"
+                      data-upgrade-showcase-target="tab"
+                      data-action="upgrade-showcase#choose"
+                      data-upgrade-showcase-index-param="<%= i %>">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 ring-1 ring-gray-200 transition group-hover:scale-105">
+                  <%= icon.call(point[:icon], "h-4 w-4") %>
+                </span>
+                <span class="min-w-0 flex-1 text-sm font-medium"><%= point[:title] %></span>
+                <span class="text-xs tabular-nums text-gray-400"><%= format("%02d", i + 1) %></span>
+                <span class="absolute inset-x-3 bottom-0 h-0.5 origin-left scale-x-0 rounded-full bg-indigo-500/70"
+                      data-upgrade-showcase-target="progress" aria-hidden="true"></span>
+              </button>
+            <% end %>
+          </div>
+
+          <%# Panel rincian fitur %>
+          <div class="relative md:col-span-3">
+            <% copy[:points].each_with_index do |point, i| %>
+              <div role="tabpanel" id="jejak-pro-panel-<%= i %>" aria-labelledby="jejak-pro-tab-<%= i %>"
+                   class="relative h-full overflow-hidden rounded-xl bg-gray-50 p-5 ring-1 ring-gray-200"
+                   data-upgrade-showcase-target="panel" <%= "hidden" unless i.zero? %>>
+                <div class="pointer-events-none absolute -right-6 -bottom-6 text-indigo-500/10" aria-hidden="true">
+                  <%= icon.call(point[:icon], "h-32 w-32") %>
+                </div>
+                <div class="relative">
+                  <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-indigo-600 ring-1 ring-gray-200 shadow-sm">
+                    <%= icon.call(point[:icon], "h-5 w-5") %>
+                  </span>
+                  <p class="mt-3 text-sm font-semibold text-gray-900"><%= point[:title] %></p>
+                  <p class="mt-1 text-sm leading-relaxed text-gray-600"><%= point[:text] %></p>
+                  <span class="mt-3 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                    Tersedia di jejak.pro
+                  </span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-5 flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-xs text-gray-500">Bila program studi Anda siap melangkah lebih jauh,</p>
+          <%= link_to "https://jejak.pro", target: "_blank", rel: "noopener",
+                class: "group inline-flex items-center gap-1.5 self-start rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 transition hover:text-gray-900 hover:ring-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 sm:self-auto" do %>
+            kenali jejak.pro
+            <span class="transition-transform group-hover:translate-x-0.5" aria-hidden="true">→</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

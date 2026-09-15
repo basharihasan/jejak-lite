@@ -49,7 +49,7 @@
             <div class="py-2 flex items-start gap-3 text-sm <%= 'opacity-50' if d.superseded_at %>">
               <span class="shrink-0 text-xs font-black h-6 w-6 rounded-full flex items-center justify-center <%= level_cls[d.level] %>"><%= d.level %></span>
               <div class="min-w-0">
-                <p class="text-gray-800"><span class="font-semibold"><%= d.competency_item.title %></span> <span class="text-xs text-gray-400">· <%= d.decided_by.full_name %> · <%= l(d.created_at, format: :short) %><%= " · tergantikan" if d.superseded_at %></span></p>
+                <p class="text-gray-800"><span class="font-semibold"><%= d.competency_item.title %></span> <span class="text-xs text-gray-400">· <%= d.decided_by.full_name %> · <%= l(d.created_at, format: :short) %><%= d.revoked? ? " · dicabut (verifikasi dibatalkan)" : (" · tergantikan" if d.superseded_at) %></span></p>
                 <p class="text-xs text-gray-500"><%= d.justification %></p>
               </div>
             </div>

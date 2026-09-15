@@ -7,6 +7,7 @@
   is_instructor         = local_assigns[:is_instructor] || false
   is_config_manager     = local_assigns[:is_config_manager] || false
   pending_verifications = local_assigns[:pending_verifications] || 0
+  pending_activity_verifications = local_assigns[:pending_activity_verifications] || 0
 
   active_class = ->(paths) { Array(paths).any? { |p| request.path == p || request.path.start_with?(p) } }
   unread = unread_notifications_count
@@ -119,6 +120,9 @@
     <%= render "shared/nav_item", label: t("nav.case_validation"), path: clinical_cases_path(scope: "to_verify"),
         active: active_class.call("/clinical_cases") && params[:scope] == "to_verify",
         badge: (pending_verifications.positive? ? (pending_verifications > 9 ? "9+" : pending_verifications) : nil) %>
+    <%= render "shared/nav_item", label: t("nav.activity_validation"), path: activity_logs_path(scope: "to_verify"),
+        active: active_class.call("/activity_logs") && params[:scope] == "to_verify",
+        badge: (pending_activity_verifications.positive? ? (pending_activity_verifications > 9 ? "9+" : pending_activity_verifications) : nil) %>
     <%= render "shared/nav_item", label: t("nav.analytics"), path: analytics_path,
         active: active_class.call("/analitik") %>
     <%= render "shared/nav_item", label: t("nav.student_directory"), path: search_path,

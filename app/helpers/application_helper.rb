@@ -12,4 +12,22 @@ module ApplicationHelper
     else "bg-rose-50 text-rose-700"
     end
   end
+
+  # Logo AIPKI (sponsor pengembangan) dibaca dari public/branding. Berkasnya
+  # disimpan manual oleh pemilik aset; kalau belum ada, partial
+  # shared/_aipki_logo jatuh ke wordmark teks alih-alih gambar rusak.
+  AIPKI_LOGO_CANDIDATES = %w[aipki-logo.png aipki-logo.webp aipki-logo.jpg aipki-logo.svg].freeze
+
+  def aipki_logo_path
+    name = AIPKI_LOGO_CANDIDATES.find { |f| Rails.public_path.join("branding", f).exist? }
+    name && "/branding/#{name}"
+  end
+
+  # Logo Diktisaintek Berdampak (sponsor pengembangan, berdampingan dengan
+  # AIPKI). Tanpa cadangan teks: bila berkasnya tidak ada, logo tidak tampil.
+  DIKTISAINTEK_LOGO_FILE = "Primary_Horizontal-Logo.png"
+
+  def diktisaintek_logo_path
+    "/branding/#{DIKTISAINTEK_LOGO_FILE}" if Rails.public_path.join("branding", DIKTISAINTEK_LOGO_FILE).exist?
+  end
 end

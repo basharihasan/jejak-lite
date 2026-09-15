@@ -28,6 +28,21 @@ class ClinicalCasePolicy < ApplicationPolicy
     verify?
   end
 
+  def reject?
+    verify?
+  end
+
+  # Hanya verifier kasus itu sendiri atau admin yang boleh membatalkan.
+  def cancel_verification?
+    !owner? && record.status == "verified" &&
+      (record.verified_by_id == user.id || user.has_role?("admin"))
+  end
+
+  # Pemilik dan pembimbing yang boleh membuka kasus boleh berdiskusi.
+  def comment?
+    show?
+  end
+
   # Break Glass: siapa pun yang boleh membuka kasus (pemilik, pembimbing/
   # verifier, admin) boleh membukanya — tetapi selalu beralasan & tercatat.
   def break_glass?
@@ -41,6 +56,11 @@ class ClinicalCasePolicy < ApplicationPolicy
   # CBD/Long Case hanya dari kasus milik sendiri yang sudah diajukan/diverifikasi.
   def initiate_assessment?
     owner? && %w[submitted verified].include?(record.status)
+  end
+
+  # Mini-CEX / DOPS dari kasus: aturan yang sama dengan CBD/Long Case.
+  def initiate_workplace_assessment?
+    initiate_assessment?
   end
 
   class Scope < Scope

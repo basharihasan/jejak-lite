@@ -1,0 +1,18 @@
+<%# Logo AIPKI. Latar logo aslinya putih, jadi bingkainya dipaku ke putih
+    literal (bg-[#fff]) — bukan bg-white — supaya retrofit mode gelap di
+    application.css tidak menggelapkannya dan logo tetap terbaca.
+    public/branding/aipki-logo.png = turunan transparan & terpangkas dari
+    aipki-logo.jpg (berkas asli); mix-blend-multiply menjaga bila hanya JPEG
+    yang tersedia, supaya latar putih-keabuannya tidak membentuk kotak. Lokal: img_class (ukuran gambar), frame_class (bingkai). %>
+<% img_class   = local_assigns.fetch(:img_class, "h-12 w-auto") %>
+<% frame_class = local_assigns.fetch(:frame_class, "inline-flex items-center rounded-xl bg-[#fff] px-3 py-2 ring-1 ring-black/5") %>
+<span class="<%= frame_class %>">
+  <% if (logo = aipki_logo_path) %>
+    <%= image_tag logo, alt: "Logo AIPKI — Asosiasi Institusi Pendidikan Kedokteran Indonesia", class: "#{img_class} mix-blend-multiply" %>
+  <% else %>
+    <span class="flex items-center gap-2" role="img" aria-label="AIPKI — Asosiasi Institusi Pendidikan Kedokteran Indonesia">
+      <span class="rounded-md border-2 border-[#d71920] px-2 py-0.5 text-lg font-black italic leading-none tracking-tight text-[#d71920]">AIPKI</span>
+      <span class="max-w-[9rem] text-[9px] font-semibold uppercase leading-tight text-[#1f2937]">Asosiasi Institusi Pendidikan Kedokteran Indonesia</span>
+    </span>
+  <% end %>
+</span>

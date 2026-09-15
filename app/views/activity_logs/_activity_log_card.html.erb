@@ -11,10 +11,14 @@
         <% if activity_log.delivery_mode.present? %>
           <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500"><%= activity_log.delivery_mode_label %></span>
         <% end %>
+        <% if activity_log.verified? %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">✓ Terverifikasi</span>
+        <% end %>
       </div>
       <p class="mt-1.5 font-semibold text-gray-800 truncate"><%= activity_log.title %></p>
       <p class="text-xs text-gray-400 mt-1">
         <%= l(activity_log.activity_date, format: :long) %><% if activity_log.location.present? %> · <%= activity_log.location %><% end %>
+        <% if local_assigns[:show_owner] %> · <%= activity_log.user.full_name %><% end %>
       </p>
       <% if activity_log.competency_items.any? %>
         <div class="mt-1.5 flex flex-wrap gap-1">

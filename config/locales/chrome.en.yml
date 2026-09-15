@@ -1,6 +1,6 @@
 en:
   chrome:
-    brand_subtitle_default: "Jejak Lite"
+    brand_subtitle_default: "JEJAK Essential"
     no_role: "No role yet"
     edit_profile: "Edit Profile"
     search_menu: "Search menu..."
@@ -47,6 +47,7 @@ en:
     competency_map: "Competency Map"
     epa_map: "EPA & Entrustment Map"
     case_validation: "Clinical Case Validation"
+    activity_validation: "Activity Validation"
     analytics: "Analytics Dashboard"
     student_directory: "Student Directory"
     academic_periods: "Academic Periods"

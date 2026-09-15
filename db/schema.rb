@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -74,9 +74,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.datetime "verified_at"
+    t.bigint "verified_by_id"
     t.index ["category"], name: "index_activity_logs_on_category"
     t.index ["user_id", "activity_date"], name: "index_activity_logs_on_user_id_and_activity_date"
     t.index ["user_id"], name: "index_activity_logs_on_user_id"
+    t.index ["verified_by_id"], name: "index_activity_logs_on_verified_by_id"
   end
 
   create_table "app_settings", force: :cascade do |t|
@@ -284,8 +287,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
     t.text "family_history"
     t.text "general_condition"
     t.string "icd10_code"
+    t.text "laboratory_results"
     t.text "learning_points"
     t.text "management"
+    t.text "other_investigations"
     t.text "patient_address"
     t.integer "patient_age"
     t.string "patient_age_group"
@@ -296,6 +301,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
     t.string "patient_occupation"
     t.text "patient_phone"
     t.text "physical_examination"
+    t.text "radiology_results"
     t.boolean "recommend_remediation", default: false, null: false
     t.string "skdi_level"
     t.string "status", default: "draft", null: false
@@ -381,6 +387,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
 
   create_table "dops_evaluations", force: :cascade do |t|
     t.string "case_complexity"
+    t.bigint "clinical_case_id"
     t.bigint "clinical_rotation_id", null: false
     t.string "clinical_setting"
     t.datetime "created_at", null: false
@@ -396,6 +403,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
     t.bigint "student_id", null: false
     t.datetime "updated_at", null: false
     t.string "video_recording_url"
+    t.index ["clinical_case_id"], name: "index_dops_evaluations_on_clinical_case_id"
     t.index ["clinical_rotation_id"], name: "index_dops_evaluations_on_clinical_rotation_id"
     t.index ["evaluator_id"], name: "index_dops_evaluations_on_evaluator_id"
     t.index ["student_id", "evaluated_at"], name: "index_dops_evaluations_on_student_id_and_evaluated_at"
@@ -541,6 +549,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
   create_table "mini_cex_evaluations", force: :cascade do |t|
     t.string "case_complexity"
     t.string "case_description", null: false
+    t.bigint "clinical_case_id"
     t.bigint "clinical_rotation_id", null: false
     t.string "clinical_setting"
     t.datetime "created_at", null: false
@@ -556,6 +565,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
     t.bigint "student_id", null: false
     t.datetime "updated_at", null: false
     t.string "video_recording_url"
+    t.index ["clinical_case_id"], name: "index_mini_cex_evaluations_on_clinical_case_id"
     t.index ["clinical_rotation_id"], name: "index_mini_cex_evaluations_on_clinical_rotation_id"
     t.index ["evaluator_id"], name: "index_mini_cex_evaluations_on_evaluator_id"
     t.index ["student_id", "evaluated_at"], name: "index_mini_cex_evaluations_on_student_id_and_evaluated_at"
@@ -732,6 +742,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
   add_foreign_key "activity_log_competency_tags", "activity_logs"
   add_foreign_key "activity_log_competency_tags", "competency_items"
   add_foreign_key "activity_logs", "users"
+  add_foreign_key "activity_logs", "users", column: "verified_by_id", validate: false
   add_foreign_key "app_settings", "users", column: "updated_by_id"
   add_foreign_key "assessment_blueprint_mappings", "assessment_blueprints"
   add_foreign_key "assessment_blueprint_mappings", "competency_items"
@@ -746,7 +757,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
   add_foreign_key "assessment_form_answers", "assessment_form_fields"
   add_foreign_key "assessment_form_answers", "assessment_form_submissions"
   add_foreign_key "assessment_form_fields", "assessment_form_templates"
-  add_foreign_key "assessment_form_fields", "competency_items", validate: false
+  add_foreign_key "assessment_form_fields", "competency_items"
   add_foreign_key "assessment_form_submissions", "assessment_form_templates"
   add_foreign_key "assessment_form_submissions", "users", column: "respondent_id"
   add_foreign_key "assessment_form_submissions", "users", column: "subject_user_id"
@@ -772,6 +783,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
   add_foreign_key "competency_milestones", "academic_periods"
   add_foreign_key "competency_milestones", "competency_items"
   add_foreign_key "device_push_tokens", "users"
+  add_foreign_key "dops_evaluations", "clinical_cases"
   add_foreign_key "dops_evaluations", "clinical_rotations"
   add_foreign_key "dops_evaluations", "users", column: "evaluator_id"
   add_foreign_key "dops_evaluations", "users", column: "student_id"
@@ -796,6 +808,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_050001) do
   add_foreign_key "learning_units", "study_programs"
   add_foreign_key "logbook_case_targets", "academic_periods"
   add_foreign_key "logbook_case_targets", "study_programs"
+  add_foreign_key "mini_cex_evaluations", "clinical_cases"
   add_foreign_key "mini_cex_evaluations", "clinical_rotations"
   add_foreign_key "mini_cex_evaluations", "users", column: "evaluator_id"
   add_foreign_key "mini_cex_evaluations", "users", column: "student_id"

@@ -17,11 +17,13 @@
   is_config_manager = current_user.has_role?("admin")
   is_instructor = is_dosen || is_preceptor || is_kaprodi || is_admin
   pending_verifications = is_instructor ? ClinicalCase.awaiting_verification.count : 0
+  pending_activity_verifications = is_instructor ? ActivityLog.awaiting_verification.count : 0
   brand_title    = "JEJAK"
   brand_subtitle = current_user.study_program&.name || t("chrome.brand_subtitle_default")
   nav_locals = { is_student: is_student, is_instructor: is_instructor,
                  is_config_manager: is_config_manager,
-                 pending_verifications: pending_verifications }
+                 pending_verifications: pending_verifications,
+                 pending_activity_verifications: pending_activity_verifications }
 %>
 
 <div>

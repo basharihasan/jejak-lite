@@ -50,4 +50,37 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     assert_match "Peta Kompetensi DOPS Anda", response.body
     assert_match "Peta Kompetensi Mini-CEX Anda", response.body
   end
+
+  test "mahasiswa berotasi tanpa kasus baru 2 hari melihat pengingat pencatatan kasus" do
+    siti = users(:siti)
+    siti.clinical_rotations.ongoing.update_all(start_date: 10.days.ago.to_date)
+    siti.clinical_cases.update_all(created_at: 5.days.ago)
+    sign_in siti
+
+    get dashboard_path
+
+    assert_match "hari tidak ada kasus baru yang Anda catat", response.body
+  end
+
+  test "pengingat hilang setelah mahasiswa mencatat kasus hari ini" do
+    siti = users(:siti)
+    siti.clinical_rotations.ongoing.update_all(start_date: 10.days.ago.to_date)
+    siti.clinical_cases.create!(case_date: Date.current, chief_complaint: "Batuk pilek")
+    sign_in siti
+
+    get dashboard_path
+
+    assert_no_match "tidak ada kasus baru yang Anda catat", response.body
+  end
+
+  test "mahasiswa yang baru mulai rotasi hari ini belum ditagih kasus" do
+    siti = users(:siti)
+    siti.clinical_rotations.ongoing.update_all(start_date: Date.current)
+    siti.clinical_cases.delete_all
+    sign_in siti
+
+    get dashboard_path
+
+    assert_no_match "Belum ada satu pun kasus", response.body
+  end
 end

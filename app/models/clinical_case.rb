@@ -3,7 +3,9 @@
 class ClinicalCase < ApplicationRecord
   include ClinicalContextOptions
 
-  STATUSES = %w[draft submitted verified needs_revision].freeze
+  # rejected = final: kasus tidak layak dijadikan bukti (mis. bukan kasus
+  # sungguhan/duplikat) — beda dari needs_revision yang masih bisa diperbaiki.
+  STATUSES = %w[draft submitted verified needs_revision rejected].freeze
   AGE_GROUPS = %w[Anak Dewasa Lansia].freeze
   GENDERS = %w[Laki-laki Perempuan].freeze
 
@@ -32,6 +34,24 @@ class ClinicalCase < ApplicationRecord
     "height_cm" => "TB (cm)"
   }.freeze
 
+  # Judul langkah wizard & pemetaan atribut -> langkah untuk menunjuk galat.
+  WIZARD_STEPS = [
+    "Identitas & Demografi", "Anamnesis, Pemeriksaan Fisik & Tanda Vital", "Pemeriksaan Penunjang",
+    "Diagnosis & Tatalaksana", "Terapi & Resep", "Pembelajaran & Bukti"
+  ].freeze
+  WIZARD_STEP_ATTRIBUTES = {
+    1 => %w[anamnesis general_condition physical_examination family_history vital_signs],
+    2 => %w[laboratory_results radiology_results other_investigations],
+    3 => %w[diagnosis icd10_code skdi_level management],
+    4 => %w[prescription_items],
+    5 => %w[learning_points evidence_files]
+  }.freeze
+
+  def self.wizard_step_for(attribute)
+    name = attribute.to_s.split(".").first
+    WIZARD_STEP_ATTRIBUTES.find { |_step, attrs| attrs.include?(name) }&.first || 0
+  end
+
   belongs_to :user
   belongs_to :verified_by, class_name: "User", optional: true
 
@@ -45,6 +65,8 @@ class ClinicalCase < ApplicationRecord
   has_many :break_glass_accesses, dependent: :destroy
   has_one :patient_consent, dependent: :destroy
   has_many :assessment_instances, dependent: :nullify # CBD / Long Case yang berangkat dari kasus ini
+  has_many :dops_evaluations, dependent: :nullify      # DOPS / Mini-CEX yang diinisiasi dari kasus ini
+  has_many :mini_cex_evaluations, dependent: :nullify
 
   before_save :sync_diagnosis_definition
 
@@ -67,7 +89,7 @@ class ClinicalCase < ApplicationRecord
   scope :awaiting_verification, -> { where(status: "submitted") }
 
   def status_label
-    { "draft" => "Draf", "submitted" => "Menunggu Verifikasi", "verified" => "Terverifikasi", "needs_revision" => "Perlu Revisi" }.fetch(status, status)
+    { "draft" => "Draf", "submitted" => "Menunggu Verifikasi", "verified" => "Terverifikasi", "needs_revision" => "Perlu Revisi", "rejected" => "Ditolak" }.fetch(status, status)
   end
 
   def entrustment_level_label
@@ -116,6 +138,43 @@ class ClinicalCase < ApplicationRecord
       title: "Kasus klinis perlu direvisi", message: comment
     )
   end
+  def reject!(by:, comment:)
+    update!(status: "rejected", verified_by: by, verified_at: Time.current)
+    case_verification_comments.create!(user: by, action: "rejected", body: comment)
+    Notification.notify!(
+      recipient: user, sender: by, notifiable: self,
+      title: "Kasus klinis ditolak", message: comment
+    )
+  end
+
+  # Membatalkan verifikasi: kasus kembali ke antrean "Menunggu Verifikasi" dan
+  # level entrustment EPA yang ditulis verifikasi ini dicabut (keputusan
+  # sebelumnya dipulihkan) — Peta EPA tidak boleh memuat level dari
+  # verifikasi yang sudah dibatalkan.
+  def cancel_verification!(by:, reason:)
+    transaction do
+      update!(status: "submitted", verified_by: nil, verified_at: nil,
+              entrustment_level: nil, recommend_remediation: false)
+      EntrustmentDecision.revoke_for_case!(self)
+      case_verification_comments.create!(user: by, action: "verification_cancelled", body: reason)
+    end
+    Notification.notify!(
+      recipient: user, sender: by, notifiable: self,
+      title: "Verifikasi kasus klinis dibatalkan", message: reason
+    )
+  end
+
+  # Komentar verifikasi tanpa mengubah status — diskusi pemilik ↔ verifier.
+  def add_verification_comment!(by:, body:)
+    comment = case_verification_comments.create!(user: by, action: "commented", body: body)
+    recipient = by.id == user_id ? verified_by : user
+    if recipient && recipient.id != by.id
+      Notification.notify!(recipient: recipient, sender: by, notifiable: self,
+                           title: "Komentar baru pada kasus klinis", message: body)
+    end
+    comment
+  end
+
   # Baris resep yang BENAR-BENAR kosong dibuang diam-diam (mahasiswa menambah
   # baris lalu tidak jadi memakainya); baris yang sudah terisi sebagian tetapi
   # tanpa nama obat DITAHAN dan dilaporkan — isian yang sudah diketik tidak

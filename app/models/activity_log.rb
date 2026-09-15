@@ -5,6 +5,7 @@ class ActivityLog < ApplicationRecord
   DELIVERY_MODES = { "luring" => "Luring", "daring" => "Daring" }.freeze
 
   belongs_to :user
+  belongs_to :verified_by, class_name: "User", optional: true
 
   has_many :activity_log_competency_tags, dependent: :destroy
   has_many :competency_items, through: :activity_log_competency_tags
@@ -15,6 +16,9 @@ class ActivityLog < ApplicationRecord
   validates :category, inclusion: { in: CATEGORIES.keys }
 
   scope :recent, -> { order(activity_date: :desc, created_at: :desc) }
+  scope :owned_by, ->(user) { where(user: user) }
+  scope :awaiting_verification, -> { where(verified_at: nil) }
+  scope :verified, -> { where.not(verified_at: nil) }
   scope :klinis, -> { where(category: "klinis") }
   scope :non_klinis, -> { where(category: "non_klinis") }
   scope :in_month, ->(date) { where(activity_date: date.beginning_of_month..date.end_of_month) }
@@ -26,6 +30,18 @@ class ActivityLog < ApplicationRecord
 
   def category_label
     CATEGORIES.fetch(category, category)
+  end
+
+  def verified?
+    verified_at.present?
+  end
+
+  def verify!(by:)
+    update!(verified_at: Time.current, verified_by: by)
+    Notification.notify!(
+      recipient: user, sender: by, notifiable: self,
+      title: "Kegiatan terverifikasi", message: title
+    )
   end
 
   # Kode acak non-identifikasi (bukan nama/RM pasien) — cuma penanda supaya

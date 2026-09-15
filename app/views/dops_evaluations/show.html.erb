@@ -3,7 +3,9 @@
     <div>
       <div class="flex items-center gap-2">
         <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">DOPS</span>
-        <% if @dops_evaluation.draft? %>
+        <% if @dops_evaluation.requested? %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">Diminta — menunggu penilai</span>
+        <% elsif @dops_evaluation.draft? %>
           <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Draf</span>
         <% else %>
           <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">Terkirim</span>
@@ -19,8 +21,20 @@
              @dops_evaluation.patient_age_group && ClinicalContextOptions::AGE_GROUPS[@dops_evaluation.patient_age_group],
              @dops_evaluation.case_complexity && "Kompleksitas #{ClinicalContextOptions::CASE_COMPLEXITY[@dops_evaluation.case_complexity]}"].compact.join(" · ") %>
       </p>
+      <% if @dops_evaluation.clinical_case && policy(@dops_evaluation.clinical_case).show? %>
+        <%= link_to "Dari kasus: #{@dops_evaluation.clinical_case.chief_complaint} →", clinical_case_path(@dops_evaluation.clinical_case), class: "mt-1 inline-block text-xs font-medium text-indigo-600 hover:underline" %>
+      <% end %>
     </div>
     <div class="flex items-center gap-2 shrink-0">
+      <% if @dops_evaluation.requested? && policy(@dops_evaluation).update? %>
+        <%= link_to "Isi Penilaian", edit_dops_evaluation_path(@dops_evaluation),
+              class: "text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl" %>
+      <% end %>
+      <% if @dops_evaluation.requested? && !policy(@dops_evaluation).update? && policy(@dops_evaluation).destroy? %>
+        <%= button_to "Batalkan Permintaan", dops_evaluation_path(@dops_evaluation), method: :delete,
+              class: "text-sm text-rose-600 hover:underline",
+              form: { data: { turbo_confirm: "Batalkan permintaan ini?" } } %>
+      <% end %>
       <% if @dops_evaluation.draft? && policy(@dops_evaluation).submit? %>
         <%= button_to "Kirim Evaluasi", submit_dops_evaluation_path(@dops_evaluation), method: :patch,
               class: "text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl cursor-pointer" %>

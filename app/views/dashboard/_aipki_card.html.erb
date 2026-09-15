@@ -1,0 +1,20 @@
+<%# Peran AIPKI sebagai sponsor pengembangan — tampil untuk semua peran di
+    Beranda. Logo dari shared/_aipki_logo (cadangan teks bila berkas logo
+    belum disimpan di public/branding). %>
+<div class="mt-5 relative overflow-hidden rounded-2xl bg-red-50 ring-1 ring-red-100 p-5">
+  <div class="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-[#d71920]/10 blur-2xl"></div>
+  <div class="relative flex flex-col gap-4 sm:flex-row sm:items-center">
+    <div class="flex shrink-0 flex-wrap items-stretch gap-2 self-start sm:self-center">
+      <%= render "shared/aipki_logo", img_class: "h-20 w-auto", frame_class: "inline-flex items-center rounded-xl bg-[#fff] px-3 py-2 ring-1 ring-red-100" %>
+      <%= render "shared/diktisaintek_logo", img_class: "h-11 w-auto", frame_class: "inline-flex items-center rounded-xl bg-[#fff] px-4 py-2 ring-1 ring-red-100" %>
+    </div>
+    <div class="min-w-0 flex-1">
+      <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Sponsor Pengembangan</p>
+      <p class="mt-1 text-sm font-semibold text-gray-900">JEJAK Essential dikembangkan dengan dukungan AIPKI</p>
+      <p class="mt-1 text-sm text-gray-600">
+        Asosiasi Institusi Pendidikan Kedokteran Indonesia (AIPKI) mensponsori pengembangan aplikasi ini agar
+        logbook kasus klinis, asesmen, dan peta kompetensi dapat dimanfaatkan oleh institusi pendidikan kedokteran di Indonesia.
+      </p>
+    </div>
+  </div>
+</div>

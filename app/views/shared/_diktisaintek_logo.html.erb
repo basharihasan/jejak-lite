@@ -1,0 +1,11 @@
+<%# Logo Diktisaintek Berdampak — PNG transparan melebar (±3,4:1), jadi
+    tingginya dibuat lebih rendah dari logo AIPKI agar bobot visualnya setara.
+    Bingkai putih literal (bg-[#fff]) sama alasannya dengan shared/_aipki_logo.
+    Lokal: img_class (ukuran gambar), frame_class (bingkai). %>
+<% if (logo = diktisaintek_logo_path) %>
+  <% img_class   = local_assigns.fetch(:img_class, "h-8 w-auto") %>
+  <% frame_class = local_assigns.fetch(:frame_class, "inline-flex items-center rounded-xl bg-[#fff] px-4 py-2 ring-1 ring-black/5") %>
+  <span class="<%= frame_class %>">
+    <%= image_tag logo, alt: "Logo Diktisaintek Berdampak", class: img_class %>
+  </span>
+<% end %>

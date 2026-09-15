@@ -30,6 +30,11 @@ class DashboardController < ApplicationController
     ]
   }.freeze
 
+  # Pengingat pencatatan kasus: mahasiswa yang sedang berotasi klinik dan
+  # tidak mencatat kasus baru dalam N hari kalender terakhir (meniru
+  # DashboardController#load_case_logging_reminder jejak.pro).
+  CASE_LOGGING_GAP_DAYS = 2
+
   def show
     @active_role = current_user.active_role
     @next_steps = ROLE_NEXT_STEPS.fetch(@active_role&.code, ROLE_NEXT_STEPS["mahasiswa"])
@@ -43,6 +48,7 @@ class DashboardController < ApplicationController
     @upcoming_schedules = EvaluationSchedule.for_user(current_user).upcoming.includes(:student, :evaluator).limit(3)
     @pending_assessments = current_user.assessment_instances.awaiting_score.includes(:assessment_event).recent.limit(3)
 
+    load_case_logging_reminder if @active_role&.code == "mahasiswa"
     load_instructor_quick_actions if current_user.instructor?
     load_own_competency_radar
   end
@@ -54,9 +60,24 @@ class DashboardController < ApplicationController
   # menunggu verifikasi) sehingga dosen/preseptor/admin langsung tahu ada
   # yang perlu dikerjakan tanpa membuka tiap halaman satu-satu.
   def load_instructor_quick_actions
-    @draft_evaluations_count = DopsEvaluation.draft.where(evaluator: current_user).count +
-                                MiniCexEvaluation.draft.where(evaluator: current_user).count
+    @draft_evaluations_count = DopsEvaluation.pending_for_evaluator.where(evaluator: current_user).count +
+                                MiniCexEvaluation.pending_for_evaluator.where(evaluator: current_user).count
     @pending_verifications_count = ClinicalCase.awaiting_verification.count
+  end
+
+  # Dihitung per hari kalender (zona aplikasi), bukan jam bergulir, supaya
+  # pengingat muncul di pergantian hari. Yang baru mulai rotasi dalam jendela
+  # itu belum ditagih.
+  def load_case_logging_reminder
+    @case_logging_gap = nil
+    since = (Date.current - (CASE_LOGGING_GAP_DAYS - 1)).beginning_of_day
+    started = current_user.clinical_rotations.ongoing.minimum(:start_date)
+    return if started.nil? || started >= since.to_date
+
+    last_at = current_user.clinical_cases.maximum(:created_at)
+    return if last_at.present? && last_at >= since
+
+    @case_logging_gap = { last_at: last_at, days: last_at && (Date.current - last_at.to_date).to_i }
   end
 
   def load_own_competency_radar

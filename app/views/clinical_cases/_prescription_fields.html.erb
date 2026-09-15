@@ -1,7 +1,10 @@
 <%# Satu baris resep. Dipakai untuk baris yang sudah ada maupun sebagai
     cetakan baris baru (index NEW_RECORD diganti Stimulus). %>
 <% cell = "block w-full rounded-lg border-0 py-2 px-2.5 text-sm text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
-<div class="rounded-xl bg-white ring-1 ring-gray-200 p-3" data-prescription-target="row">
+<div class="rounded-xl bg-white ring-1 <%= f.object.errors.any? ? "ring-rose-400" : "ring-gray-200" %> p-3" data-prescription-target="row">
+  <% if f.object.errors.any? %>
+    <p class="mb-2 text-xs font-semibold text-rose-700">Baris ini bermasalah: <%= f.object.errors.full_messages.to_sentence %></p>
+  <% end %>
   <%= f.hidden_field :id %>
   <%= f.hidden_field :_destroy, value: "0" %>
   <div class="grid grid-cols-2 sm:grid-cols-12 gap-2">

@@ -41,9 +41,21 @@ class ActivityLogsControllerTest < ActionDispatch::IntegrationTest
     assert_equal users(:budi), log.user
   end
 
-  test "tidak bisa melihat kegiatan milik orang lain" do
+  test "pengajar bisa melihat (untuk memverifikasi) kegiatan mahasiswa lain, tapi tidak bisa menyunting" do
     get activity_log_path(activity_logs(:kegiatan_siti))
-    assert_response :not_found
+    assert_response :success
+    assert_no_match "Sunting", response.body
+  end
+
+  test "mahasiswa lain (bukan pengajar) tidak bisa melihat kegiatan milik orang lain" do
+    sign_out users(:budi)
+    sign_in users(:siti)
+    other = User.create!(full_name: "Mahasiswa Lain", email: "mhs.lain@example.com", password: "password123", confirmed_at: Time.current)
+    other.roles << roles(:mahasiswa)
+    log = other.activity_logs.create!(title: "Kegiatan rahasia", category: "non_klinis", activity_date: Date.current)
+
+    get activity_log_path(log)
+    assert_redirected_to root_path
   end
 
   test "generate_patient_code membuat kode untuk kegiatan klinis" do

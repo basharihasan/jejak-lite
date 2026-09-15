@@ -48,6 +48,22 @@ class EntrustmentDecision < ApplicationRecord
     end
   end
 
+  # Verifikasi kasus dibatalkan: keputusan TERKINI yang lahir dari kasus itu
+  # dicabut (superseded_at tanpa superseded_by = dicabut, bukan digantikan)
+  # dan keputusan yang tadinya digantikannya dipulihkan menjadi terkini.
+  def self.revoke_for_case!(clinical_case)
+    transaction do
+      current.where(clinical_case: clinical_case).find_each do |decision|
+        where(superseded_by_id: decision.id).update_all(superseded_by_id: nil, superseded_at: nil)
+        decision.update_columns(superseded_at: Time.current)
+      end
+    end
+  end
+
+  def revoked?
+    superseded_at.present? && superseded_by_id.nil?
+  end
+
   # Peta EPA seorang mahasiswa: [ranah, keputusan terkini atau nil] untuk
   # semua ranah kerangka kompetensi.
   def self.map_for(student, framework)

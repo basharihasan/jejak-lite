@@ -8,13 +8,20 @@ class CaseVerificationComment < ApplicationRecord
   ACTIONS = {
     "submitted" => "Dikirim untuk Verifikasi",
     "verified" => "Diverifikasi",
-    "revision_requested" => "Diminta Revisi"
+    "revision_requested" => "Diminta Revisi",
+    "rejected" => "Ditolak",
+    "verification_cancelled" => "Verifikasi Dibatalkan",
+    "commented" => "Komentar"
   }.freeze
+
+  # Aksi yang wajib beralasan: mahasiswa harus tahu apa yang salah.
+  BODY_REQUIRED = %w[revision_requested rejected verification_cancelled commented].freeze
 
   belongs_to :clinical_case
   belongs_to :user
 
   validates :action, inclusion: { in: ACTIONS.keys }
+  validates :body, presence: { message: "wajib diisi" }, if: -> { BODY_REQUIRED.include?(action) }
 
   scope :chronological, -> { order(:created_at) }
 

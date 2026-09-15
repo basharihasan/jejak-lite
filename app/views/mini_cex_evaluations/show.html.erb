@@ -3,12 +3,16 @@
     <div>
       <div class="flex items-center gap-2">
         <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">Mini-CEX</span>
-        <% if @mini_cex_evaluation.draft? %>
+        <% if @mini_cex_evaluation.requested? %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">Diminta — menunggu penilai</span>
+        <% elsif @mini_cex_evaluation.draft? %>
           <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Draf</span>
         <% else %>
           <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">Terkirim</span>
         <% end %>
-        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"><%= @mini_cex_evaluation.global_rating_label %></span>
+        <% if @mini_cex_evaluation.global_rating.present? %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"><%= @mini_cex_evaluation.global_rating_label %></span>
+        <% end %>
       </div>
       <h1 class="text-xl font-bold text-gray-900 mt-2"><%= @mini_cex_evaluation.case_description %></h1>
       <p class="text-sm text-gray-400 mt-1">
@@ -20,8 +24,20 @@
              @mini_cex_evaluation.patient_age_group && ClinicalContextOptions::AGE_GROUPS[@mini_cex_evaluation.patient_age_group],
              @mini_cex_evaluation.case_complexity && "Kompleksitas #{ClinicalContextOptions::CASE_COMPLEXITY[@mini_cex_evaluation.case_complexity]}"].compact.join(" · ") %>
       </p>
+      <% if @mini_cex_evaluation.clinical_case && policy(@mini_cex_evaluation.clinical_case).show? %>
+        <%= link_to "Dari kasus: #{@mini_cex_evaluation.clinical_case.chief_complaint} →", clinical_case_path(@mini_cex_evaluation.clinical_case), class: "mt-1 inline-block text-xs font-medium text-indigo-600 hover:underline" %>
+      <% end %>
     </div>
     <div class="flex items-center gap-2 shrink-0">
+      <% if @mini_cex_evaluation.requested? && policy(@mini_cex_evaluation).update? %>
+        <%= link_to "Isi Penilaian", edit_mini_cex_evaluation_path(@mini_cex_evaluation),
+              class: "text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl" %>
+      <% end %>
+      <% if @mini_cex_evaluation.requested? && !policy(@mini_cex_evaluation).update? && policy(@mini_cex_evaluation).destroy? %>
+        <%= button_to "Batalkan Permintaan", mini_cex_evaluation_path(@mini_cex_evaluation), method: :delete,
+              class: "text-sm text-rose-600 hover:underline",
+              form: { data: { turbo_confirm: "Batalkan permintaan ini?" } } %>
+      <% end %>
       <% if @mini_cex_evaluation.draft? && policy(@mini_cex_evaluation).submit? %>
         <%= button_to "Kirim Evaluasi", submit_mini_cex_evaluation_path(@mini_cex_evaluation), method: :patch,
               class: "text-sm bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-xl cursor-pointer" %>

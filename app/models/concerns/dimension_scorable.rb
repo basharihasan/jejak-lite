@@ -16,17 +16,25 @@ module DimensionScorable
   extend ActiveSupport::Concern
 
   SCORE_RANGE = (1..9).freeze
-  STATUSES = %w[draft submitted].freeze
+  # requested = diinisiasi mahasiswa dari kasus, menunggu penilai mengisi
+  # rubrik; belum ada skor sehingga aturan dimensi wajib belum berlaku.
+  STATUSES = %w[requested draft submitted].freeze
+  STATUS_LABELS = { "requested" => "Diminta", "draft" => "Draf", "submitted" => "Terkirim" }.freeze
   VIDEO_URL_FORMAT = %r{\Ahttps?://}i
 
   included do
     validates :evaluated_at, presence: true
     validates :status, inclusion: { in: STATUSES }
     validates :video_recording_url, format: { with: VIDEO_URL_FORMAT }, allow_blank: true
-    validate :required_dimensions_scored
+    validate :required_dimensions_scored, unless: :requested?
     validate :scores_in_range
 
     scope :draft, -> { where(status: "draft") }
+    scope :requested, -> { where(status: "requested") }
+    # Pekerjaan penilai yang belum selesai: permintaan mahasiswa + draf.
+    scope :pending_for_evaluator, -> { where(status: %w[requested draft]) }
+
+    belongs_to :clinical_case, optional: true
     scope :submitted, -> { where(status: "submitted") }
 
     after_create_commit :notify_student, if: :submitted?
@@ -45,6 +53,14 @@ module DimensionScorable
 
   def draft?
     status == "draft"
+  end
+
+  def requested?
+    status == "requested"
+  end
+
+  def status_label
+    STATUS_LABELS.fetch(status, status)
   end
 
   def submitted?

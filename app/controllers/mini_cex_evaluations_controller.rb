@@ -44,7 +44,10 @@ class MiniCexEvaluationsController < ApplicationController
 
   def destroy
     authorize @mini_cex_evaluation
+    clinical_case = @mini_cex_evaluation.clinical_case
     @mini_cex_evaluation.destroy
+    return redirect_to(clinical_case_path(clinical_case), notice: "Permintaan Mini-CEX dibatalkan.", status: :see_other) if clinical_case && @mini_cex_evaluation.student_id == current_user.id
+
     redirect_to assessments_path, notice: "Evaluasi Mini-CEX dihapus.", status: :see_other
   end
 

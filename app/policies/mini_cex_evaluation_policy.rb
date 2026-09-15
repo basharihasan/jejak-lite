@@ -15,8 +15,10 @@ class MiniCexEvaluationPolicy < ApplicationPolicy
   end
   alias edit? update?
 
+  # Penilai/admin menghapus; mahasiswa hanya membatalkan permintaannya
+  # sendiri selama penilai belum mulai mengisi.
   def destroy?
-    update?
+    update? || (record.student_id == user.id && record.requested?)
   end
   alias submit? update?
 

@@ -69,13 +69,14 @@ class ClinicalCasesControllerTest < ActionDispatch::IntegrationTest
     assert_in_delta 22.0, kasus.bmi, 0.1
   end
 
-  test "halaman form kasus klinis menampilkan wizard 4 langkah" do
+  test "halaman form kasus klinis menampilkan wizard 6 langkah dengan Simpan Draf di setiap langkah" do
     sign_in users(:siti)
     get new_clinical_case_path
 
     assert_response :success
     assert_select "[data-controller='wizard']"
-    assert_select "[data-wizard-target='step']", count: 4
+    assert_select "[data-wizard-target='step']", count: 6
+    assert_select "input[type=submit][value='Simpan sebagai Draf']:not([hidden])"
   end
 
   test "mahasiswa mengirim draf untuk verifikasi" do

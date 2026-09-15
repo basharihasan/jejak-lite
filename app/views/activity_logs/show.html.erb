@@ -1,15 +1,26 @@
 <div class="max-w-2xl">
   <div class="flex items-center justify-between">
     <div>
-      <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= @activity_log.category == "klinis" ? "bg-sky-50 text-sky-700" : "bg-emerald-50 text-emerald-700" %>">
-        <%= @activity_log.category_label %>
-      </span>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= @activity_log.category == "klinis" ? "bg-sky-50 text-sky-700" : "bg-emerald-50 text-emerald-700" %>">
+          <%= @activity_log.category_label %>
+        </span>
+        <% if @activity_log.verified? %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">✓ Terverifikasi</span>
+        <% else %>
+          <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Menunggu Verifikasi</span>
+        <% end %>
+      </div>
       <h1 class="text-xl font-bold text-gray-900 mt-2"><%= @activity_log.title %></h1>
       <p class="text-sm text-gray-400 mt-1">
         <%= l(@activity_log.activity_date, format: :long) %><%= " · #{@activity_log.activity_type}" if @activity_log.activity_type.present? %>
         <%= " · #{@activity_log.location}" if @activity_log.location.present? %>
         <%= " · #{@activity_log.delivery_mode_label}" if @activity_log.delivery_mode.present? %>
+        <% if @activity_log.user_id != current_user.id %> · dicatat oleh <%= @activity_log.user.full_name %><% end %>
       </p>
+      <% if @activity_log.verified? %>
+        <p class="text-xs text-emerald-600 mt-1">Diverifikasi oleh <%= @activity_log.verified_by.full_name %> · <%= l(@activity_log.verified_at, format: :long) %></p>
+      <% end %>
       <% if @activity_log.competency_items.any? %>
         <div class="mt-2 flex flex-wrap gap-1">
           <% @activity_log.competency_items.each do |item| %>
@@ -19,10 +30,16 @@
       <% end %>
     </div>
     <div class="flex items-center gap-2 shrink-0">
-      <%= link_to "Sunting", edit_activity_log_path(@activity_log), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
-      <%= button_to "Hapus", activity_log_path(@activity_log), method: :delete,
-            class: "text-sm text-rose-600 hover:underline",
-            form: { data: { turbo_confirm: "Hapus kegiatan ini?" } } %>
+      <% if policy(@activity_log).verify? %>
+        <%= button_to "Verifikasi", verify_activity_log_path(@activity_log), method: :patch,
+              class: "text-sm bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-xl cursor-pointer" %>
+      <% end %>
+      <% if policy(@activity_log).update? %>
+        <%= link_to "Sunting", edit_activity_log_path(@activity_log), class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
+        <%= button_to "Hapus", activity_log_path(@activity_log), method: :delete,
+              class: "text-sm text-rose-600 hover:underline",
+              form: { data: { turbo_confirm: "Hapus kegiatan ini?" } } %>
+      <% end %>
     </div>
   </div>
 

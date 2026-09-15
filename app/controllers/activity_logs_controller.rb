@@ -2,12 +2,17 @@
 
 class ActivityLogsController < ApplicationController
   before_action :authenticate_user!, except: %i[feed]
-  before_action :set_activity_log, only: %i[show edit update destroy generate_patient_code]
+  before_action :set_activity_log, only: %i[show edit update destroy generate_patient_code verify]
 
+  # scope=to_verify (pengajar saja): kegiatan siapa pun yang belum
+  # diverifikasi, meniru tab "Perlu Diverifikasi" ClinicalCasesController.
   def index
+    @scope = params[:scope] == "to_verify" && current_user.can_verify_clinical_cases? ? "to_verify" : "mine"
     @category = params[:category] if ActivityLog::CATEGORIES.key?(params[:category])
     @competency_item_id = params[:competency_item_id].presence
-    scope = current_user.activity_logs.recent
+
+    base = @scope == "to_verify" ? ActivityLog.awaiting_verification.includes(:user) : current_user.activity_logs
+    scope = base.recent
     scope = scope.where(category: @category) if @category
     scope = scope.tagged_with(@competency_item_id) if @competency_item_id
     @activity_logs_by_date = scope.includes(:competency_items).group_by(&:activity_date)
@@ -15,6 +20,13 @@ class ActivityLogsController < ApplicationController
   end
 
   def show
+    authorize @activity_log
+  end
+
+  def verify
+    authorize @activity_log
+    @activity_log.verify!(by: current_user)
+    redirect_to @activity_log, notice: "Kegiatan diverifikasi."
   end
 
   def new
@@ -34,10 +46,12 @@ class ActivityLogsController < ApplicationController
   end
 
   def edit
+    authorize @activity_log
     load_form_collections
   end
 
   def update
+    authorize @activity_log
     if @activity_log.update(activity_log_params)
       redirect_to @activity_log, notice: "Kegiatan berhasil diperbarui."
     else
@@ -47,11 +61,13 @@ class ActivityLogsController < ApplicationController
   end
 
   def destroy
+    authorize @activity_log
     @activity_log.destroy
     redirect_to activity_logs_path, notice: "Kegiatan dihapus.", status: :see_other
   end
 
   def generate_patient_code
+    authorize @activity_log, :update?
     @activity_log.ensure_patient_code!
     redirect_to @activity_log, notice: "Kode pasien dibuat."
   end
@@ -82,7 +98,7 @@ class ActivityLogsController < ApplicationController
   private
 
   def set_activity_log
-    @activity_log = current_user.activity_logs.find(params[:id])
+    @activity_log = ActivityLog.find(params[:id])
   end
 
   def activity_log_params
@@ -105,7 +121,7 @@ class ActivityLogsController < ApplicationController
   end
 
   def build_ics(user, logs)
-    lines = [ "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Jejak Lite//Logbook//ID", "CALSCALE:GREGORIAN" ]
+    lines = [ "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//JEJAK Essential//Logbook//ID", "CALSCALE:GREGORIAN" ]
     logs.each do |log|
       lines.concat([
         "BEGIN:VEVENT",

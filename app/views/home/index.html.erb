@@ -1,11 +1,354 @@
-<div class="text-center py-20">
-  <h1 class="text-3xl font-bold text-gray-900">Jejak Lite</h1>
-  <p class="mt-3 text-gray-500">Versi ringan Jejak — logbook kegiatan, komunitas, dan asesmen dasar.</p>
+<% content_for :title, "JEJAK Essential — Ekosistem Pendidikan Klinis Longitudinal" %>
+<% content_for :head do %>
+  <meta property="og:title" content="JEJAK Essential">
+  <meta property="og:description" content="Logbook kasus klinis, asesmen, dan peta kompetensi untuk pendidikan kedokteran — dikembangkan dengan dukungan AIPKI.">
+  <style>
+    html { scroll-behavior: smooth; }
+    .je-grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 75%);
+    }
+  </style>
+<% end %>
 
-  <div class="mt-8 flex justify-center gap-3">
-    <%= link_to "Masuk", new_user_session_path,
-          class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm" %>
-    <%= link_to "Daftar", new_user_registration_path,
-          class: "border border-gray-300 hover:bg-gray-50 font-semibold px-5 py-2.5 rounded-xl text-sm" %>
-  </div>
+<%
+  pillars = [
+    { tag: "Pilar A", title: "Logbook Kasus Klinis",
+      body: "Catat kasus dan kegiatan harian sejak tahun preklinik hingga profesi, lalu verifikasi oleh dosen atau preseptor.",
+      points: [ "Privacy Mode menyala bawaan & Break Glass beraudit", "Persetujuan pasien lewat QR", "Target kasus FKTP / FKRTL" ],
+      tone: "indigo" },
+    { tag: "Pilar B", title: "Asesmen Terintegrasi",
+      body: "Satu tempat untuk asesmen akademik dan asesmen di tempat kerja, lengkap dengan umpan balik yang tercatat.",
+      points: [ "14 jenis asesmen — DOPS, Mini-CEX, CBD, Long Case, CBT, OSCE", "Impor hasil lewat CSV berpemetaan kolom", "Keputusan entrustment EPA tingkat 1–5" ],
+      tone: "emerald" },
+    { tag: "Pilar C", title: "Peta Kompetensi",
+      body: "Ubah catatan dan nilai menjadi gambaran perkembangan kompetensi setiap mahasiswa dari waktu ke waktu.",
+      points: [ "Nilai blok terbobot dari komponen yang sudah dinilai", "Persentil kohort PSSK & PSPD", "Portofolio longitudinal per mahasiswa" ],
+      tone: "amber" }
+  ]
+  tone_classes = {
+    "indigo"  => { chip: "bg-indigo-50 text-indigo-700", dot: "bg-indigo-500", bar: "from-indigo-500 to-violet-500" },
+    "emerald" => { chip: "bg-emerald-50 text-emerald-700", dot: "bg-emerald-500", bar: "from-emerald-500 to-teal-500" },
+    "amber"   => { chip: "bg-amber-50 text-amber-700", dot: "bg-amber-500", bar: "from-amber-500 to-orange-500" }
+  }
+  journey = [
+    [ "Catat", "Mahasiswa mencatat kasus, kegiatan, dan refleksi." ],
+    [ "Verifikasi", "Dosen & preseptor memvalidasi serta memberi umpan balik." ],
+    [ "Nilai", "Asesmen akademik dan klinis masuk ke satu profil." ],
+    [ "Petakan", "Kompetensi dan tingkat entrustment terlihat utuh." ]
+  ]
+  audiences = [
+    [ "Mahasiswa", "Logbook, jadwal rotasi, asesmen menunggu, jurnal umpan balik, dan portofolio pribadi." ],
+    [ "Dosen & Preseptor", "Validasi kasus, penilaian DOPS/Mini-CEX berbasis rubrik, dan direktori mahasiswa." ],
+    [ "Kaprodi", "Dashboard analitik kohort, capaian kompetensi, dan peta EPA program studi." ],
+    [ "Admin Prodi", "Periode akademik, pengguna & impor CSV, event asesmen, serta master kurikulum." ]
+  ]
+  safeguards = [
+    [ "Identitas terenkripsi", "Identitas pasien disimpan terenkripsi di basis data." ],
+    [ "Privacy Mode bawaan", "Data identitas tersamarkan kecuali benar-benar dibutuhkan." ],
+    [ "Break Glass beraudit", "Akses darurat berbatas waktu dan setiap aksesnya tercatat." ],
+    [ "Persetujuan pasien", "Persetujuan dikumpulkan lewat tautan QR yang mudah dipakai." ]
+  ]
+%>
+
+<div class="bg-white text-gray-900">
+
+  <%# ── Navigasi ─────────────────────────────────────────────── %>
+  <header class="absolute inset-x-0 top-0 z-20">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:px-8">
+      <%= link_to root_path, class: "flex items-center gap-2.5" do %>
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500 shadow-lg shadow-indigo-900/40">
+          <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+        </span>
+        <span class="leading-none">
+          <span class="block text-base font-extrabold tracking-tight text-white">JEJAK</span>
+          <span class="block text-[10px] font-semibold uppercase tracking-[0.25em] text-indigo-300">Essential</span>
+        </span>
+      <% end %>
+
+      <div class="hidden items-center gap-7 text-sm font-medium text-slate-300 md:flex">
+        <a href="#fitur" class="hover:text-white">Fitur</a>
+        <a href="#pengguna" class="hover:text-white">Untuk Siapa</a>
+        <a href="#keamanan" class="hover:text-white">Keamanan</a>
+        <a href="#aipki" class="hover:text-white">AIPKI</a>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <%= link_to "Masuk", new_user_session_path, class: "rounded-xl px-4 py-2 text-sm font-semibold text-white hover:bg-white/10" %>
+        <%= link_to "Daftar", new_user_registration_path, class: "hidden rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/20 sm:inline-block" %>
+      </div>
+    </nav>
+  </header>
+
+  <%# ── Hero ─────────────────────────────────────────────────── %>
+  <section class="relative overflow-hidden bg-slate-950">
+    <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-950 to-slate-950"></div>
+    <div class="pointer-events-none absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-indigo-600/25 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-[#d71920]/15 blur-3xl"></div>
+    <div class="je-grid-bg pointer-events-none absolute inset-0"></div>
+
+    <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pb-20 pt-32 sm:px-6 lg:grid-cols-2 lg:px-8 lg:pb-28 lg:pt-40">
+      <div>
+        <a href="#aipki" class="inline-flex items-center gap-2 rounded-full bg-white/5 py-1 pl-1 pr-3 text-xs font-medium text-slate-300 ring-1 ring-white/10 hover:bg-white/10">
+          <span class="rounded-full bg-[#d71920] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">AIPKI</span>
+          Dikembangkan dengan dukungan AIPKI
+          <span aria-hidden="true">→</span>
+        </a>
+
+        <h1 class="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+          Jejak belajar klinis,
+          <span class="bg-gradient-to-r from-indigo-300 via-sky-300 to-emerald-300 bg-clip-text text-transparent">utuh dari hari pertama.</span>
+        </h1>
+        <p class="mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
+          <strong class="font-semibold text-white">JEJAK Essential</strong> menyatukan logbook kasus klinis, asesmen,
+          dan peta kompetensi dalam satu ekosistem longitudinal — untuk mahasiswa, dosen, preseptor,
+          dan pengelola program studi kedokteran.
+        </p>
+
+        <div class="mt-9 flex flex-wrap items-center gap-3">
+          <%= link_to new_user_session_path, class: "inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/50 hover:bg-indigo-400" do %>
+            Masuk ke JEJAK <span aria-hidden="true">→</span>
+          <% end %>
+          <a href="#fitur" class="rounded-xl px-6 py-3 text-sm font-semibold text-slate-200 ring-1 ring-white/15 hover:bg-white/5">Lihat fitur</a>
+        </div>
+
+        <div class="mt-12">
+          <span class="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Sponsor pengembangan</span>
+          <div class="mt-3 flex flex-wrap items-stretch gap-3">
+            <%= render "shared/aipki_logo", img_class: "h-16 w-auto", frame_class: "inline-flex items-center rounded-xl bg-[#fff] px-3 py-1.5 ring-1 ring-black/5" %>
+            <%= render "shared/diktisaintek_logo", img_class: "h-10 w-auto", frame_class: "inline-flex items-center rounded-xl bg-[#fff] px-4 py-1.5 ring-1 ring-black/5" %>
+          </div>
+        </div>
+      </div>
+
+      <%# Pratinjau antarmuka — ilustrasi, bukan data sungguhan. %>
+      <div class="relative" aria-hidden="true">
+        <div class="absolute -inset-4 rounded-[2rem] bg-gradient-to-tr from-indigo-500/20 to-emerald-400/10 blur-2xl"></div>
+        <div class="relative rounded-3xl bg-slate-900/80 p-5 shadow-2xl ring-1 ring-white/10 backdrop-blur">
+          <div class="flex items-center justify-between">
+            <div class="flex gap-1.5">
+              <span class="h-2.5 w-2.5 rounded-full bg-rose-400/80"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-amber-400/80"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-emerald-400/80"></span>
+            </div>
+            <span class="text-[10px] font-medium text-slate-500">Beranda · Mahasiswa</span>
+          </div>
+
+          <div class="mt-5 grid grid-cols-3 gap-3">
+            <div class="col-span-1 rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+              <p class="text-[10px] font-semibold uppercase text-slate-400">Kasus</p>
+              <p class="mt-1 text-2xl font-bold text-white">128</p>
+              <p class="text-[10px] text-emerald-300">+12 bulan ini</p>
+            </div>
+            <div class="col-span-2 rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+              <p class="text-[10px] font-semibold uppercase text-slate-400">Target kasus FKTP</p>
+              <div class="mt-3 h-2 rounded-full bg-white/10"><div class="h-2 w-[72%] rounded-full bg-gradient-to-r from-indigo-400 to-sky-400"></div></div>
+              <div class="mt-2 flex justify-between text-[10px] text-slate-400"><span>72%</span><span>Stase Ilmu Penyakit Dalam</span></div>
+            </div>
+          </div>
+
+          <div class="mt-3 grid grid-cols-5 gap-3">
+            <div class="col-span-3 rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+              <p class="text-[10px] font-semibold uppercase text-slate-400">Tingkat Entrustment EPA</p>
+              <div class="mt-3 space-y-2.5">
+                <% [ [ "Anamnesis", "w-4/5", "4" ], [ "Pemeriksaan fisik", "w-3/5", "3" ], [ "Tata laksana", "w-2/5", "2" ] ].each do |label, width, level| %>
+                  <div>
+                    <div class="flex justify-between text-[10px] text-slate-300"><span><%= label %></span><span>Level <%= level %></span></div>
+                    <div class="mt-1 h-1.5 rounded-full bg-white/10"><div class="h-1.5 <%= width %> rounded-full bg-emerald-400"></div></div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="col-span-2 flex flex-col justify-between rounded-2xl bg-white/5 p-4 ring-1 ring-white/10">
+              <p class="text-[10px] font-semibold uppercase text-slate-400">Mini-CEX</p>
+              <svg viewBox="0 0 100 100" class="mx-auto h-20 w-20">
+                <polygon points="50,8 90,38 75,88 25,88 10,38" fill="none" stroke="rgba(255,255,255,.12)" />
+                <polygon points="50,22 78,40 68,76 32,80 22,42" fill="rgba(129,140,248,.35)" stroke="#818cf8" stroke-width="1.5" />
+              </svg>
+              <p class="text-center text-[10px] text-slate-400">Rata-rata 7,4</p>
+            </div>
+          </div>
+
+          <div class="mt-3 flex items-center gap-3 rounded-2xl bg-amber-400/10 p-3 ring-1 ring-amber-300/20">
+            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/20 text-sm">📝</span>
+            <div class="min-w-0">
+              <p class="truncate text-xs font-semibold text-amber-100">DOPS — Pemasangan infus</p>
+              <p class="text-[10px] text-amber-200/70">Menunggu penilaian preseptor</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Pita sponsor ─────────────────────────────────────────── %>
+  <section class="border-b border-gray-100 bg-white">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-center gap-4 px-4 py-8 text-center sm:flex-row sm:gap-8 sm:px-6 sm:text-left lg:px-8">
+      <p class="text-sm text-gray-500">Pengembangan aplikasi ini disponsori oleh</p>
+      <div class="flex flex-wrap items-stretch justify-center gap-3">
+        <%= render "shared/aipki_logo", img_class: "h-20 w-auto", frame_class: "inline-flex items-center rounded-2xl bg-[#fff] px-4 py-1 ring-1 ring-gray-200" %>
+        <%= render "shared/diktisaintek_logo", img_class: "h-12 w-auto", frame_class: "inline-flex items-center rounded-2xl bg-[#fff] px-5 py-1 ring-1 ring-gray-200" %>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Tiga pilar ───────────────────────────────────────────── %>
+  <section id="fitur" class="scroll-mt-8 bg-slate-50 py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Tiga pilar</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Semua yang esensial untuk pendidikan klinis</h2>
+        <p class="mt-4 text-gray-600">Fokus pada inti: mencatat, menilai, dan memetakan kompetensi — tanpa kerumitan yang tidak dibutuhkan program studi.</p>
+      </div>
+
+      <div class="mt-14 grid gap-6 md:grid-cols-3">
+        <% pillars.each do |pillar| %>
+          <% tone = tone_classes[pillar[:tone]] %>
+          <div class="relative overflow-hidden rounded-3xl bg-white p-7 shadow-sm ring-1 ring-gray-200">
+            <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r <%= tone[:bar] %>"></div>
+            <span class="inline-block rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide <%= tone[:chip] %>"><%= pillar[:tag] %></span>
+            <h3 class="mt-4 text-xl font-bold text-gray-900"><%= pillar[:title] %></h3>
+            <p class="mt-2 text-sm leading-relaxed text-gray-600"><%= pillar[:body] %></p>
+            <ul class="mt-5 space-y-2.5">
+              <% pillar[:points].each do |point| %>
+                <li class="flex gap-2.5 text-sm text-gray-700">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full <%= tone[:dot] %>"></span>
+                  <span><%= point %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Alur longitudinal ────────────────────────────────────── %>
+  <section class="bg-white py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid items-center gap-12 lg:grid-cols-5">
+        <div class="lg:col-span-2">
+          <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Longitudinal</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-gray-900">Satu alur, dari catatan harian sampai keputusan kompetensi</h2>
+          <p class="mt-4 text-gray-600">Setiap kasus yang dicatat, setiap umpan balik, dan setiap nilai menyambung ke profil mahasiswa yang sama — PSSK maupun PSPD.</p>
+        </div>
+        <ol class="grid gap-4 sm:grid-cols-2 lg:col-span-3">
+          <% journey.each_with_index do |(title, body), i| %>
+            <li class="rounded-2xl bg-slate-50 p-6 ring-1 ring-gray-200">
+              <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white"><%= i + 1 %></span>
+              <p class="mt-4 font-semibold text-gray-900"><%= title %></p>
+              <p class="mt-1 text-sm text-gray-600"><%= body %></p>
+            </li>
+          <% end %>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Untuk siapa ──────────────────────────────────────────── %>
+  <section id="pengguna" class="scroll-mt-8 bg-slate-50 py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Untuk siapa</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Satu akun, menu mengikuti peran</h2>
+        <p class="mt-4 text-gray-600">Seseorang bisa memegang beberapa peran sekaligus dan berganti peran kapan saja; menu yang tampil menyesuaikan peran aktif.</p>
+      </div>
+      <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <% audiences.each do |title, body| %>
+          <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+            <p class="font-semibold text-gray-900"><%= title %></p>
+            <p class="mt-2 text-sm leading-relaxed text-gray-600"><%= body %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Keamanan ─────────────────────────────────────────────── %>
+  <section id="keamanan" class="scroll-mt-8 bg-slate-950 py-20 sm:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-12 lg:grid-cols-2">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-widest text-emerald-300">Privasi pasien</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-white">Data pasien dilindungi sejak rancangan</h2>
+          <p class="mt-4 text-slate-400">Pendidikan klinis menyentuh data yang sensitif. JEJAK Essential memperlakukannya dengan hati-hati secara bawaan, bukan sebagai pengaturan tambahan.</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <% safeguards.each do |title, body| %>
+            <div class="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
+              <p class="font-semibold text-white"><%= title %></p>
+              <p class="mt-1.5 text-sm text-slate-400"><%= body %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Peran AIPKI ──────────────────────────────────────────── %>
+  <section id="aipki" class="scroll-mt-8 bg-white py-20 sm:py-24">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="relative overflow-hidden rounded-[2rem] bg-red-50 p-8 ring-1 ring-red-100 sm:p-12">
+        <div class="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-[#d71920]/10 blur-2xl"></div>
+        <div class="relative grid items-center gap-10 lg:grid-cols-5">
+          <div class="flex justify-center lg:col-span-2">
+            <%= render "shared/aipki_logo", img_class: "h-40 w-auto sm:h-48", frame_class: "inline-flex items-center justify-center rounded-3xl bg-[#fff] p-6 shadow-sm ring-1 ring-red-100" %>
+          </div>
+          <div class="lg:col-span-3">
+            <p class="text-sm font-semibold uppercase tracking-widest text-red-700">Sponsor pengembangan</p>
+            <h2 class="mt-3 text-3xl font-bold tracking-tight text-gray-900">Peran AIPKI dalam JEJAK Essential</h2>
+            <p class="mt-4 leading-relaxed text-gray-700">
+              <strong>Asosiasi Institusi Pendidikan Kedokteran Indonesia (AIPKI)</strong> adalah sponsor pengembangan
+              JEJAK Essential. Dukungan AIPKI memungkinkan aplikasi ini dibangun sebagai fondasi pencatatan
+              pendidikan klinis yang dapat dimanfaatkan oleh institusi pendidikan kedokteran di Indonesia.
+            </p>
+            <ul class="mt-6 space-y-3 text-sm text-gray-700">
+              <li class="flex gap-3"><span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#d71920]"></span>Mendukung pengembangan logbook, asesmen, dan peta kompetensi yang selaras dengan kebutuhan pendidikan kedokteran.</li>
+              <li class="flex gap-3"><span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#d71920]"></span>Menjembatani kebutuhan institusi anggota agar alat bantu pendidikan klinis lebih mudah dijangkau.</li>
+              <li class="flex gap-3"><span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#d71920]"></span>Mendorong praktik pencatatan dan penilaian yang konsisten antar program studi.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Ajakan akhir ─────────────────────────────────────────── %>
+  <section class="bg-white pb-20 sm:pb-24">
+    <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Mulai catat jejak belajar hari ini</h2>
+      <p class="mx-auto mt-4 max-w-xl text-gray-600">Masuk dengan akun institusi Anda, atau daftar lalu tunggu admin program studi menetapkan peran Anda.</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <%= link_to "Masuk", new_user_session_path, class: "rounded-xl bg-indigo-600 px-7 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700" %>
+        <%= link_to "Daftar akun", new_user_registration_path, class: "rounded-xl px-7 py-3 text-sm font-semibold text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50" %>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Kaki halaman ─────────────────────────────────────────── %>
+  <footer class="border-t border-gray-200 bg-slate-50">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-10 sm:px-6 md:flex-row lg:px-8">
+      <div class="text-center md:text-left">
+        <p class="text-sm font-bold text-gray-900">JEJAK Essential</p>
+        <p class="mt-1 text-xs text-gray-500">Ekosistem Pendidikan Klinis Longitudinal · © <%= Date.current.year %></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-gray-500">Disponsori oleh</span>
+        <div class="flex items-stretch gap-2">
+          <%= render "shared/aipki_logo", img_class: "h-14 w-auto", frame_class: "inline-flex items-center rounded-lg bg-[#fff] px-2.5 py-1 ring-1 ring-gray-200" %>
+          <%= render "shared/diktisaintek_logo", img_class: "h-8 w-auto", frame_class: "inline-flex items-center rounded-lg bg-[#fff] px-3 py-1 ring-1 ring-gray-200" %>
+        </div>
+      </div>
+      <div class="flex gap-5 text-xs text-gray-500">
+        <%= link_to "Masuk", new_user_session_path, class: "hover:text-gray-900" %>
+        <%= link_to "Identitas Visual", brand_path, class: "hover:text-gray-900" %>
+      </div>
+    </div>
+  </footer>
 </div>
