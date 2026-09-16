@@ -42,12 +42,16 @@ Isi paket:
 | `jejak_pro/periode.csv` | nama dan tanggal periode, plus kolom kosong **Kode Periode jejak.pro** |
 | `jejak_pro/rotasi_klinik.csv` | berbentuk `ClinicalRotationImporter` jejak.pro |
 | `jejak_pro/kasus_klinis.csv` | kasus klinis, termasuk resep dan tanda vital |
-| `jejak_pro/logbook_kegiatan.csv` | logbook kegiatan dan refleksinya |
+| `jejak_pro/logbook_kegiatan.csv` | logbook kegiatan dan refleksinya; sejak format 1.1 juga nama domain, subdomain, dan bentuk kegiatan, waktu mulai/selesai, serta tautan bukti/dokumen |
 | `jejak_pro/kompetensi.csv` | ranah kompetensi, plus kolom kosong **Kode Kompetensi jejak.pro** |
 | `jejak_pro/daftar_event_asesmen.csv` | event asesmen, plus kolom kosong **ID Event jejak.pro** / **ID Template jejak.pro** |
 | `jejak_pro/nilai/*.csv` | nilai per event: nilai asli, persen, mentah per dimensi, persen per ranah kompetensi |
 | `jejak_pro/pemetaan_kompetensi.csv` | acuan pemetaan dimensi/rubrik → ranah (untuk dibaca manusia) |
 | `jejak_pro/lampiran.csv` + `lampiran/` | berkas unggahan |
+
+### Versi format
+
+Paket berformat **1.1** sejak 17 September 2026: `logbook_kegiatan.csv` mendapat tujuh kolom baru di ujung (`domain`, `subdomain`, `bentuk_kegiatan`, `waktu_mulai`, `waktu_selesai`, `link_bukti`, `link_dokumen`). Perubahannya hanya menambah kolom, jadi importer jejak.pro versi lama tetap bisa membacanya, hanya tanpa kolom baru itu. Importer versi baru mencocokkan domain, subdomain, dan bentuk kegiatan ke taksonomi jejak.pro **berdasarkan nama**. Nama yang tidak ditemukan dilaporkan sebagai peringatan, dan kegiatannya tetap masuk tanpa tingkat itu. Domain yang dibuat admin jejak-lite sendiri perlu dibuat dulu dengan nama yang sama di jejak.pro (Domain Kegiatan Akademik) sebelum `COMMIT=1`.
 
 ### Data pasien
 

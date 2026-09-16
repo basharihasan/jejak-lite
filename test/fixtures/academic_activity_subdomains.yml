@@ -1,0 +1,25 @@
+jaga_ugd:
+  academic_activity_domain: praktek
+  name: Jaga UGD
+  position: 1
+
+poliklinik:
+  academic_activity_domain: praktek
+  name: Poliklinik
+  position: 2
+
+tutorial:
+  academic_activity_domain: belajar_mengajar
+  name: Tutorial
+  position: 1
+
+subdomain_arsip:
+  academic_activity_domain: belajar_mengajar
+  name: Metode Lama
+  position: 2
+  is_active: false
+
+kompetisi:
+  academic_activity_domain: prestasi
+  name: Kompetisi
+  position: 1

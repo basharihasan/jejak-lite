@@ -15,90 +15,90 @@
 
 <%# ── 1. IKHTISAR ── %>
 <div>
-  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.overview") %></p>
+  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= term("nav.groups.overview") %></p>
 
-  <%= render "shared/nav_item", label: t("nav.home"), path: dashboard_path,
+  <%= render "shared/nav_item", label: term("nav.home"), path: dashboard_path,
       active: request.path == "/dashboard" || request.path == "/" %>
 
   <% if is_student %>
-    <%= render "shared/nav_item", label: t("nav.portfolio"), path: portfolio_path,
+    <%= render "shared/nav_item", label: term("nav.portfolio"), path: portfolio_path,
         active: active_class.call("/portfolio") %>
   <% end %>
 
-  <%= render "shared/nav_item", label: t("nav.my_profile"), path: profile_path,
+  <%= render "shared/nav_item", label: term("nav.my_profile"), path: profile_path,
       active: active_class.call("/profile") %>
 
-  <%= render "shared/nav_item", label: t("nav.notifications"), path: notifications_path,
+  <%= render "shared/nav_item", label: term("nav.notifications"), path: notifications_path,
       active: active_class.call("/notifications"),
       badge: (unread.positive? ? (unread > 9 ? "9+" : unread) : nil) %>
 </div>
 
 <%# ── 2. PERJALANAN BELAJAR ── %>
 <div>
-  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.learning_journey") %></p>
+  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= term("nav.groups.learning_journey") %></p>
 
   <% logbook_active = active_class.call(%w[/clinical_cases /activity_logs /kalender]) %>
   <div data-controller="accordion" data-accordion-open-value="<%= logbook_active ? 'true' : 'false' %>" class="mb-1">
     <button type="button" data-action="click->accordion#toggle"
             class="w-full group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer select-none">
-      <span class="flex-1 text-left truncate"><%= t("nav.logbook") %></span>
+      <span class="flex-1 text-left truncate"><%= term("nav.logbook") %></span>
       <svg data-accordion-target="icon" class="h-4 w-4 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
       </svg>
     </button>
 
     <div data-accordion-target="content" class="mt-1 pl-3 space-y-1 <%= "hidden" unless logbook_active %> border-l border-slate-800/80 ml-5">
-      <%= render "shared/nav_item", label: t("nav.clinical_cases"), path: clinical_cases_path,
+      <%= render "shared/nav_item", label: term("nav.clinical_cases"), path: clinical_cases_path,
           active: active_class.call("/clinical_cases") && params[:scope] != "to_verify" %>
-      <%= render "shared/nav_item", label: t("nav.activity_logs"), path: activity_logs_path,
+      <%= render "shared/nav_item", label: term("nav.activity_logs"), path: activity_logs_path,
           active: active_class.call("/activity_logs") %>
-      <%= render "shared/nav_item", label: t("nav.calendar"), path: activity_logs_calendar_path,
+      <%= render "shared/nav_item", label: term("nav.calendar"), path: activity_logs_calendar_path,
           active: active_class.call("/kalender") %>
     </div>
   </div>
 
-  <%= render "shared/nav_item", label: t("nav.clinical_rotations"), path: clinical_rotations_path,
+  <%= render "shared/nav_item", label: term("nav.clinical_rotations"), path: clinical_rotations_path,
       active: active_class.call("/clinical_rotations") %>
 
-  <%= render "shared/nav_item", label: t("nav.tutorial_enrollments"), path: tutorial_enrollments_path,
+  <%= render "shared/nav_item", label: term("nav.tutorial_enrollments"), path: tutorial_enrollments_path,
       active: active_class.call("/tutorial_enrollments") %>
 
-  <%= render "shared/nav_item", label: t("nav.reflections"), path: reflection_entries_path,
+  <%= render "shared/nav_item", label: term("nav.reflections"), path: reflection_entries_path,
       active: active_class.call("/reflection_entries") %>
 
-  <%= render "shared/nav_item", label: t("nav.final_projects"), path: final_projects_path,
+  <%= render "shared/nav_item", label: term("nav.final_projects"), path: final_projects_path,
       active: active_class.call("/final_projects") %>
 </div>
 
 <%# ── 3. ASESMEN ── %>
 <div>
-  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.assessment") %></p>
+  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= term("nav.groups.assessment") %></p>
 
   <% assessment_active = active_class.call(%w[/nilai-ujian /asesmen /dops_evaluations /mini_cex_evaluations /assessment_form_templates /assessment_form_submissions /student/assessments /student/feedback_journal /examiner_evaluations]) %>
   <div data-controller="accordion" data-accordion-open-value="<%= assessment_active ? 'true' : 'false' %>" class="mb-1">
     <button type="button" data-action="click->accordion#toggle"
             class="w-full group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer select-none">
-      <span class="flex-1 text-left truncate"><%= t("nav.assessment_accordion") %></span>
+      <span class="flex-1 text-left truncate"><%= term("nav.assessment_accordion") %></span>
       <svg data-accordion-target="icon" class="h-4 w-4 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
       </svg>
     </button>
 
     <div data-accordion-target="content" class="mt-1 pl-3 space-y-1 <%= "hidden" unless assessment_active %> border-l border-slate-800/80 ml-5">
-      <%= render "shared/nav_item", label: t("nav.academic_assessments"), path: exam_scores_path,
+      <%= render "shared/nav_item", label: term("nav.academic_assessments"), path: exam_scores_path,
           active: active_class.call("/nilai-ujian") %>
-      <%= render "shared/nav_item", label: t("nav.workplace_assessment"), path: assessments_path,
+      <%= render "shared/nav_item", label: term("nav.workplace_assessment"), path: assessments_path,
           active: active_class.call(%w[/asesmen /dops_evaluations /mini_cex_evaluations]) %>
       <% if is_instructor %>
-        <%= render "shared/nav_item", label: t("nav.rubric_assessment"), path: examiner_evaluations_path,
+        <%= render "shared/nav_item", label: term("nav.rubric_assessment"), path: examiner_evaluations_path,
             active: active_class.call("/examiner_evaluations") %>
       <% else %>
-        <%= render "shared/nav_item", label: t("nav.rubric_assessment"), path: student_assessments_path,
+        <%= render "shared/nav_item", label: term("nav.rubric_assessment"), path: student_assessments_path,
             active: active_class.call("/student/assessments") %>
-        <%= render "shared/nav_item", label: t("nav.feedback_journal"), path: student_feedback_journal_path,
+        <%= render "shared/nav_item", label: term("nav.feedback_journal"), path: student_feedback_journal_path,
             active: active_class.call("/student/feedback_journal") %>
       <% end %>
-      <%= render "shared/nav_item", label: t("nav.form_templates"), path: assessment_form_templates_path,
+      <%= render "shared/nav_item", label: term("nav.form_templates"), path: assessment_form_templates_path,
           active: active_class.call(%w[/assessment_form_templates /assessment_form_submissions]) %>
     </div>
   </div>
@@ -106,26 +106,26 @@
 
 <%# ── 4. KOMPETENSI & PRESTASI ── %>
 <div>
-  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.competency") %></p>
-  <%= render "shared/nav_item", label: t("nav.competency_map"), path: academic_assessments_path,
+  <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= term("nav.groups.competency") %></p>
+  <%= render "shared/nav_item", label: term("nav.competency_map"), path: academic_assessments_path,
       active: active_class.call("/capaian-belajar") %>
-  <%= render "shared/nav_item", label: t("nav.epa_map"), path: entrustment_decisions_path,
+  <%= render "shared/nav_item", label: term("nav.epa_map"), path: entrustment_decisions_path,
       active: active_class.call("/dashboard/entrustment") %>
 </div>
 
 <%# ── 5. COACHING CENTER — dosen, preseptor, kaprodi, admin ── %>
 <% if is_instructor %>
   <div>
-    <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.coaching") %></p>
-    <%= render "shared/nav_item", label: t("nav.case_validation"), path: clinical_cases_path(scope: "to_verify"),
+    <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= term("nav.groups.coaching") %></p>
+    <%= render "shared/nav_item", label: term("nav.case_validation"), path: clinical_cases_path(scope: "to_verify"),
         active: active_class.call("/clinical_cases") && params[:scope] == "to_verify",
         badge: (pending_verifications.positive? ? (pending_verifications > 9 ? "9+" : pending_verifications) : nil) %>
-    <%= render "shared/nav_item", label: t("nav.activity_validation"), path: activity_logs_path(scope: "to_verify"),
+    <%= render "shared/nav_item", label: term("nav.activity_validation"), path: activity_logs_path(scope: "to_verify"),
         active: active_class.call("/activity_logs") && params[:scope] == "to_verify",
         badge: (pending_activity_verifications.positive? ? (pending_activity_verifications > 9 ? "9+" : pending_activity_verifications) : nil) %>
-    <%= render "shared/nav_item", label: t("nav.analytics"), path: analytics_path,
+    <%= render "shared/nav_item", label: term("nav.analytics"), path: analytics_path,
         active: active_class.call("/analitik") %>
-    <%= render "shared/nav_item", label: t("nav.student_directory"), path: search_path,
+    <%= render "shared/nav_item", label: term("nav.student_directory"), path: search_path,
         active: active_class.call("/cari") %>
   </div>
 <% end %>
@@ -133,32 +133,36 @@
 <%# ── 6. KONFIGURASI — admin ── %>
 <% if is_config_manager %>
   <div>
-    <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= t("nav.groups.configuration") %></p>
-    <%= render "shared/nav_item", label: t("nav.academic_periods"), path: academic_periods_path,
+    <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= term("nav.groups.configuration") %></p>
+    <%= render "shared/nav_item", label: term("nav.academic_periods"), path: academic_periods_path,
         active: active_class.call("/academic_periods") %>
-    <%= render "shared/nav_item", label: t("nav.study_programs"), path: study_programs_path,
+    <%= render "shared/nav_item", label: term("nav.study_programs"), path: study_programs_path,
         active: active_class.call("/study_programs") %>
-    <%= render "shared/nav_item", label: t("nav.users"), path: admin_users_path,
+    <%= render "shared/nav_item", label: term("nav.users"), path: admin_users_path,
         active: active_class.call("/admin/users") %>
-    <%= render "shared/nav_item", label: t("nav.assessment_events"), path: admin_assessment_events_path,
+    <%= render "shared/nav_item", label: term("nav.assessment_events"), path: admin_assessment_events_path,
         active: active_class.call("/admin/assessment_events") %>
-    <%= render "shared/nav_item", label: t("nav.evaluation_schedules"), path: admin_evaluation_schedules_path,
+    <%= render "shared/nav_item", label: term("nav.evaluation_schedules"), path: admin_evaluation_schedules_path,
         active: active_class.call("/admin/evaluation_schedules") %>
-    <%= render "shared/nav_item", label: t("nav.competency_frameworks"), path: competency_frameworks_path,
+    <%= render "shared/nav_item", label: term("nav.competency_frameworks"), path: competency_frameworks_path,
         active: active_class.call(%w[/competency_frameworks /competency_items]) %>
-    <%= render "shared/nav_item", label: t("nav.assessment_blueprints"), path: assessment_blueprints_path,
+    <%= render "shared/nav_item", label: term("nav.assessment_blueprints"), path: assessment_blueprints_path,
         active: active_class.call("/assessment_blueprints") %>
-    <%= render "shared/nav_item", label: t("nav.learning_units"), path: admin_learning_units_path,
+    <%= render "shared/nav_item", label: term("nav.learning_units"), path: admin_learning_units_path,
         active: active_class.call("/admin/learning_units") %>
-    <%= render "shared/nav_item", label: t("nav.logbook_case_targets"), path: admin_logbook_case_targets_path,
+    <%= render "shared/nav_item", label: term("nav.logbook_case_targets"), path: admin_logbook_case_targets_path,
         active: active_class.call("/admin/logbook_case_targets") %>
-    <%= render "shared/nav_item", label: t("nav.diagnosis_definitions"), path: admin_diagnosis_definitions_path,
+    <%= render "shared/nav_item", label: term("nav.activity_taxonomy"), path: admin_academic_activity_domains_path,
+        active: active_class.call(%w[/admin/academic_activity_domains /admin/academic_activity_subdomains /admin/academic_activity_templates]) %>
+    <%= render "shared/nav_item", label: term("nav.diagnosis_definitions"), path: admin_diagnosis_definitions_path,
         active: active_class.call("/admin/diagnosis_definitions") %>
-    <%= render "shared/nav_item", label: t("nav.skill_definitions"), path: admin_skill_definitions_path,
+    <%= render "shared/nav_item", label: term("nav.skill_definitions"), path: admin_skill_definitions_path,
         active: active_class.call("/admin/skill_definitions") %>
-    <%= render "shared/nav_item", label: t("nav.medication_definitions"), path: admin_medication_definitions_path,
+    <%= render "shared/nav_item", label: term("nav.medication_definitions"), path: admin_medication_definitions_path,
         active: active_class.call("/admin/medication_definitions") %>
-    <%= render "shared/nav_item", label: t("nav.data_governance"), path: admin_data_governance_path,
+    <%= render "shared/nav_item", label: term("nav.terminology"), path: admin_terminology_path,
+        active: active_class.call("/admin/terminology") %>
+    <%= render "shared/nav_item", label: term("nav.data_governance"), path: admin_data_governance_path,
         active: active_class.call("/admin/data_governance") %>
   </div>
 <% end %>

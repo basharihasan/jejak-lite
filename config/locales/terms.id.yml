@@ -1,0 +1,58 @@
+# Istilah halaman Logbook Kegiatan. Setiap kunci di bawah `terms` otomatis
+# muncul di Konfigurasi → Taksonomi Istilah dan bisa diganti admin (lihat
+# app/models/terminology.rb). Tidak ada padanan English: halaman isi masih
+# berbahasa Indonesia, jadi locale en jatuh ke berkas ini.
+id:
+  terms:
+    activity_calendar: "Kalender Kegiatan"
+    new_activity: "Catat Kegiatan Baru"
+    edit_activity: "Sunting Kegiatan"
+    activity_info: "Informasi Kegiatan"
+    activity_domain: "Domain Kegiatan"
+    activity_subdomain: "Subdomain / Kategori"
+    activity_template: "Bentuk Kegiatan"
+    activity_topic: "Topik Kegiatan"
+    activity_location: "Lokasi"
+    started_at: "Waktu Mulai"
+    ended_at: "Waktu Selesai"
+    delivery_mode: "Metode Pelaksanaan"
+    clinical_rotation: "Rotasi Klinik / Wahana"
+    academic_period: "Semester"
+    participant_count: "Jumlah Peserta/Pasien"
+    activity_notes: "Catatan"
+    activity_reflection: "Refleksi Singkat"
+    covered_competencies: "Kompetensi yang Dicakup"
+    evidence_section: "Dokumen & Bukti"
+    evidence_url: "Link Bukti Aktivitas"
+    document_url: "Link Dokumen"
+    evidence_files: "Unggah Berkas Bukti"
+  activerecord:
+    models:
+      academic_activity_domain: "Domain kegiatan"
+      academic_activity_subdomain: "Subdomain kegiatan"
+      academic_activity_template: "Bentuk kegiatan"
+    attributes:
+      activity_log:
+        title: "Topik kegiatan"
+        activity_date: "Tanggal"
+        category: "Kategori"
+        academic_activity_domain: "Domain kegiatan"
+        academic_activity_subdomain: "Subdomain / kategori"
+        academic_activity_template: "Bentuk kegiatan"
+        started_at: "Waktu mulai"
+        ended_at: "Waktu selesai"
+        delivery_mode: "Metode pelaksanaan"
+        clinical_rotation: "Rotasi klinik"
+        evidence_url: "Link bukti aktivitas"
+        document_url: "Link dokumen"
+      academic_activity_domain:
+        name: "Nama domain"
+        color_code: "Kode warna"
+        icon: "Ikon"
+      academic_activity_subdomain:
+        name: "Nama subdomain"
+      academic_activity_template:
+        name: "Nama bentuk kegiatan"
+      terminology_override:
+        key: "Kunci"
+        value: "Label"

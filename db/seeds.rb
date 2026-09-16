@@ -22,6 +22,11 @@ end
   sp.save!
 end
 
+# Taksonomi Logbook Kegiatan (Domain → Subdomain → Bentuk Kegiatan) meniru
+# jejak.pro. Hanya mengisi basis data yang belum punya domain sama sekali —
+# domain yang dihapus admin tidak muncul lagi di deploy berikutnya.
+AcademicActivityTaxonomySeeder.call
+
 # Fase 10 — Formulir Evaluasi baku: tutor evaluation, evaluasi blok,
 # asesmen tambahan. Dibangun di atas Form Builder (Fase 9), bukan model
 # terpisah — templat ini contoh siap pakai, admin bebas menambah/mengubah.

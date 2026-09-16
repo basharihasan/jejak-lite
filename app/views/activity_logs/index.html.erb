@@ -1,7 +1,8 @@
+<% content_for :title, term("nav.activity_logs") %>
 <div class="flex items-center justify-between flex-wrap gap-3">
-  <h1 class="text-xl font-bold text-gray-900">Logbook Kegiatan</h1>
+  <h1 class="text-xl font-bold text-gray-900"><%= term("nav.activity_logs") %></h1>
   <div class="flex items-center gap-2">
-    <%= link_to "Kalender", activity_logs_calendar_path, class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
+    <%= link_to term("nav.calendar"), activity_logs_calendar_path, class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
     <%= link_to "Portfolio", portfolio_path, class: "text-sm text-gray-600 hover:text-indigo-600 font-medium" %>
     <%= link_to "+ Catat Kegiatan", new_activity_log_path,
           class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
@@ -15,22 +16,28 @@
   </div>
 <% end %>
 
-<div class="mt-4 flex flex-wrap items-center gap-2">
-  <%= link_to "Semua", activity_logs_path(scope: @scope), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@category.nil? ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
-  <% ActivityLog::CATEGORIES.each do |code, label| %>
-    <%= link_to label, activity_logs_path(category: code, scope: @scope), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@category == code ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
-  <% end %>
-</div>
+<% if @filter_domains.any? %>
+  <div class="mt-4 flex flex-wrap items-center gap-2">
+    <%= link_to "Semua", activity_logs_path(scope: @scope, competency_item_id: @competency_item_id), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@domain.nil? ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+    <% @filter_domains.each do |domain| %>
+      <%= link_to activity_logs_path(domain_id: domain.id, scope: @scope, competency_item_id: @competency_item_id),
+            class: "inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium #{@domain == domain ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" do %>
+        <%= activity_color_dot(domain.color) %>
+        <%= domain.name %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>
 
 <% if @all_competency_items.any? %>
   <div class="mt-2 flex flex-wrap items-center gap-1.5">
     <span class="text-xs text-gray-400">Kompetensi:</span>
     <% @all_competency_items.each do |item| %>
-      <%= link_to item.title, activity_logs_path(category: @category, competency_item_id: item.id),
+      <%= link_to item.title, activity_logs_path(scope: @scope, domain_id: @domain&.id, competency_item_id: item.id),
             class: "text-[11px] px-2 py-1 rounded-full font-medium #{@competency_item_id == item.id.to_s ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}" %>
     <% end %>
     <% if @competency_item_id %>
-      <%= link_to "✕ Hapus filter", activity_logs_path(category: @category), class: "text-[11px] text-gray-400 hover:text-rose-600" %>
+      <%= link_to "✕ Hapus filter", activity_logs_path(scope: @scope, domain_id: @domain&.id), class: "text-[11px] text-gray-400 hover:text-rose-600" %>
     <% end %>
   </div>
 <% end %>

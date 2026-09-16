@@ -1,0 +1,8 @@
+<% content_for :title, "Sunting Domain" %>
+<div class="max-w-xl space-y-5">
+  <div>
+    <%= link_to "← #{term('nav.activity_taxonomy')}", admin_academic_activity_domains_path(anchor: "domain-#{@record.id}"), class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+    <h1 class="mt-2 text-xl font-bold text-gray-900">Sunting Domain</h1>
+  </div>
+  <%= render "form", record: @record %>
+</div>

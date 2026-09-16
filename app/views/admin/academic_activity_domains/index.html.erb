@@ -1,0 +1,99 @@
+<% content_for :title, term("nav.activity_taxonomy") %>
+<%
+  badge = ->(text, tone) { tag.span(text, class: "text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full #{tone}") }
+  used_label = ->(count) { count.to_i.positive? ? tag.span("#{count} kegiatan", class: "text-[11px] text-gray-400 whitespace-nowrap") : nil }
+  domains = @domains.to_a
+%>
+<div class="flex items-start justify-between flex-wrap gap-3">
+  <div class="max-w-3xl">
+    <h1 class="text-xl font-bold text-gray-900"><%= term("nav.activity_taxonomy") %></h1>
+    <p class="text-sm text-gray-500 mt-0.5">
+      Manajemen taksonomi Logbook Kegiatan &amp; Kalender:
+      <strong><%= term("terms.activity_domain") %></strong> →
+      <strong><%= term("terms.activity_subdomain") %></strong> →
+      <strong><%= term("terms.activity_template") %></strong> (opsional).
+      Pilihan yang dinonaktifkan hilang dari form, tetapi kegiatan yang sudah memakainya tetap utuh.
+    </p>
+  </div>
+  <%= link_to "+ Tambah Domain", new_admin_academic_activity_domain_path,
+        class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm whitespace-nowrap" %>
+</div>
+
+<% if @unclassified_count.positive? %>
+  <div class="mt-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm">
+    <strong><%= @unclassified_count %> kegiatan lama</strong> belum punya domain — tetap tampil sebagai Klinis/Non-Klinis,
+    dan pemiliknya diminta memilih domain saat menyuntingnya.
+  </div>
+<% end %>
+
+<div class="mt-4 space-y-4">
+  <% domains.each_with_index do |domain, index| %>
+    <% subdomains = domain.academic_activity_subdomains.to_a %>
+    <section id="domain-<%= domain.id %>" class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden scroll-mt-20 <%= 'opacity-70' unless domain.is_active? %>">
+      <div class="flex items-center justify-between gap-3 flex-wrap px-5 py-3.5 border-b border-gray-100 border-l-4" style="border-left-color: <%= safe_activity_color(domain.color) %>">
+        <div class="flex items-center gap-2 flex-wrap min-w-0">
+          <%= activity_color_dot(domain.color, size: "h-3 w-3") %>
+          <h2 class="font-semibold text-gray-900"><%= domain.name %></h2>
+          <%= badge.call("Klinis", "bg-sky-50 text-sky-700") if domain.is_clinical? %>
+          <%= badge.call("Nonaktif", "bg-gray-100 text-gray-500") unless domain.is_active? %>
+          <%= used_label.call(@usage[:domains][domain.id]) %>
+        </div>
+        <%= render "node_actions", record: domain, used: @usage[:domains][domain.id], has_children: subdomains.any?,
+                                   first: index.zero?, last: index == domains.size - 1 %>
+      </div>
+
+      <div class="px-5 py-4">
+        <% if subdomains.any? %>
+          <ul class="divide-y divide-gray-100">
+            <% subdomains.each_with_index do |subdomain, sub_index| %>
+              <% templates = subdomain.academic_activity_templates.to_a %>
+              <li class="py-2.5">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                  <div class="flex items-center gap-2 flex-wrap min-w-0 <%= 'text-gray-400 line-through decoration-gray-300' unless subdomain.is_active? %>">
+                    <span class="text-sm font-medium text-gray-800"><%= subdomain.name %></span>
+                    <%= badge.call("Nonaktif", "bg-gray-100 text-gray-500 no-underline") unless subdomain.is_active? %>
+                    <%= used_label.call(@usage[:subdomains][subdomain.id]) %>
+                  </div>
+                  <div class="flex items-center gap-3 flex-wrap justify-end">
+                    <%= link_to "+ #{term('terms.activity_template')}",
+                          new_admin_academic_activity_subdomain_academic_activity_template_path(subdomain),
+                          class: "text-xs text-gray-400 hover:text-indigo-600 whitespace-nowrap" %>
+                    <%= render "node_actions", record: subdomain, used: @usage[:subdomains][subdomain.id], has_children: templates.any?,
+                                               first: sub_index.zero?, last: sub_index == subdomains.size - 1 %>
+                  </div>
+                </div>
+
+                <% if templates.any? %>
+                  <div class="mt-2 ml-4 pl-3 border-l border-gray-200 space-y-1.5">
+                    <% templates.each_with_index do |template, template_index| %>
+                      <div class="flex items-center justify-between gap-3 flex-wrap">
+                        <div class="flex items-center gap-2 min-w-0">
+                          <span class="text-xs <%= template.is_active? ? 'text-gray-600' : 'text-gray-400 line-through' %>"><%= template.name %></span>
+                          <%= badge.call("Nonaktif", "bg-gray-100 text-gray-500") unless template.is_active? %>
+                          <%= used_label.call(@usage[:templates][template.id]) %>
+                        </div>
+                        <%= render "node_actions", record: template, used: @usage[:templates][template.id],
+                                                   first: template_index.zero?, last: template_index == templates.size - 1 %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-sm text-gray-400 italic">Belum ada subdomain — form hanya meminta domain untuk kegiatan ini.</p>
+        <% end %>
+        <%= link_to "+ Tambah #{term('terms.activity_subdomain')}",
+              new_admin_academic_activity_domain_academic_activity_subdomain_path(domain),
+              class: "mt-3 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-800" %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if domains.empty? %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6 text-center text-sm text-gray-400">
+      Belum ada domain. Form Logbook Kegiatan tidak bisa dipakai sampai minimal satu domain aktif.
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,78 @@
+<% content_for :title, term("nav.terminology") %>
+<% cls = "block w-full rounded-xl border-0 py-2 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+<div class="max-w-4xl" data-controller="text-filter">
+  <div class="flex items-start justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-xl font-bold text-gray-900"><%= term("nav.terminology") %></h1>
+      <p class="text-sm text-gray-500 mt-0.5 max-w-2xl">
+        Ganti label menu sidebar dan istilah di halaman Logbook Kegiatan sesuai sebutan di institusi Anda.
+        Kosongkan isian untuk kembali ke label bawaan. Label menu hanya berlaku untuk antarmuka Bahasa Indonesia;
+        pilihan English tetap memakai terjemahan bawaan.
+      </p>
+    </div>
+    <div class="text-right text-xs text-gray-400">
+      <p><%= @entries.values.sum(&:size) %> label tersedia</p>
+      <p><%= @overrides.size %> sudah diganti</p>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <label for="terminology-search" class="sr-only">Cari label</label>
+    <input id="terminology-search" type="search" placeholder="Cari label atau kunci…" autocomplete="off"
+           data-text-filter-target="input" data-action="input->text-filter#filter"
+           class="<%= cls %> max-w-sm">
+  </div>
+
+  <%= form_with url: admin_terminology_path, method: :patch, class: "mt-4 space-y-4" do %>
+    <% Terminology::SECTIONS.each do |section, title| %>
+      <% entries = @entries.fetch(section, []) %>
+      <% next if entries.empty? %>
+      <section class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden" data-text-filter-target="group">
+        <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
+          <h2 class="text-sm font-semibold text-gray-900"><%= title %></h2>
+          <span class="text-xs text-gray-400"><%= entries.size %> label</span>
+        </div>
+        <div class="hidden sm:grid grid-cols-12 gap-4 px-5 py-2 bg-gray-50 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+          <div class="col-span-4">Label bawaan</div>
+          <div class="col-span-6">Label pengganti</div>
+          <div class="col-span-2 text-right">Status</div>
+        </div>
+        <div class="divide-y divide-gray-100">
+          <% entries.each do |entry| %>
+            <% override = @overrides[entry.key] %>
+            <% value = @submitted.key?(entry.key) ? @submitted[entry.key] : override&.value %>
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 px-5 py-3 items-center"
+                 data-text-filter-target="row" data-text-filter-terms="<%= [ entry.default_value, entry.key, override&.value ].compact.join(' ') %>">
+              <div class="sm:col-span-4 min-w-0">
+                <label for="<%= "term_#{entry.key.tr('.', '_')}" %>" class="text-sm font-medium text-gray-800"><%= entry.default_value %></label>
+                <p class="text-[10px] font-mono text-gray-400 truncate"><%= entry.key %></p>
+              </div>
+              <div class="sm:col-span-6">
+                <%= text_field_tag "terms[#{entry.key}]", value, id: "term_#{entry.key.tr('.', '_')}",
+                      placeholder: entry.default_value, maxlength: TerminologyOverride::MAX_LENGTH,
+                      class: "#{cls} #{'bg-indigo-50 ring-indigo-200' if override}" %>
+              </div>
+              <div class="sm:col-span-2 sm:text-right">
+                <% if override %>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700"
+                        title="<%= "Diganti #{override.updated_by&.full_name || 'admin'} · #{l(override.updated_at, format: :short)}" %>">Kustom</span>
+                <% else %>
+                  <span class="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">Bawaan</span>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <p class="text-sm text-gray-400 text-center py-6" data-text-filter-target="empty" hidden>Tidak ada label yang cocok.</p>
+
+    <div class="sticky bottom-20 lg:bottom-4 z-10">
+      <div class="rounded-2xl bg-white/95 backdrop-blur ring-1 ring-gray-200 shadow-lg px-5 py-3 flex items-center justify-between gap-4 flex-wrap">
+        <p class="text-xs text-gray-500">Perubahan berlaku untuk seluruh pengguna begitu disimpan.</p>
+        <%= submit_tag "Simpan Label", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+      </div>
+    </div>
+  <% end %>
+</div>

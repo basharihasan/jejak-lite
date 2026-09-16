@@ -2,6 +2,7 @@
 
 class AcademicPeriod < ApplicationRecord
   has_many :clinical_rotations, dependent: :destroy
+  has_many :activity_logs, dependent: :nullify
 
   validates :name, :start_date, :end_date, presence: true
   validate :end_date_after_start_date

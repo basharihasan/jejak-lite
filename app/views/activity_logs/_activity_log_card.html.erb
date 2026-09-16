@@ -2,11 +2,9 @@
   <div class="flex items-start justify-between gap-3">
     <div class="min-w-0">
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= activity_log.category == "klinis" ? "bg-sky-50 text-sky-700" : "bg-emerald-50 text-emerald-700" %>">
-          <%= activity_log.category_label %>
-        </span>
-        <% if activity_log.activity_type.present? %>
-          <span class="text-xs text-gray-400"><%= activity_log.activity_type %></span>
+        <%= activity_domain_badge(activity_log) %>
+        <% if (detail = activity_log.taxonomy_detail) %>
+          <span class="text-xs text-gray-500"><%= detail %></span>
         <% end %>
         <% if activity_log.delivery_mode.present? %>
           <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500"><%= activity_log.delivery_mode_label %></span>
@@ -17,7 +15,7 @@
       </div>
       <p class="mt-1.5 font-semibold text-gray-800 truncate"><%= activity_log.title %></p>
       <p class="text-xs text-gray-400 mt-1">
-        <%= l(activity_log.activity_date, format: :long) %><% if activity_log.location.present? %> · <%= activity_log.location %><% end %>
+        <%= l(activity_log.activity_date, format: :long) %><% if activity_log.started_at %>, <%= l(activity_log.started_at, format: "%H:%M") %><% end %><% if activity_log.location.present? %> · <%= activity_log.location %><% end %>
         <% if local_assigns[:show_owner] %> · <%= activity_log.user.full_name %><% end %>
       </p>
       <% if activity_log.competency_items.any? %>

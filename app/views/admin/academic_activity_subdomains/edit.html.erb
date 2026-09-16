@@ -1,0 +1,11 @@
+<% content_for :title, "Sunting #{term('terms.activity_subdomain')}" %>
+<div class="max-w-xl space-y-5">
+  <div>
+    <%= link_to "← #{term('nav.activity_taxonomy')}", admin_academic_activity_domains_path(anchor: "domain-#{@domain.id}"), class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+    <h1 class="mt-2 text-xl font-bold text-gray-900">Sunting <%= term("terms.activity_subdomain") %></h1>
+  </div>
+  <%= render "admin/academic_activity_domains/name_form",
+        record: @record, model: (@record.persisted? ? [ :admin, @record ] : [ :admin, @domain, @record ]),
+        parent_label: term("terms.activity_domain"), parent_name: @domain.name,
+        anchor_domain_id: @domain.id, placeholder: "Contoh: Tutorial, Jaga UGD, Kompetisi" %>
+</div>

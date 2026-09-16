@@ -1,93 +1,205 @@
-<%= form_with model: activity_log, class: "space-y-4" do |f| %>
+<%# Form Logbook Kegiatan — susunan & isian meniru form jejak.pro
+    (app/views/activity_logs/_form.html.erb di PFKV2): Domain → Subdomain /
+    Kategori → Bentuk Kegiatan, topik, lokasi, waktu, metode, rotasi,
+    semester, catatan, kompetensi, dokumen & bukti. Label memakai `term` agar
+    bisa diganti admin lewat Taksonomi Istilah. %>
+<%
+  input_class = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm"
+  label_class = "block text-sm font-semibold text-gray-700 mb-1"
+  required_mark = tag.span("*", class: "text-rose-600", "aria-hidden": "true")
+
+  subdomain_options = activity_subdomain_options(@domains, activity_log)
+  template_options  = activity_template_options(@domains, activity_log)
+  current_subdomains = subdomain_options.fetch(activity_log.academic_activity_domain_id.to_s, [])
+  current_templates  = template_options.fetch(activity_log.academic_activity_subdomain_id.to_s, [])
+  subdomain_placeholder = "— Pilih #{term('terms.activity_subdomain')} —"
+  template_placeholder  = "— Pilih #{term('terms.activity_template')} —"
+%>
+<%= form_with model: activity_log, class: "space-y-6",
+      data: { controller: "activity-taxonomy",
+              activity_taxonomy_subdomains_value: subdomain_options.to_json,
+              activity_taxonomy_templates_value: template_options.to_json } do |f| %>
   <% if activity_log.errors.any? %>
-    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
-      <%= activity_log.errors.full_messages.to_sentence %>
+    <div class="rounded-xl bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm">
+      <p class="font-semibold mb-1"><%= activity_log.errors.count %> isian perlu diperbaiki:</p>
+      <ul class="list-disc list-inside space-y-0.5">
+        <% activity_log.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div>
-      <%= f.label :category, "Kategori", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.select :category, ActivityLog::CATEGORIES.invert, { include_blank: "Pilih..." },
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+  <%# ── Bagian 1: Informasi Kegiatan ── %>
+  <section class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden">
+    <div class="border-b border-gray-100 px-5 py-3.5">
+      <h2 class="text-sm font-semibold text-gray-900"><%= term("terms.activity_info") %></h2>
     </div>
-    <div>
-      <%= f.label :activity_type, "Jenis Kegiatan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.text_field :activity_type, placeholder: "Rawat Jalan, Penyuluhan, dll",
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
-    </div>
-  </div>
-
-  <div>
-    <%= f.label :title, "Judul Kegiatan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <%= f.text_field :title, placeholder: "Contoh: Jaga IGD, Penyuluhan Stunting",
-          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
-  </div>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div>
-      <%= f.label :activity_date, "Tanggal", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.date_field :activity_date,
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
-    </div>
-    <div>
-      <%= f.label :participant_count, "Jumlah Peserta/Pasien (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.number_field :participant_count, min: 1,
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div>
-      <%= f.label :location, "Lokasi (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-      <%= f.text_field :location, placeholder: "Contoh: Puskesmas Sukamaju",
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
-    </div>
-    <div>
-      <p class="block text-sm font-semibold text-gray-700 mb-1">Metode</p>
-      <div class="flex gap-3 mt-2.5">
-        <% ActivityLog::DELIVERY_MODES.each do |value, label| %>
-          <label class="flex items-center gap-1.5 text-sm text-gray-600">
-            <%= f.radio_button :delivery_mode, value, class: "text-indigo-600" %> <%= label %>
-          </label>
+    <div class="px-5 py-5 space-y-5">
+      <div>
+        <%= f.label :academic_activity_domain_id, class: label_class do %>
+          <%= term("terms.activity_domain") %> <%= required_mark %>
+        <% end %>
+        <% if @domains.any? %>
+          <%= f.select :academic_activity_domain_id,
+                options_for_select(@domains.map { |d| [ d.name, d.id ] }, activity_log.academic_activity_domain_id),
+                { include_blank: "— Pilih #{term('terms.activity_domain')} —" },
+                class: input_class, required: true,
+                data: { activity_taxonomy_target: "domain", action: "change->activity-taxonomy#domainChanged" } %>
+        <% else %>
+          <p class="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-500">
+            Admin belum mengaktifkan satu pun domain kegiatan (Konfigurasi → <%= term("nav.activity_taxonomy") %>).
+          </p>
         <% end %>
       </div>
-    </div>
-  </div>
 
+      <div data-activity-taxonomy-target="subdomainField" <%= "hidden" if current_subdomains.empty? %>>
+        <%= f.label :academic_activity_subdomain_id, term("terms.activity_subdomain"), class: label_class %>
+        <%= f.select :academic_activity_subdomain_id,
+              options_for_select(current_subdomains.map { |s| [ s[:name], s[:id] ] }, activity_log.academic_activity_subdomain_id),
+              { include_blank: subdomain_placeholder },
+              class: input_class,
+              data: { activity_taxonomy_target: "subdomain", action: "change->activity-taxonomy#subdomainChanged",
+                      placeholder: subdomain_placeholder } %>
+      </div>
+
+      <div data-activity-taxonomy-target="templateField" <%= "hidden" if current_templates.empty? %>>
+        <%= f.label :academic_activity_template_id, term("terms.activity_template"), class: label_class %>
+        <%= f.select :academic_activity_template_id,
+              options_for_select(current_templates.map { |t| [ t[:name], t[:id] ] }, activity_log.academic_activity_template_id),
+              { include_blank: template_placeholder },
+              class: input_class,
+              data: { activity_taxonomy_target: "template", placeholder: template_placeholder } %>
+      </div>
+
+      <div>
+        <%= f.label :title, class: label_class do %>
+          <%= term("terms.activity_topic") %> <%= required_mark %>
+        <% end %>
+        <%= f.text_field :title, placeholder: "Contoh: Pemeriksaan fisik kepala & leher", required: true, class: input_class %>
+      </div>
+
+      <div>
+        <%= f.label :location, term("terms.activity_location"), class: label_class %>
+        <%= f.text_field :location, placeholder: "Contoh: Ruang Tutorial C2.3 / Puskesmas Sukamaju", class: input_class %>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :started_at, class: label_class do %>
+            <%= term("terms.started_at") %> <%= required_mark %>
+          <% end %>
+          <%= f.datetime_local_field :started_at, value: activity_log.started_at&.strftime("%Y-%m-%dT%H:%M"),
+                required: true, class: input_class %>
+        </div>
+        <div>
+          <%= f.label :ended_at, term("terms.ended_at"), class: label_class %>
+          <%= f.datetime_local_field :ended_at, value: activity_log.ended_at&.strftime("%Y-%m-%dT%H:%M"), class: input_class %>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend class="<%= label_class %>"><%= term("terms.delivery_mode") %> <%= required_mark %></legend>
+        <div class="grid grid-cols-2 gap-3">
+          <% ActivityLog::DELIVERY_MODES.each do |value, label| %>
+            <label class="flex cursor-pointer items-center gap-3 rounded-xl ring-1 ring-inset ring-gray-300 px-4 py-3 text-sm hover:bg-gray-50 has-[:checked]:ring-2 has-[:checked]:ring-indigo-500 has-[:checked]:bg-indigo-50">
+              <%= f.radio_button :delivery_mode, value, required: true, class: "text-indigo-600" %>
+              <span class="font-medium text-gray-900"><%= label %></span>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
+
+      <div>
+        <%= f.label :clinical_rotation_id, term("terms.clinical_rotation"), class: label_class %>
+        <% if @clinical_rotations.any? %>
+          <%= f.select :clinical_rotation_id,
+                options_for_select(@clinical_rotations.map { |r| [ "#{r.station_name}#{" — #{r.institution_name}" if r.institution_name.present?} (#{l(r.start_date, format: :short)} – #{l(r.end_date, format: :short)})", r.id ] },
+                                   activity_log.clinical_rotation_id),
+                { include_blank: "— Pilih rotasi (opsional) —" }, class: input_class %>
+        <% else %>
+          <p class="rounded-xl border border-dashed border-gray-300 px-4 py-2.5 text-sm text-gray-400 italic">Belum ada data rotasi klinik untuk akun ini.</p>
+        <% end %>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :academic_period_id, term("terms.academic_period"), class: label_class %>
+          <%= f.select :academic_period_id,
+                options_for_select(@academic_periods.map { |p| [ p.name, p.id ] }, activity_log.academic_period_id),
+                { include_blank: "— Otomatis dari tanggal —" }, class: input_class %>
+        </div>
+        <div>
+          <%= f.label :participant_count, "#{term('terms.participant_count')} (opsional)", class: label_class %>
+          <%= f.number_field :participant_count, min: 1, class: input_class %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :description, term("terms.activity_notes"), class: label_class %>
+        <%= f.text_area :description, rows: 4, class: "#{input_class} resize-y" %>
+      </div>
+
+      <div>
+        <%= f.label :reflection, "#{term('terms.activity_reflection')} (opsional)", class: label_class %>
+        <p class="text-xs text-gray-400 mb-1">Apa yang Anda pelajari dari kegiatan ini?</p>
+        <%= f.text_area :reflection, rows: 2, class: "#{input_class} resize-y" %>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Bagian 2: Kompetensi ── %>
   <% if @all_competency_items&.any? %>
-    <div>
-      <p class="block text-sm font-semibold text-gray-700 mb-1">Kompetensi yang Dilatih (opsional)</p>
-      <div class="flex flex-wrap gap-3 bg-gray-50 rounded-xl p-3">
+    <section class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden">
+      <div class="border-b border-gray-100 px-5 py-3.5">
+        <h2 class="text-sm font-semibold text-gray-900"><%= term("terms.covered_competencies") %></h2>
+        <p class="mt-0.5 text-xs text-gray-500">Pilih satu atau lebih area kompetensi yang relevan dengan kegiatan ini.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 px-5 py-5">
         <% @all_competency_items.each do |item| %>
-          <label class="flex items-center gap-1.5 text-xs text-gray-600">
+          <label class="flex items-center gap-3 rounded-xl ring-1 ring-inset ring-gray-200 px-4 py-3 text-sm text-gray-700 cursor-pointer hover:bg-indigo-50 has-[:checked]:ring-indigo-400 has-[:checked]:bg-indigo-50">
             <%= check_box_tag "activity_log[competency_item_ids][]", item.id, activity_log.competency_item_ids.include?(item.id),
                   id: "competency_item_#{item.id}", class: "rounded border-gray-300 text-indigo-600" %>
             <%= item.title %>
           </label>
         <% end %>
       </div>
-    </div>
+      <%# Tanpa isian kosong ini, mencentang-habis semua kompetensi saat
+          menyunting tidak mengirim apa pun dan tautan lama tetap tersimpan. %>
+      <%= hidden_field_tag "activity_log[competency_item_ids][]", "", id: nil %>
+    </section>
   <% end %>
 
-  <div>
-    <%= f.label :description, "Deskripsi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <%= f.text_area :description, rows: 3,
-          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
-  </div>
+  <%# ── Bagian 3: Dokumen & Bukti ── %>
+  <section class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden">
+    <div class="border-b border-gray-100 px-5 py-3.5">
+      <h2 class="text-sm font-semibold text-gray-900"><%= term("terms.evidence_section") %></h2>
+    </div>
+    <div class="px-5 py-5 space-y-4">
+      <div>
+        <%= f.label :evidence_url, term("terms.evidence_url"), class: label_class %>
+        <%= f.url_field :evidence_url, placeholder: "https://…", class: input_class %>
+      </div>
+      <div>
+        <%= f.label :document_url, term("terms.document_url"), class: label_class %>
+        <%= f.url_field :document_url, placeholder: "https://…", class: input_class %>
+      </div>
+      <div>
+        <%= f.label :evidence_files, "#{term('terms.evidence_files')} (opsional)", class: label_class %>
+        <%= f.file_field :evidence_files, multiple: true, class: "text-sm" %>
+        <% if activity_log.persisted? && activity_log.evidence_files.attached? %>
+          <p class="mt-1 text-xs text-gray-400">
+            Sudah terlampir <%= activity_log.evidence_files.count %> berkas — berkas baru ditambahkan, tidak menggantikan.
+          </p>
+        <% end %>
+      </div>
+    </div>
+  </section>
 
-  <div>
-    <%= f.label :reflection, "Refleksi Singkat (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <p class="text-xs text-gray-400 mb-1">Apa yang Anda pelajari dari kegiatan ini?</p>
-    <%= f.text_area :reflection, rows: 2,
-          class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm resize-none" %>
+  <div class="flex items-center justify-end gap-3">
+    <%= link_to "Batal", activity_log.persisted? ? activity_log_path(activity_log) : activity_logs_path,
+          class: "rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <%= f.submit activity_log.persisted? ? "Simpan Perubahan" : "Simpan Kegiatan",
+          class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
   </div>
-
-  <div>
-    <%= f.label :evidence_files, "Bukti Pendukung (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-    <%= f.file_field :evidence_files, multiple: true, class: "text-sm" %>
-  </div>
-
-  <%= f.submit activity_log.persisted? ? "Simpan Perubahan" : "Catat Kegiatan",
-        class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
 <% end %>

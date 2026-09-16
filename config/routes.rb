@@ -84,6 +84,23 @@ Rails.application.routes.draw do
       collection { post :import }
     end
     resources :logbook_case_targets, except: %i[show]
+    # Domain Kegiatan Akademik (taksonomi Logbook Kegiatan & Kalender) dan
+    # Taksonomi Istilah — padanan menu Konfigurasi jejak.pro.
+    concern :taxonomy_node do
+      member do
+        patch :move
+        patch :toggle_active
+      end
+    end
+    resources :academic_activity_domains, except: %i[show], concerns: :taxonomy_node do
+      resources :academic_activity_subdomains, only: %i[new create edit update destroy], shallow: true,
+                                               concerns: :taxonomy_node do
+        resources :academic_activity_templates, only: %i[new create edit update destroy], shallow: true,
+                                                concerns: :taxonomy_node
+      end
+    end
+    get   "terminology", to: "terminology_overrides#index", as: :terminology
+    patch "terminology", to: "terminology_overrides#update"
     resources :assessment_events do
       member do
         get  :import

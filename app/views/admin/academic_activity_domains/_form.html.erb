@@ -1,0 +1,45 @@
+<%
+  cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm"
+  lbl = "block text-sm font-semibold text-gray-700 mb-1"
+%>
+<%= form_with model: [ :admin, record ], class: "space-y-5 bg-white rounded-2xl ring-1 ring-gray-200 p-5" do |f| %>
+  <% if record.errors.any? %>
+    <div class="rounded-lg bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 text-sm"><%= record.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Nama Domain", class: lbl %>
+    <%= f.text_field :name, required: true, maxlength: 150, placeholder: "Contoh: Praktek, Belajar Mengajar", class: cls %>
+  </div>
+
+  <div>
+    <%= f.label :color_code, "Warna Penanda", class: lbl %>
+    <div class="flex items-center gap-3">
+      <%= f.color_field :color_code, value: record.color, class: "h-10 w-16 rounded-lg ring-1 ring-gray-300 cursor-pointer" %>
+      <span class="text-xs text-gray-500">Dipakai sebagai titik warna di daftar kegiatan dan kalender.</span>
+    </div>
+  </div>
+
+  <div class="space-y-3">
+    <label class="flex items-start gap-3 text-sm">
+      <%= f.check_box :is_clinical, class: "mt-0.5 rounded border-gray-300 text-indigo-600" %>
+      <span>
+        <span class="font-semibold text-gray-700">Kegiatan klinis</span>
+        <span class="block text-xs text-gray-500">Dihitung sebagai "Klinis" di Portfolio dan menampilkan Kode Pasien (anonim) di detail kegiatan.</span>
+      </span>
+    </label>
+    <label class="flex items-start gap-3 text-sm">
+      <%= f.check_box :is_active, class: "mt-0.5 rounded border-gray-300 text-indigo-600" %>
+      <span>
+        <span class="font-semibold text-gray-700">Aktif</span>
+        <span class="block text-xs text-gray-500">Domain nonaktif tidak muncul lagi di form, tetapi kegiatan lama yang memakainya tetap utuh.</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="flex items-center justify-end gap-3 pt-2">
+    <%= link_to "Batal", admin_academic_activity_domains_path(anchor: record.persisted? ? "domain-#{record.id}" : nil),
+          class: "rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50" %>
+    <%= f.submit "Simpan", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+  </div>
+<% end %>

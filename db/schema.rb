@@ -10,9 +10,43 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "academic_activity_domains", force: :cascade do |t|
+    t.string "color_code"
+    t.datetime "created_at", null: false
+    t.string "icon"
+    t.boolean "is_active", default: true, null: false
+    t.boolean "is_clinical", default: false, null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_academic_activity_domains_on_name", unique: true
+  end
+
+  create_table "academic_activity_subdomains", force: :cascade do |t|
+    t.bigint "academic_activity_domain_id", null: false
+    t.datetime "created_at", null: false
+    t.boolean "is_active", default: true, null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["academic_activity_domain_id", "name"], name: "idx_activity_subdomains_unique_name", unique: true
+    t.index ["academic_activity_domain_id"], name: "idx_on_academic_activity_domain_id_bf2d5d6c50"
+  end
+
+  create_table "academic_activity_templates", force: :cascade do |t|
+    t.bigint "academic_activity_subdomain_id", null: false
+    t.datetime "created_at", null: false
+    t.boolean "is_active", default: true, null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["academic_activity_subdomain_id", "name"], name: "idx_activity_templates_unique_name", unique: true
+    t.index ["academic_activity_subdomain_id"], name: "idx_on_academic_activity_subdomain_id_02a6c97b80"
+  end
 
   create_table "academic_periods", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -61,22 +95,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
   end
 
   create_table "activity_logs", force: :cascade do |t|
+    t.bigint "academic_activity_domain_id"
+    t.bigint "academic_activity_subdomain_id"
+    t.bigint "academic_activity_template_id"
+    t.bigint "academic_period_id"
     t.date "activity_date", null: false
     t.string "activity_type"
     t.string "category", null: false
+    t.bigint "clinical_rotation_id"
     t.datetime "created_at", null: false
     t.string "delivery_mode"
     t.text "description"
+    t.string "document_url"
+    t.datetime "ended_at"
+    t.string "evidence_url"
     t.string "location"
     t.integer "participant_count"
     t.string "patient_code"
     t.text "reflection"
+    t.datetime "started_at"
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.datetime "verified_at"
     t.bigint "verified_by_id"
+    t.index ["academic_activity_domain_id"], name: "index_activity_logs_on_academic_activity_domain_id"
+    t.index ["academic_activity_subdomain_id"], name: "index_activity_logs_on_academic_activity_subdomain_id"
+    t.index ["academic_activity_template_id"], name: "index_activity_logs_on_academic_activity_template_id"
+    t.index ["academic_period_id"], name: "index_activity_logs_on_academic_period_id"
     t.index ["category"], name: "index_activity_logs_on_category"
+    t.index ["clinical_rotation_id"], name: "index_activity_logs_on_clinical_rotation_id"
     t.index ["user_id", "activity_date"], name: "index_activity_logs_on_user_id_and_activity_date"
     t.index ["user_id"], name: "index_activity_logs_on_user_id"
     t.index ["verified_by_id"], name: "index_activity_logs_on_verified_by_id"
@@ -663,6 +711,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
     t.index ["name"], name: "index_study_programs_on_name", unique: true
   end
 
+  create_table "terminology_overrides", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "updated_by_id"
+    t.string "value", null: false
+    t.index ["key"], name: "index_terminology_overrides_on_key", unique: true
+    t.index ["updated_by_id"], name: "index_terminology_overrides_on_updated_by_id"
+  end
+
   create_table "tutorial_enrollments", force: :cascade do |t|
     t.bigint "academic_period_id", null: false
     t.boolean "active", default: true, null: false
@@ -737,10 +795,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
     t.index ["study_program_id"], name: "index_users_on_study_program_id"
   end
 
+  add_foreign_key "academic_activity_subdomains", "academic_activity_domains"
+  add_foreign_key "academic_activity_templates", "academic_activity_subdomains"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_log_competency_tags", "activity_logs"
   add_foreign_key "activity_log_competency_tags", "competency_items"
+  add_foreign_key "activity_logs", "academic_activity_domains"
+  add_foreign_key "activity_logs", "academic_activity_subdomains"
+  add_foreign_key "activity_logs", "academic_activity_templates"
+  add_foreign_key "activity_logs", "academic_periods"
+  add_foreign_key "activity_logs", "clinical_rotations"
   add_foreign_key "activity_logs", "users"
   add_foreign_key "activity_logs", "users", column: "verified_by_id", validate: false
   add_foreign_key "app_settings", "users", column: "updated_by_id"
@@ -757,7 +822,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
   add_foreign_key "assessment_form_answers", "assessment_form_fields"
   add_foreign_key "assessment_form_answers", "assessment_form_submissions"
   add_foreign_key "assessment_form_fields", "assessment_form_templates"
-  add_foreign_key "assessment_form_fields", "competency_items"
+  add_foreign_key "assessment_form_fields", "competency_items", validate: false
   add_foreign_key "assessment_form_submissions", "assessment_form_templates"
   add_foreign_key "assessment_form_submissions", "users", column: "respondent_id"
   add_foreign_key "assessment_form_submissions", "users", column: "subject_user_id"
@@ -783,7 +848,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
   add_foreign_key "competency_milestones", "academic_periods"
   add_foreign_key "competency_milestones", "competency_items"
   add_foreign_key "device_push_tokens", "users"
-  add_foreign_key "dops_evaluations", "clinical_cases"
+  add_foreign_key "dops_evaluations", "clinical_cases", validate: false
   add_foreign_key "dops_evaluations", "clinical_rotations"
   add_foreign_key "dops_evaluations", "users", column: "evaluator_id"
   add_foreign_key "dops_evaluations", "users", column: "student_id"
@@ -808,7 +873,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
   add_foreign_key "learning_units", "study_programs"
   add_foreign_key "logbook_case_targets", "academic_periods"
   add_foreign_key "logbook_case_targets", "study_programs"
-  add_foreign_key "mini_cex_evaluations", "clinical_cases"
+  add_foreign_key "mini_cex_evaluations", "clinical_cases", validate: false
   add_foreign_key "mini_cex_evaluations", "clinical_rotations"
   add_foreign_key "mini_cex_evaluations", "users", column: "evaluator_id"
   add_foreign_key "mini_cex_evaluations", "users", column: "student_id"
@@ -819,6 +884,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_080003) do
   add_foreign_key "reflection_entries", "activity_logs"
   add_foreign_key "reflection_entries", "clinical_cases"
   add_foreign_key "reflection_entries", "users"
+  add_foreign_key "terminology_overrides", "users", column: "updated_by_id"
   add_foreign_key "tutorial_enrollments", "academic_periods"
   add_foreign_key "tutorial_enrollments", "users"
   add_foreign_key "tutorial_enrollments", "users", column: "tutor_id"

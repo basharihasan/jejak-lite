@@ -20,3 +20,17 @@ kegiatan_siti:
   category: klinis
   activity_type: Kunjungan Rumah
   activity_date: <%= 1.day.ago.to_date %>
+
+# Kegiatan bertaksonomi (form sejak 17 Sep 2026). Tiga fixture di atas
+# sengaja format lama: hanya category + teks bebas activity_type.
+tutorial_siti:
+  user: siti
+  title: Tutorial Skenario Nyeri Dada
+  category: non_klinis
+  academic_activity_domain: belajar_mengajar
+  academic_activity_subdomain: tutorial
+  activity_date: <%= 2.days.ago.to_date %>
+  started_at: <%= 2.days.ago.change(hour: 8) %>
+  ended_at: <%= 2.days.ago.change(hour: 10) %>
+  delivery_mode: luring
+  evidence_url: https://drive.example.com/bukti-tutorial

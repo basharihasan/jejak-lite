@@ -61,9 +61,11 @@ en:
     assessment_blueprints: "Assessment Blueprint"
     learning_units: "Learning Units & Matrix"
     logbook_case_targets: "Logbook Case Targets"
+    activity_taxonomy: "Academic Activity Domains"
     diagnosis_definitions: "Diagnosis Master"
     skill_definitions: "Skills Master"
     medication_definitions: "Medication Master"
+    terminology: "Terminology"
     data_governance: "Data Governance"
     mobile:
       home: "Home"

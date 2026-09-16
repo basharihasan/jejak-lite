@@ -1,0 +1,26 @@
+<%# Tombol aksi satu simpul taksonomi (domain / subdomain / bentuk kegiatan):
+    geser urutan, sunting, aktif/nonaktif, hapus. Hapus hanya ditawarkan bila
+    belum dipakai kegiatan mana pun — controller tetap menolaknya bila dipakai. %>
+<%
+  used = local_assigns.fetch(:used, 0).to_i
+  link_class = "text-xs font-medium hover:underline cursor-pointer"
+  icon_class = "h-6 w-6 inline-flex items-center justify-center rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+%>
+<div class="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+  <% unless local_assigns[:first] %>
+    <%= button_to "▲", polymorphic_path([ :admin, record ], action: :move, direction: "up"), method: :patch,
+          class: icon_class, title: "Geser ke atas", "aria-label": "Geser #{record.name} ke atas", form: { class: "inline" } %>
+  <% end %>
+  <% unless local_assigns[:last] %>
+    <%= button_to "▼", polymorphic_path([ :admin, record ], action: :move, direction: "down"), method: :patch,
+          class: icon_class, title: "Geser ke bawah", "aria-label": "Geser #{record.name} ke bawah", form: { class: "inline" } %>
+  <% end %>
+  <%= link_to "Sunting", polymorphic_path([ :admin, record ], action: :edit), class: "#{link_class} text-indigo-600 ml-1" %>
+  <%= button_to record.is_active? ? "Nonaktifkan" : "Aktifkan",
+        polymorphic_path([ :admin, record ], action: :toggle_active), method: :patch,
+        class: "#{link_class} #{record.is_active? ? 'text-amber-600' : 'text-emerald-600'}", form: { class: "inline" } %>
+  <% if used.zero? %>
+    <%= button_to "Hapus", polymorphic_path([ :admin, record ]), method: :delete,
+          class: "#{link_class} text-rose-600", form: { class: "inline", data: { turbo_confirm: "Hapus “#{record.name}”#{' beserta seluruh isinya' if local_assigns[:has_children]}?" } } %>
+  <% end %>
+</div>

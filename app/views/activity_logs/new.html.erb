@@ -1,4 +1,8 @@
-<div class="max-w-2xl">
-  <h1 class="text-xl font-bold text-gray-900 mb-6">Catat Kegiatan Baru</h1>
+<% content_for :title, term("terms.new_activity") %>
+<div class="max-w-3xl space-y-5">
+  <div>
+    <%= link_to "← #{term('nav.activity_logs')}", activity_logs_path, class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+    <h1 class="mt-2 text-xl font-bold text-gray-900"><%= term("terms.new_activity") %></h1>
+  </div>
   <%= render "form", activity_log: @activity_log %>
 </div>

@@ -16,7 +16,7 @@ class MigrationExporterTest < ActiveSupport::TestCase
     MigrationExporter.new(dir: @dir).call
 
     manifest = JSON.parse(@dir.join("manifest.json").read)
-    assert_equal "1.0", manifest["format_version"]
+    assert_equal "1.1", manifest["format_version"]
     assert_equal "jejak-lite", manifest["source"]["app"]
     assert_equal false, manifest["patient_identity_included"]
     assert_equal User.count, manifest["counts"]["users"]
@@ -50,6 +50,22 @@ class MigrationExporterTest < ActiveSupport::TestCase
     rotasi = CSV.read(@dir.join("jejak_pro/rotasi_klinik.csv"), headers: true)
     assert_equal [ "NPM", "Email Mahasiswa", "Blok Klinis", "Wahana", "Periode", "Mulai", "Selesai", "Status", "Tier", "Email Preseptor" ],
                  rotasi.headers
+  end
+
+  test "logbook kegiatan membawa nama domain, subdomain, dan waktu untuk dicocokkan jejak.pro" do
+    MigrationExporter.new(dir: @dir).call
+
+    logbook = CSV.read(@dir.join("jejak_pro/logbook_kegiatan.csv"), headers: true)
+    assert_equal MigrationExporter::ACTIVITY_HEADERS, logbook.headers
+    assert_equal %w[id_jejak_lite email_mahasiswa tanggal judul kategori mode deskripsi refleksi lokasi jumlah_peserta],
+                 logbook.headers.first(10), "kolom versi 1.0 tidak boleh bergeser"
+    tutorial = logbook.find { |row| row["id_jejak_lite"] == activity_logs(:tutorial_siti).id.to_s }
+    assert_equal [ "Belajar Mengajar", "Tutorial", nil ], tutorial.fields("domain", "subdomain", "bentuk_kegiatan")
+    assert_equal activity_logs(:tutorial_siti).started_at.iso8601, tutorial["waktu_mulai"]
+    assert_equal "https://drive.example.com/bukti-tutorial", tutorial["link_bukti"]
+
+    assert JSON.parse(@dir.join("data/academic_activity_domains.json").read).any? { |row| row["name"] == "Praktek" }
+    assert @dir.join("data/terminology_overrides.json").exist?
   end
 
   test "identitas pasien tidak ikut kecuali diminta" do

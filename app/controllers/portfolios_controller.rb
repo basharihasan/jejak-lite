@@ -11,16 +11,24 @@ class PortfoliosController < ApplicationController
     @klinis_count = @logs.klinis.count
     @non_klinis_count = @logs.non_klinis.count
     @monthly_counts = @logs.group_by_month(:activity_date, last: 6).count
-    @type_counts = @logs.where.not(activity_type: [ nil, "" ]).group(:activity_type).count.sort_by { |_, c| -c }.first(8)
+    # Kegiatan baru tidak lagi mengisi teks bebas activity_type — hitung dari
+    # taksonomi (Bentuk Kegiatan → Subdomain), teks lama sebagai cadangan.
+    @type_counts = @logs.with_taxonomy.filter_map(&:kind_label).tally.sort_by { |_, c| -c }.first(8)
   end
 
   def export
-    logs = current_user.activity_logs.recent
+    logs = current_user.activity_logs.recent.with_taxonomy.includes(:academic_period, :clinical_rotation)
 
     csv = CSV.generate(headers: true) do |rows|
-      rows << [ "Tanggal", "Kategori", "Jenis", "Judul", "Deskripsi", "Refleksi", "Jumlah Peserta" ]
+      rows << [ "Tanggal", "Waktu Mulai", "Waktu Selesai", "Domain", "Subdomain / Kategori", "Bentuk Kegiatan",
+                "Klinis/Non-Klinis", "Topik", "Lokasi", "Metode", "Semester", "Rotasi", "Catatan", "Refleksi",
+                "Jumlah Peserta", "Link Bukti", "Link Dokumen" ]
       logs.each do |log|
-        rows << [ log.activity_date, log.category_label, log.activity_type, log.title, log.description, log.reflection, log.participant_count ]
+        rows << [ log.activity_date, log.started_at&.strftime("%H:%M"), log.ended_at&.strftime("%Y-%m-%d %H:%M"),
+                  log.domain_label, log.academic_activity_subdomain&.name || log.activity_type,
+                  log.academic_activity_template&.name, log.category_label, log.title, log.location,
+                  log.delivery_mode_label, log.academic_period&.name, log.clinical_rotation&.station_name,
+                  log.description, log.reflection, log.participant_count, log.evidence_url, log.document_url ]
       end
     end
 

@@ -1,10 +1,9 @@
+<% content_for :title, @activity_log.title %>
 <div class="max-w-2xl">
   <div class="flex items-center justify-between">
     <div>
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= @activity_log.category == "klinis" ? "bg-sky-50 text-sky-700" : "bg-emerald-50 text-emerald-700" %>">
-          <%= @activity_log.category_label %>
-        </span>
+        <%= activity_domain_badge(@activity_log) %>
         <% if @activity_log.verified? %>
           <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">✓ Terverifikasi</span>
         <% else %>
@@ -12,8 +11,14 @@
         <% end %>
       </div>
       <h1 class="text-xl font-bold text-gray-900 mt-2"><%= @activity_log.title %></h1>
+      <% if (detail = @activity_log.taxonomy_detail) %>
+        <p class="text-sm text-gray-600 mt-1"><%= detail %></p>
+      <% end %>
       <p class="text-sm text-gray-400 mt-1">
-        <%= l(@activity_log.activity_date, format: :long) %><%= " · #{@activity_log.activity_type}" if @activity_log.activity_type.present? %>
+        <%= l(@activity_log.activity_date, format: :long) %>
+        <% if @activity_log.started_at %>
+          · <%= l(@activity_log.started_at, format: "%H:%M") %><%= "–#{l(@activity_log.ended_at, format: @activity_log.ended_at.to_date == @activity_log.started_at.to_date ? '%H:%M' : '%-d %b %H:%M')}" if @activity_log.ended_at %>
+        <% end %>
         <%= " · #{@activity_log.location}" if @activity_log.location.present? %>
         <%= " · #{@activity_log.delivery_mode_label}" if @activity_log.delivery_mode.present? %>
         <% if @activity_log.user_id != current_user.id %> · dicatat oleh <%= @activity_log.user.full_name %><% end %>
@@ -43,9 +48,25 @@
     </div>
   </div>
 
+  <% context_rows = [
+       [ term("terms.clinical_rotation"), @activity_log.clinical_rotation&.then { |r| [ r.station_name, r.institution_name.presence ].compact.join(" — ") } ],
+       [ term("terms.academic_period"), @activity_log.academic_period&.name ],
+       [ term("terms.participant_count"), @activity_log.participant_count ]
+     ].select { |_, value| value.present? } %>
+  <% if context_rows.any? %>
+    <dl class="mt-6 bg-white rounded-2xl ring-1 ring-gray-200 p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <% context_rows.each do |label, value| %>
+        <div>
+          <dt class="text-xs font-semibold text-gray-500 uppercase"><%= label %></dt>
+          <dd class="text-sm text-gray-800 mt-0.5"><%= value %></dd>
+        </div>
+      <% end %>
+    </dl>
+  <% end %>
+
   <% if @activity_log.description.present? %>
-    <div class="mt-6 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
-      <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Deskripsi</p>
+    <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <p class="text-xs font-semibold text-gray-500 uppercase mb-1"><%= term("terms.activity_notes") %></p>
       <p class="text-sm text-gray-700 whitespace-pre-line"><%= @activity_log.description %></p>
     </div>
   <% end %>
@@ -57,9 +78,16 @@
     </div>
   <% end %>
 
-  <% if @activity_log.evidence_files.attached? %>
+  <% links = [ [ term("terms.evidence_url"), @activity_log.evidence_url ], [ term("terms.document_url"), @activity_log.document_url ] ].select { |_, url| url.present? } %>
+  <% if @activity_log.evidence_files.attached? || links.any? %>
     <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
-      <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Bukti Pendukung</p>
+      <p class="text-xs font-semibold text-gray-500 uppercase mb-2"><%= term("terms.evidence_section") %></p>
+      <% links.each do |label, url| %>
+        <p class="text-sm mb-1.5">
+          <span class="text-gray-500"><%= label %>:</span>
+          <%= link_to url, url, target: "_blank", rel: "noopener noreferrer nofollow", class: "text-indigo-600 hover:underline break-all" %>
+        </p>
+      <% end %>
       <div class="flex flex-wrap gap-2">
         <% @activity_log.evidence_files.each do |file| %>
           <%= link_to rails_blob_path(file, disposition: "attachment"), class: "text-xs bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 text-gray-600" do %>
@@ -70,7 +98,7 @@
     </div>
   <% end %>
 
-  <% if @activity_log.category == "klinis" %>
+  <% if @activity_log.clinical? %>
     <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 p-5">
       <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Kode Pasien (anonim)</p>
       <% if @activity_log.patient_code.present? %>

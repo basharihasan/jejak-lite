@@ -65,10 +65,20 @@ namespace :demo do
 
     klinis_domain = CompetencyItem.find_by(title: "Keterampilan Klinis")
 
+    AcademicActivityTaxonomySeeder.call
+    # Pasangan (domain, subdomain) taksonomi bawaan; nil bila admin sudah
+    # mengubah namanya — kegiatan demo tetap dibuat, hanya tanpa taksonomi.
+    demo_kinds = [ [ "Praktek", "Stase Ruang perawatan" ], [ "Belajar Mengajar", "Bed-site Teaching" ] ].map do |domain_name, subdomain_name|
+      AcademicActivitySubdomain.joins(:academic_activity_domain)
+                               .find_by(name: subdomain_name, academic_activity_domains: { name: domain_name })
+    end
+
     [ mahasiswa1, mahasiswa2 ].each_with_index do |student, i|
       log = ActivityLog.find_or_create_by!(user: student, title: "Kegiatan Logbook Demo #{i + 1}") do |l|
         l.category = "klinis"
-        l.activity_type = "Observasi Tindakan"
+        l.academic_activity_subdomain = demo_kinds[i]
+        l.started_at = (i + 1).days.ago.change(hour: 8)
+        l.ended_at = (i + 1).days.ago.change(hour: 12)
         l.activity_date = (i + 1).days.ago.to_date
         l.location = "RSUP Demo"
         l.delivery_mode = "luring"

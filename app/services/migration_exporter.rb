@@ -23,7 +23,9 @@ require "fileutils"
 # Identitas pasien terenkripsi TIDAK ikut secara bawaan; harus diminta
 # eksplisit (include_patient_identity: true) dan selalu dicatat di manifest.
 class MigrationExporter
-  FORMAT_VERSION = "1.0"
+  # 1.1: logbook_kegiatan.csv mendapat kolom taksonomi & waktu di UJUNG
+  # (aditif — importer 1.0 tetap bisa membaca, kolom baru diabaikan).
+  FORMAT_VERSION = "1.1"
 
   # Tabel yang disalin utuh ke data/*.json.
   FULL_TABLES = %w[
@@ -31,6 +33,7 @@ class MigrationExporter
     clinical_rotations tutorial_enrollments
     clinical_cases prescription_items patient_consents medication_definitions
     diagnosis_definitions skill_definitions logbook_case_targets
+    academic_activity_domains academic_activity_subdomains academic_activity_templates
     activity_logs activity_log_competency_tags reflection_entries
     competency_frameworks competency_items competency_milestones
     assessment_blueprints assessment_blueprint_mappings
@@ -42,6 +45,7 @@ class MigrationExporter
     exam_imports exam_scores
     learning_units assessment_mappings
     notifications app_settings break_glass_accesses case_verification_comments
+    terminology_overrides
   ].freeze
   # Sengaja tidak ikut: device_push_tokens (kunci perangkat, tak berguna di
   # server lain) dan tabel Active Storage (berkasnya diekspor ke lampiran/).
@@ -63,7 +67,12 @@ class MigrationExporter
     email_verifikator waktu_verifikasi tanda_vital
   ].freeze
   CASE_IDENTITY_HEADERS = %w[nama_pasien no_rm tanggal_lahir_pasien telepon_pasien alamat_pasien].freeze
-  ACTIVITY_HEADERS = %w[id_jejak_lite email_mahasiswa tanggal judul kategori mode deskripsi refleksi lokasi jumlah_peserta].freeze
+  # `domain`/`subdomain`/`bentuk_kegiatan` berisi NAMA — jejak.pro memakai
+  # taksonomi bernama sama (AcademicActivityDomain dst.) dan mencocokkannya.
+  ACTIVITY_HEADERS = %w[
+    id_jejak_lite email_mahasiswa tanggal judul kategori mode deskripsi refleksi lokasi jumlah_peserta
+    domain subdomain bentuk_kegiatan waktu_mulai waktu_selesai link_bukti link_dokumen
+  ].freeze
   EMAIL_ALIAS_HEADERS = [ "Email jejak-lite", "Email jejak.pro" ].freeze
   COMPETENCY_HEADERS = [ "ID jejak-lite", "Kerangka", "Induk", "Nama", "Kode Kompetensi jejak.pro" ].freeze
   EVENT_HEADERS = [
@@ -212,9 +221,12 @@ class MigrationExporter
 
   def export_activity_logs_csv
     write_csv("jejak_pro/logbook_kegiatan.csv", ACTIVITY_HEADERS) do |csv|
-      ActivityLog.includes(:user).order(:activity_date, :id).find_each do |log|
+      ActivityLog.includes(:user).with_taxonomy.order(:activity_date, :id).find_each do |log|
         csv << [ log.id, log.user.email, log.activity_date, log.title, log.category, log.delivery_mode,
-                 log.description, log.reflection, log.location, log.participant_count ]
+                 log.description, log.reflection, log.location, log.participant_count,
+                 log.academic_activity_domain&.name, log.academic_activity_subdomain&.name,
+                 log.academic_activity_template&.name, log.started_at&.iso8601, log.ended_at&.iso8601,
+                 log.evidence_url, log.document_url ]
       end
     end
   end

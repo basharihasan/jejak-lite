@@ -1,0 +1,20 @@
+praktek:
+  name: Praktek
+  color_code: "#10b981"
+  position: 1
+  is_clinical: true
+
+belajar_mengajar:
+  name: Belajar Mengajar
+  color_code: "#3b82f6"
+  position: 2
+
+prestasi:
+  name: Prestasi Kemahasiswaan
+  color_code: "#f59e0b"
+  position: 3
+
+domain_arsip:
+  name: Domain Arsip
+  position: 4
+  is_active: false

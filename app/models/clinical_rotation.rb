@@ -7,6 +7,7 @@ class ClinicalRotation < ApplicationRecord
   belongs_to :user # mahasiswa
   belongs_to :academic_period
   belongs_to :preceptor, class_name: "User", optional: true
+  has_many :activity_logs, dependent: :nullify
 
   validates :station_name, :start_date, :end_date, presence: true
   validate :end_date_after_start_date
