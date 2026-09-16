@@ -42,6 +42,12 @@ RUN bundle install --local || bundle install && \
 
 COPY . .
 
+# Jaring pengaman: skrip bin/* dulu sempat tercatat git tanpa bit
+# executable (repo ini banyak dikerjakan di Windows) — chmod eksplisit di
+# sini supaya build tidak lagi bergantung pada mode berkas yang tersimpan
+# di git.
+RUN chmod +x bin/*
+
 # Kunci DUMMY khusus untuk precompile aset saat BUILD image — bukan kunci
 # sungguhan (yang disuntik lewat docker-compose environment saat container
 # jalan). config/initializers/active_record_encryption.rb cuma memeriksa
