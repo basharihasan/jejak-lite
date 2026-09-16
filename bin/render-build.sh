@@ -17,3 +17,11 @@ bundle exec rails db:seed
 if [ -n "${ADMIN_EMAIL}" ] && [ -n "${ADMIN_PASSWORD}" ]; then
   bundle exec rails users:create_admin
 fi
+
+# Akun & data demo untuk mencoba tiap peran. Tidak pernah jalan kecuali
+# DEMO_SEED diisi, karena situs ini terbuka di internet. Isi DEMO_PASSWORD
+# dengan kata sandi sendiri — tanpa itu akun demo memakai password123 yang
+# tercantum publik di repositori.
+if [ -n "${DEMO_SEED}" ]; then
+  bundle exec rails demo:seed
+fi

@@ -6,19 +6,22 @@
 # password lemah yang diketahui publik, bukan data rujukan aplikasi.
 # Idempoten: aman dijalankan berkali-kali (find_or_create_by! di semua titik).
 namespace :demo do
-  desc "Buat akun & data demo untuk mencoba semua fitur jejak-lite (password: password123)"
+  desc "Buat akun & data demo untuk mencoba semua fitur jejak-lite (password: DEMO_PASSWORD, bawaan password123)"
   task seed: :environment do
+    # Instance publik wajib menimpa lewat DEMO_PASSWORD; bawaannya sengaja
+    # lemah supaya mencoba di komputer sendiri tetap sederhana.
+    demo_password = ENV.fetch("DEMO_PASSWORD", "password123")
     if Rails.env.production?
-      puts "Peringatan: menjalankan data DEMO (password publik: password123) di production."
+      puts "Peringatan: menjalankan data DEMO di production."
       puts "Hanya lakukan ini untuk instance demo/showcase, bukan deployment sungguhan."
     end
 
-    def demo_user(email, full_name:, roles:, study_program: nil)
+    def demo_user(email, full_name:, roles:, study_program: nil, password: ENV.fetch("DEMO_PASSWORD", "password123"))
       user = User.find_or_initialize_by(email: email)
       user.full_name = full_name
       user.study_program = study_program if study_program
       if user.new_record?
-        user.password = user.password_confirmation = "password123"
+        user.password = user.password_confirmation = password
         user.confirmed_at = Time.current
       end
       user.save!(validate: false)
@@ -202,7 +205,7 @@ namespace :demo do
       r.content = "Refleksi demo: belajar pentingnya komunikasi empatik dengan pasien."
     end
 
-    puts "Data demo siap. Akun (password: password123):"
+    puts "Data demo siap. Akun (password: #{demo_password}):"
     [ admin, dosen, preseptor, kaprodi, multirole, mahasiswa1, mahasiswa2 ].each do |u|
       puts "  #{u.email.ljust(32)} #{u.roles.pluck(:code).join(', ')}"
     end
