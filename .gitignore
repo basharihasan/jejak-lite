@@ -7,8 +7,10 @@
 # Ignore bundler config.
 /.bundle
 
-# Ignore all environment files.
+# Ignore all environment files, KECUALI templat (tanpa nilai sungguhan)
+# untuk deployment Docker/NAS.
 /.env*
+!/.env.example
 
 # Ignore all logfiles and tempfiles.
 /log/*

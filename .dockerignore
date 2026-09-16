@@ -1,0 +1,27 @@
+# Meniru .gitignore untuk konteks build Docker — jangan salin apa pun yang
+# gitignored (rahasia, artefak lokal) ke dalam image.
+.git/
+.github/
+.gitignore
+.dockerignore
+tmp/*
+!tmp/.keep
+log/*
+!log/.keep
+storage/*
+!storage/.keep
+public/assets
+public/packs
+node_modules/
+.env
+.env.*
+config/master.key
+coverage/
+test/screenshots/
+*.pem
+Dockerfile
+docker-compose*.yml
+# Dokumentasi repo di root — TAPI BUKAN app/views/panduan/panduan.md, yang
+# dibaca runtime oleh PanduanController (halaman /panduan pengguna).
+/*.md
+
