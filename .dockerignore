@@ -16,6 +16,11 @@ node_modules/
 .env
 .env.*
 config/master.key
+# credentials.yml.enc sengaja TIDAK ikut: image self-hosted memasok seluruh
+# rahasia lewat ENV (SECRET_KEY_BASE + AR_ENCRYPTION_*). Dengan berkas ini
+# absen, Rails tidak pernah perlu RAILS_MASTER_KEY — menghapus satu langkah
+# rapuh (salah tempel kunci = gagal boot) pada pemasangan pelanggan.
+config/credentials.yml.enc
 coverage/
 test/screenshots/
 *.pem
