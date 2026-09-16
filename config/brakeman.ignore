@@ -1,0 +1,30 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "29d82307d10c77eb2d71a0334e39d67f2f98c2681fd828ff6ef1d490fdc5e6d5",
+      "note": "Weak confidence. link_to uses html_safe on Rails route helper hrefs. assessment_event.name is escaped by ERB. Safe."
+    },
+    {
+      "fingerprint": "2d83f2f5392288d6eace72a7c334e7f6ea0a398c5fa0941b402b221080cc764d",
+      "note": "Weak confidence. Link labels are integer/symbol-derived values. Hrefs are route helpers. Safe."
+    },
+    {
+      "fingerprint": "3fcb8b1c6c20a305efe54f5f8f8fef32cb7e0b55aa67dd6eb995ddebcb7dda1d",
+      "note": "Weak confidence. video_recording_url stored by admin/supervisors. rel=noopener present. Accepted."
+    },
+    {
+      "fingerprint": "6682951cae647a14de9b5d0437e4a7f1532921b837f99f308d628ba2df8b9216",
+      "note": "Medium confidence. dimension_mapping keys are dynamic CSV column headers in admin-only import flow. permit! intentional; values validated downstream. Admin only."
+    },
+    {
+      "fingerprint": "7a2015c2b3fc6e9dba0d0e0278fcc38a917d3ab1dec35f508366e9a033abfe41",
+      "note": "Weak confidence. RQRCode as_svg output is XML-safe SVG markup. patient_code is a DB field, not raw user input in the template."
+    },
+    {
+      "fingerprint": "98ca6b4ff6d69976ac8936a85bce8e655679943116ede6eab83c75fd78233a41",
+      "note": "Weak confidence. Same as dops_evaluations. rel=noopener present. Accepted."
+    }
+  ],
+  "updated": "2026-09-16 16:04:00 +0000",
+  "brakeman_version": "8.0.6"
+}
