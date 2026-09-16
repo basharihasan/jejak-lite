@@ -53,6 +53,14 @@ services:
       # ganti isinya di dashboard bila service-name lain atau custom domain.
       - key: APP_HOST
         value: jejak-lite.onrender.com
+      # Bootstrap admin pertama saat build (lihat bin/render-build.sh).
+      # Kosongkan ADMIN_PASSWORD setelah deploy pertama.
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_NAME
+        sync: false
       # Opsional, isi kalau ingin login Google aktif:
       # - key: GOOGLE_CLIENT_ID
       #   sync: false
