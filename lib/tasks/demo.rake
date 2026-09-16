@@ -147,15 +147,19 @@ namespace :demo do
 
     template = AssessmentFormTemplate.find_by(name: "Evaluasi Blok")
     if template && AssessmentFormSubmission.find_by(respondent: mahasiswa1, assessment_form_template: template).nil?
-      submission = template.assessment_form_submissions.create!(respondent: mahasiswa1, submitted_at: Time.current)
+      # Jawaban dirakit dulu lalu disimpan sekali: validasi
+      # all_required_fields_answered berjalan saat create, jadi submission
+      # kosong selalu ditolak pada basis data bersih.
+      submission = template.assessment_form_submissions.new(respondent: mahasiswa1, submitted_at: Time.current)
       template.assessment_form_fields.each do |field|
         value = case field.field_type
         when "rating" then "4"
         when "yes_no" then "Tidak"
         else "Contoh jawaban demo."
         end
-        submission.assessment_form_answers.create!(assessment_form_field: field, value: value)
+        submission.assessment_form_answers.new(assessment_form_field: field, value: value)
       end
+      submission.save!
     end
 
     # Fase 25 — Assessment Event & percobaan (menggantikan ExamImport/ExamScore).
