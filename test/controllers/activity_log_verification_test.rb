@@ -88,4 +88,24 @@ class ActivityLogVerificationTest < ActionDispatch::IntegrationTest
     get activity_logs_calendar_path
     assert_match "bg-emerald-500", response.body
   end
+
+  test "sidebar hanya memuat Logbook Kegiatan; Kalender dibuka lewat sakelar tampilan" do
+    sign_in users(:siti)
+
+    get activity_logs_calendar_path
+    assert_response :success
+    doc = Nokogiri::HTML5(response.body)
+    sidebar_links = doc.css('nav[data-sidebar-target="nav"] a').map { |a| a["href"] }
+    assert_includes sidebar_links, activity_logs_path
+    assert_not_includes sidebar_links, activity_logs_calendar_path
+    aktif = doc.css('nav[data-sidebar-target="nav"] a.bg-indigo-600').map { |a| a["href"] }
+    assert_includes aktif, activity_logs_path, "menu Logbook Kegiatan tetap menyala di halaman Kalender"
+
+    sakelar = doc.at_css('nav[aria-label="Tampilan logbook"]')
+    assert_equal "page", sakelar.at_css("a[href='#{activity_logs_calendar_path}']")["aria-current"]
+
+    get activity_logs_path
+    sakelar = Nokogiri::HTML5(response.body).at_css('nav[aria-label="Tampilan logbook"]')
+    assert_equal "page", sakelar.at_css("a[href='#{activity_logs_path}']")["aria-current"]
+  end
 end

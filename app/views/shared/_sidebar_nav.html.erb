@@ -51,10 +51,10 @@
     <div data-accordion-target="content" class="mt-1 pl-3 space-y-1 <%= "hidden" unless logbook_active %> border-l border-slate-800/80 ml-5">
       <%= render "shared/nav_item", label: term("nav.clinical_cases"), path: clinical_cases_path,
           active: active_class.call("/clinical_cases") && params[:scope] != "to_verify" %>
+      <%# Kalender = tampilan lain Logbook Kegiatan (sakelar Daftar | Kalender
+          di halamannya), bukan menu terpisah. %>
       <%= render "shared/nav_item", label: term("nav.activity_logs"), path: activity_logs_path,
-          active: active_class.call("/activity_logs") %>
-      <%= render "shared/nav_item", label: term("nav.calendar"), path: activity_logs_calendar_path,
-          active: active_class.call("/kalender") %>
+          active: active_class.call(%w[/activity_logs /kalender]) %>
     </div>
   </div>
 
