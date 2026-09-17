@@ -101,15 +101,26 @@ class Admin::AssessmentEventsController < ApplicationController
     headers = %w[email] + INFO_HEADERS
     headers << "skor" if dimensions.empty?
     headers << "percobaan" if @event.allow_multiple_attempts?
+    headers << "tanggal"
     headers += dimensions.map(&:name)
+
+    # Tanggal diisi tanggal ujian event sebagai bawaan; ubah per baris untuk
+    # ujian susulan/remedial. Kolom nilai tetap kosong.
+    date_index = headers.index("tanggal")
+    exam_date = @event.exam_date&.iso8601
+    build_row = lambda do |email, name, npm|
+      row = [ email, name, npm ] + Array.new(headers.size - 3)
+      row[date_index] = exam_date
+      row
+    end
 
     students = template_students
     csv = CSV.generate do |rows|
       rows << headers
       if students.any?
-        students.each { |s| rows << [ s.email, s.full_name, s.identifier_number ] + Array.new(headers.size - 3) }
+        students.each { |s| rows << build_row.call(s.email, s.full_name, s.identifier_number) }
       else
-        rows << [ "mahasiswa@kampus.ac.id", "Contoh Mahasiswa", "2206000123" ] + Array.new(headers.size - 3)
+        rows << build_row.call("mahasiswa@kampus.ac.id", "Contoh Mahasiswa", "2206000123")
       end
     end
     # BOM di depan supaya Excel membaca UTF-8 (nama beraksen tidak rusak);
@@ -143,7 +154,7 @@ class Admin::AssessmentEventsController < ApplicationController
     @result = AssessmentScoreImporter.new(
       event: @event,
       csv_text: params[:csv_text],
-      mapping: params.fetch(:mapping, {}).permit(:email, :score, :max_score, :attempt).to_h,
+      mapping: params.fetch(:mapping, {}).permit(:email, :score, :max_score, :attempt, :date).to_h,
       dimension_mapping: params.fetch(:dimension_mapping, {}).permit!.to_h
     ).call
     render :import_result
@@ -237,7 +248,8 @@ class Admin::AssessmentEventsController < ApplicationController
       "email" => find.call("email", "e-mail", "surel", "email_mahasiswa"),
       "score" => find.call("score", "skor", "nilai", "total", "nilai_akhir"),
       "max_score" => find.call("max_score", "max", "nilai_maks", "skor_maks", "maksimum"),
-      "attempt" => find.call("attempt", "percobaan", "attempt_number", "ujian_ke")
+      "attempt" => find.call("attempt", "percobaan", "attempt_number", "ujian_ke"),
+      "date" => find.call("tanggal", "tanggal_ujian", "tgl", "date", "exam_date")
     }
   end
 end

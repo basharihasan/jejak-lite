@@ -61,15 +61,17 @@ class AssessmentPipelineTest < ActionDispatch::IntegrationTest
     assert_match "attachment", response.headers["Content-Disposition"]
 
     rows = CSV.parse(response.body.delete_prefix("\uFEFF"))
-    assert_equal %w[email nama_mahasiswa npm skor percobaan], rows.first
+    assert_equal %w[email nama_mahasiswa npm skor percobaan tanggal], rows.first
     assert_includes rows.map(&:first), users(:siti).email
     assert rows.drop(1).all? { |r| r[3].nil? }, "kolom nilai templat harus kosong"
+    assert rows.drop(1).all? { |r| r[5] == event.exam_date.iso8601 }, "tanggal bawaan = tanggal ujian event"
 
     post import_preview_admin_assessment_event_path(event),
          params: { file: Rack::Test::UploadedFile.new(StringIO.new(response.body), "text/csv", original_filename: "t.csv") }
     assert_select "select[name='mapping[email]'] option[selected][value='email']"
     assert_select "select[name='mapping[score]'] option[selected][value='skor']"
     assert_select "select[name='mapping[attempt]'] option[selected][value='percobaan']"
+    assert_select "select[name='mapping[date]'] option[selected][value='tanggal']"
     assert_select "input[name='create_dimensions[]'][value='nama_mahasiswa']", 0
     assert_select "input[name='create_dimensions[]'][value='npm']", 0
   end
@@ -81,7 +83,7 @@ class AssessmentPipelineTest < ActionDispatch::IntegrationTest
     event.assessment_dimensions.create!(name: "Penalaran Klinis", max_score: 100)
 
     get import_template_admin_assessment_event_path(event, format: :csv)
-    assert_equal %w[email nama_mahasiswa npm Penalaran\ Klinis], CSV.parse(response.body.delete_prefix("\uFEFF")).first
+    assert_equal %w[email nama_mahasiswa npm tanggal Penalaran\ Klinis], CSV.parse(response.body.delete_prefix("\uFEFF")).first
   end
 
   test "baris tanpa nilai dilewati dan tidak menimpa nilai yang sudah ada" do
@@ -96,6 +98,22 @@ class AssessmentPipelineTest < ActionDispatch::IntegrationTest
     end
     assert_equal before, assessment_instances(:siti_cbt_1).reload.score
     assert_match "1 baris tanpa nilai dilewati", response.body
+  end
+
+  test "kolom tanggal mengisi tanggal nilai per baris; kosong = tanggal ujian event; format salah ditolak" do
+    sign_in @admin
+    event = assessment_events(:cbt_blok)
+    csv = "email,skor,percobaan,tanggal\nsiti@example.com,70,2,20/09/2026\nsiti@example.com,75,3,\nsiti@example.com,80,4,kemarin\n"
+
+    assert_difference "AssessmentInstance.count", 2 do
+      post import_create_admin_assessment_event_path(event),
+           params: { csv_text: csv, mapping: { email: "email", score: "skor", attempt: "percobaan", date: "tanggal" } }
+    end
+    siti = users(:siti)
+    assert_equal Date.new(2026, 9, 20), AssessmentInstance.find_by!(assessment_event: event, student: siti, attempt_number: 2).scored_at.to_date
+    assert_equal event.exam_date, AssessmentInstance.find_by!(assessment_event: event, student: siti, attempt_number: 3).scored_at.to_date
+    assert_nil AssessmentInstance.find_by(assessment_event: event, student: siti, attempt_number: 4)
+    assert_match "tanggal &quot;kemarin&quot; tidak dikenali", response.body
   end
 
   test "impor tanpa pemetaan email/skor ditolak dengan pesan" do

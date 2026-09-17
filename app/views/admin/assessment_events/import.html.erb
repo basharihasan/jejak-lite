@@ -24,16 +24,18 @@
           <% cols = [ "email", "nama_mahasiswa", "npm" ] %>
           <% cols << "skor" if @event.assessment_dimensions.empty? %>
           <% cols << "percobaan" if @event.allow_multiple_attempts? %>
+          <% cols << "tanggal" %>
           <% cols += @event.assessment_dimensions.map(&:name) %>
           <code class="bg-gray-100 px-1 rounded"><%= cols.join(", ") %></code>.
-          Isi nilainya lalu unggah; baris yang dibiarkan kosong dilewati.
+          Kolom tanggal terisi tanggal ujian event (format 2026-09-17 atau 17/09/2026) — ubah per baris untuk ujian susulan.
+          Isi nilainya lalu unggah; baris yang nilainya dibiarkan kosong dilewati.
         </p>
       </div>
       <%= link_to "Unduh templat CSV", import_template_admin_assessment_event_path(@event, format: :csv),
             class: "shrink-0 rounded-xl bg-white ring-1 ring-indigo-200 text-indigo-700 hover:bg-indigo-50 font-semibold px-3 py-2 text-xs", data: { turbo: false } %>
     </div>
     <p class="font-semibold text-gray-800 pt-2 border-t border-gray-100">Yang dibutuhkan</p>
-    <p>Baris pertama = header. Harus ada kolom <strong>email mahasiswa</strong> dan <strong>skor</strong>; kolom nilai maksimum dan nomor percobaan opsional. Nama kolom bebas — dipetakan di langkah berikutnya.</p>
+    <p>Baris pertama = header. Harus ada kolom <strong>email mahasiswa</strong> dan <strong>skor</strong>; kolom nilai maksimum, nomor percobaan, dan tanggal ujian opsional (tanggal kosong = tanggal ujian event). Nama kolom bebas — dipetakan di langkah berikutnya.</p>
     <p>Mahasiswa yang emailnya tidak ditemukan dilaporkan, bukan dibuat otomatis.</p>
   </div>
 </div>

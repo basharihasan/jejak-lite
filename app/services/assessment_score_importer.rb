@@ -32,7 +32,8 @@ class AssessmentScoreImporter
     first.count(";") > first.count(",") ? ";" : ","
   end
 
-  # mapping: { "email" => kolom, "score" => kolom|nil, "max_score" => kolom|nil, "attempt" => kolom|nil }
+  # mapping: { "email" => kolom, "score" => kolom|nil, "max_score" => kolom|nil, "attempt" => kolom|nil,
+  #            "date" => kolom|nil }  — tanggal kosong = tanggal ujian event
   # dimension_mapping: { dimension_id => kolom }
   def initialize(event:, csv_text:, mapping:, dimension_mapping: {})
     @event = event
@@ -79,7 +80,12 @@ class AssessmentScoreImporter
       instance.max_score = numeric(row, @mapping["max_score"]) || @event.max_score
       instance.status = "scored"
       instance.source = "import"
-      instance.scored_at = @event.exam_date&.to_time || Time.current
+      scored_on = parse_date(row, @mapping["date"])
+      if scored_on == :invalid
+        result.errors << "Baris #{line} (#{email}): tanggal \"#{row[@mapping["date"]]}\" tidak dikenali — pakai format 2026-09-17 atau 17/09/2026."
+        next
+      end
+      instance.scored_at = scored_on&.in_time_zone || @event.exam_date&.in_time_zone || Time.current
       instance.score = numeric(row, @mapping["score"]) || 0
 
       begin
@@ -134,6 +140,23 @@ class AssessmentScoreImporter
     return nil unless raw.match?(/\A\d+(\.\d+)?\z/)
 
     raw.to_f
+  end
+
+  # Terima ISO (2026-09-17) dan format Indonesia/Excel (17/09/2026,
+  # 17-09-2026). Kosong -> nil; tak terbaca -> :invalid.
+  def parse_date(row, column)
+    return nil if column.blank?
+
+    raw = row[column].to_s.strip
+    return nil if raw.blank?
+
+    case raw
+    when /\A(\d\d\d\d)-(\d\d?)-(\d\d?)\z/ then Date.new($1.to_i, $2.to_i, $3.to_i)
+    when %r{\A(\d\d?)[/.-](\d\d?)[/.-](\d\d\d\d)\z} then Date.new($3.to_i, $2.to_i, $1.to_i)
+    else :invalid
+    end
+  rescue Date::Error
+    :invalid
   end
 
   def resolve_attempt(row, student)
