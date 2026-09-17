@@ -41,6 +41,12 @@ class User < ApplicationRecord
   end
   alias can_verify_clinical_cases? instructor?
 
+  # Boleh membuka halaman mahasiswa lain (Peta EPA dsb.) — pengajar, plus
+  # kaprodi yang memantau tanpa menilai.
+  def can_view_students?
+    instructor? || has_role?("kaprodi")
+  end
+
   # Kata sandi bawaan akun hasil impor CSV / reset admin — publik & lemah,
   # jadi halaman Pengaturan Akun tetap satu-satunya tempat menggantinya.
   DEFAULT_PASSWORD = "password123"
