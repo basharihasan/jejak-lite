@@ -6,6 +6,21 @@
     <p class="text-sm text-gray-500"><%= @user.email %></p>
   </div>
 
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6 flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <h2 class="text-sm font-semibold text-gray-800">Konfirmasi email</h2>
+      <% if @user.confirmed? %>
+        <p class="text-xs text-emerald-700 mt-0.5">Terkonfirmasi <%= l(@user.confirmed_at.to_date, format: :long) %>.</p>
+      <% else %>
+        <p class="text-xs text-rose-700 mt-0.5">Belum terkonfirmasi<%= User.email_delivery_enabled? ? " — pengguna tidak bisa masuk sebelum mengonfirmasi." : " (tidak diwajibkan karena server email belum diatur)." %></p>
+      <% end %>
+    </div>
+    <% unless @user.confirmed? %>
+      <%= button_to "Konfirmasi Sekarang", confirm_email_admin_user_path(@user), method: :patch,
+            class: "rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 cursor-pointer" %>
+    <% end %>
+  </div>
+
   <%= form_with model: @user, url: admin_user_path(@user), method: :patch,
         class: "bg-white rounded-2xl ring-1 ring-gray-200 p-6 space-y-5" do |f| %>
     <% if @user.errors.any? %>

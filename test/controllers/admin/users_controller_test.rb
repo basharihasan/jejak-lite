@@ -53,6 +53,30 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert users(:siti).reload.valid_password?(User::DEFAULT_PASSWORD)
   end
 
+  test "reset kata sandi oleh admin ikut mengonfirmasi email yang belum terkonfirmasi" do
+    siti = users(:siti)
+    siti.update_columns(confirmed_at: nil)
+    sign_in @admin
+
+    patch reset_password_admin_user_path(siti)
+
+    assert siti.reload.confirmed?
+    assert siti.active_for_authentication?
+  end
+
+  test "admin mengonfirmasi email pengguna secara manual" do
+    siti = users(:siti)
+    siti.update_columns(confirmed_at: nil)
+    sign_in @admin
+
+    get edit_admin_user_path(siti)
+    assert_match "Belum terkonfirmasi", response.body
+
+    patch confirm_email_admin_user_path(siti)
+    assert_redirected_to edit_admin_user_path(siti)
+    assert siti.reload.confirmed?
+  end
+
   test "impor CSV membuat akun baru, memperbarui yang ada, dan melaporkan baris gagal" do
     sign_in @admin
 

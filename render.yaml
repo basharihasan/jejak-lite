@@ -61,6 +61,20 @@ services:
         sync: false
       - key: ADMIN_NAME
         sync: false
+      # Opsional, server email keluar (konfirmasi akun & lupa kata sandi).
+      # Tanpa SMTP_ADDRESS konfirmasi email TIDAK diwajibkan dan tautan
+      # "Lupa kata sandi" disembunyikan — reset kata sandi lewat admin.
+      # Contoh Gmail: smtp.gmail.com / 587 / alamat Gmail / App Password.
+      # - key: SMTP_ADDRESS
+      #   sync: false
+      # - key: SMTP_PORT
+      #   sync: false
+      # - key: SMTP_USER_NAME
+      #   sync: false
+      # - key: SMTP_PASSWORD
+      #   sync: false
+      # - key: MAILER_SENDER
+      #   sync: false
       # Opsional, isi kalau ingin login Google aktif:
       # - key: GOOGLE_CLIENT_ID
       #   sync: false

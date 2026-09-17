@@ -6,7 +6,7 @@
 class Admin::UsersController < ApplicationController
   before_action :authenticate_user!
   before_action :require_admin!
-  before_action :set_user, only: %i[edit update reset_password]
+  before_action :set_user, only: %i[edit update reset_password confirm_email]
 
   def index
     @query = params[:q].to_s.strip
@@ -49,9 +49,18 @@ class Admin::UsersController < ApplicationController
     render :edit, status: :unprocessable_entity
   end
 
+  # Admin yang mereset kata sandi sekaligus menjamin akunnya — email ikut
+  # dikonfirmasi, kalau tidak pengguna tetap tertahan "harus mengonfirmasi
+  # alamat email" walau kata sandinya benar.
   def reset_password
-    @user.update!(password: User::DEFAULT_PASSWORD, password_confirmation: User::DEFAULT_PASSWORD)
+    @user.update!(password: User::DEFAULT_PASSWORD, password_confirmation: User::DEFAULT_PASSWORD,
+                  confirmed_at: @user.confirmed_at || Time.current)
     redirect_to edit_admin_user_path(@user), notice: "Kata sandi #{@user.full_name} direset ke kata sandi bawaan.", status: :see_other
+  end
+
+  def confirm_email
+    @user.confirm unless @user.confirmed?
+    redirect_to edit_admin_user_path(@user), notice: "Email #{@user.email} ditandai terkonfirmasi.", status: :see_other
   end
 
   def import; end

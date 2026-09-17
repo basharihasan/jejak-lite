@@ -98,6 +98,23 @@ class User < ApplicationRecord
     ((filled / fields.size.to_f) * 100).round
   end
 
+  # Instalasi tanpa server surat (production tanpa SMTP_ADDRESS) tidak bisa
+  # mengirim email konfirmasi, jadi konfirmasi tidak diwajibkan di sana —
+  # kalau tetap diwajibkan, akun hasil Daftar terkunci selamanya. Lingkungan
+  # yang tidak menyetel flag ini (dev/test) dianggap bisa mengirim email.
+  def self.email_delivery_enabled?
+    Rails.configuration.x.email_delivery_enabled != false
+  end
+
+  def confirmation_required?
+    super && self.class.email_delivery_enabled?
+  end
+
+  def postpone_email_change?
+    super && self.class.email_delivery_enabled?
+  end
+  protected :confirmation_required?, :postpone_email_change?
+
 
   THEME_OPTIONS     = %w[light dark system].freeze
   FONT_SIZE_OPTIONS = %w[small normal large].freeze

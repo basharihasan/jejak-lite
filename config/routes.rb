@@ -121,7 +121,10 @@ Rails.application.routes.draw do
       end
     end
     resources :users, only: %i[index edit update] do
-      member { patch :reset_password }
+      member do
+        patch :reset_password
+        patch :confirm_email
+      end
       collection do
         get  :import
         post :import, action: :import_create
