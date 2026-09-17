@@ -19,7 +19,10 @@
     </table>
   </div>
 
-  <%= form_with url: import_create_admin_assessment_event_path(@event), method: :post, class: "bg-white rounded-2xl ring-1 ring-gray-200 p-6 space-y-4" do |f| %>
+  <%# Jawaban aksi ini berupa halaman (200), bukan redirect. Turbo menolak
+      pola itu untuk POST ("Form responses must redirect"), jadi formulir
+      dikirim sebagai POST biasa. %>
+  <%= form_with url: import_create_admin_assessment_event_path(@event), method: :post, data: { turbo: false }, class: "bg-white rounded-2xl ring-1 ring-gray-200 p-6 space-y-4" do |f| %>
     <%= hidden_field_tag :csv_text, @csv_text %>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <% { "email" => [ "Email mahasiswa", true ], "score" => [ "Skor total (opsional bila memetakan dimensi)", false ], "max_score" => [ "Nilai maksimum (opsional, bawaan #{@event.max_score})", false ],
