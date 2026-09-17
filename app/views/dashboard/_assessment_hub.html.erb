@@ -1,0 +1,49 @@
+<%# Pusat Asesmen & Capaian — kisi kartu pintasan ala beranda mahasiswa
+    jejak.pro. Hanya memuat permukaan yang ADA di tier Dasar (tanpa
+    Profesionalisme 360°/P-Max). Label kartu memakai term() supaya ikut
+    Taksonomi Istilah yang diubah admin. %>
+<%
+  hub_cards = [
+    { title: term("nav.academic_assessments"), desc: "SOCA, OSCE, CBT, progress test & nilai blok.",
+      cta: "Lihat Nilai", path: exam_scores_path, tone: "sky",
+      badge: (@pending_assessment_count.positive? ? "#{@pending_assessment_count} menunggu" : nil),
+      icon: "M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" },
+    { title: term("nav.workplace_assessment"), desc: "DOPS, Mini-CEX & rotasi klinik.",
+      cta: "Buka Portfolio Klinis", path: assessments_path, tone: "emerald",
+      icon: "M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" },
+    { title: term("nav.rubric_assessment"), desc: "Tugas berbasis rubrik/dokumen yang perlu dikumpulkan.",
+      cta: "Lihat Asesmen Saya", path: student_assessments_path, tone: "violet",
+      icon: "M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" },
+    { title: term("nav.feedback_journal"), desc: "Linimasa umpan balik naratif dari penilai.",
+      cta: "Lihat Jurnal", path: student_feedback_journal_path, tone: "rose",
+      icon: "M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" },
+    { title: term("nav.competency_map"), desc: "Capaian per ranah kompetensi dari hasil ujian & WBA.",
+      cta: "Lihat Peta", path: academic_assessments_path, tone: "amber",
+      icon: "M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" },
+    { title: term("nav.epa_map"), desc: "Tingkat supervisi mandiri & area yang masih perlu dibimbing.",
+      cta: "Lihat Entrustment", path: entrustment_decisions_path, tone: "teal",
+      icon: "M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" }
+  ]
+  tones = {
+    "sky" => "bg-sky-50 text-sky-600", "emerald" => "bg-emerald-50 text-emerald-600", "violet" => "bg-violet-50 text-violet-600",
+    "rose" => "bg-rose-50 text-rose-600", "amber" => "bg-amber-50 text-amber-600", "teal" => "bg-teal-50 text-teal-600"
+  }
+%>
+<h2 class="mt-8 text-sm font-semibold text-gray-500 uppercase tracking-wide">Pusat Asesmen &amp; Capaian</h2>
+<div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="assessment-hub">
+  <% hub_cards.each do |card| %>
+    <%= link_to card[:path], class: "group block bg-white rounded-2xl ring-1 ring-gray-200 p-5 hover:ring-indigo-300 hover:shadow-sm transition" do %>
+      <div class="flex items-start justify-between gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl <%= tones[card[:tone]] %>">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="<%= card[:icon] %>" /></svg>
+        </span>
+        <% if card[:badge] %>
+          <span class="rounded-full bg-amber-100 text-amber-800 text-[11px] font-semibold px-2 py-0.5"><%= card[:badge] %></span>
+        <% end %>
+      </div>
+      <p class="mt-4 text-base font-bold text-gray-900"><%= card[:title] %></p>
+      <p class="mt-1 text-xs text-gray-500"><%= card[:desc] %></p>
+      <span class="mt-3 inline-block text-sm font-semibold text-indigo-600 group-hover:underline"><%= card[:cta] %> →</span>
+    <% end %>
+  <% end %>
+</div>

@@ -83,4 +83,21 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_match "Belum ada satu pun kasus", response.body
   end
+
+  test "mahasiswa melihat Pusat Asesmen & Capaian dengan 6 kartu pintasan; dosen tidak" do
+    sign_in users(:siti)
+    get dashboard_path
+    assert_response :success
+    assert_match "Pusat Asesmen &amp; Capaian", response.body
+
+    hub = Nokogiri::HTML5(response.body).at_css('[data-testid="assessment-hub"]')
+    hrefs = hub.css("a").map { |a| a["href"] }
+    assert_equal [ exam_scores_path, assessments_path, student_assessments_path, student_feedback_journal_path,
+                   academic_assessments_path, entrustment_decisions_path ], hrefs
+    assert_match "menunggu", hub.text if users(:siti).assessment_instances.awaiting_score.exists?
+
+    sign_in users(:budi)
+    get dashboard_path
+    assert_no_match "Pusat Asesmen", response.body
+  end
 end

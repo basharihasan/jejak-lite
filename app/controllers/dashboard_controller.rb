@@ -48,7 +48,10 @@ class DashboardController < ApplicationController
     @upcoming_schedules = EvaluationSchedule.for_user(current_user).upcoming.includes(:student, :evaluator).limit(3)
     @pending_assessments = current_user.assessment_instances.awaiting_score.includes(:assessment_event).recent.limit(3)
 
-    load_case_logging_reminder if @active_role&.code == "mahasiswa"
+    if @active_role&.code == "mahasiswa"
+      load_case_logging_reminder
+      @pending_assessment_count = current_user.assessment_instances.awaiting_score.count
+    end
     load_instructor_quick_actions if current_user.instructor?
     load_own_competency_radar
   end

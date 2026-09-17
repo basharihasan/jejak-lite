@@ -129,6 +129,8 @@
   </div>
 <% end %>
 
+<%= render "dashboard/assessment_hub" if @active_role&.code == "mahasiswa" %>
+
 <h2 class="mt-8 text-sm font-semibold text-gray-500 uppercase tracking-wide">Langkah Berikutnya</h2>
 <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
   <% @next_steps.each do |step| %>
