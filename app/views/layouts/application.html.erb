@@ -85,6 +85,7 @@
 
           <main class="flex-1 min-h-0 overflow-y-auto">
             <div class="mx-auto <%= content_for?(:container_class) ? yield(:container_class) : "max-w-7xl" %> px-4 py-6 sm:px-6 lg:px-8">
+              <%= render "shared/viewing_student_banner" if user_signed_in? && viewing_other_student? %>
               <%= yield %>
             </div>
           </main>

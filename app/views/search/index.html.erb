@@ -9,10 +9,10 @@
   <div class="mt-6 space-y-2">
     <% if @users.any? %>
       <% @users.each do |user| %>
-        <%# Seluruh kartu jadi tautan: admin → sunting pengguna; pengajar/
-            kaprodi → Peta EPA mahasiswa. Selain itu kartu tetap tanpa tautan. %>
-        <% target = if current_user.has_role?("admin") then edit_admin_user_path(user)
-                    elsif current_user.can_view_students? && user.has_role?("mahasiswa") then entrustment_decisions_path(student_id: user.id)
+        <%# Seluruh kartu jadi tautan: mahasiswa → Dasbor Mahasiswa (pengajar/
+            kaprodi/admin); pengguna lain → sunting (admin). Selain itu tanpa tautan. %>
+        <% target = if current_user.can_view_students? && user.has_role?("mahasiswa") then student_dashboard_path(user)
+                    elsif current_user.has_role?("admin") then edit_admin_user_path(user)
                     end %>
         <%= content_tag (target ? :a : :div), (target ? { href: target } : {}).merge(class: "bg-white rounded-xl ring-1 ring-gray-200 p-4 flex items-center gap-3 #{'hover:ring-indigo-300 hover:bg-indigo-50/40 transition-colors' if target}") do %>
           <span class="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-semibold">
@@ -23,7 +23,7 @@
             <p class="text-xs text-gray-400"><%= user.email %><%= " · #{user.roles.map(&:name).join(', ')}" if user.roles.any? %></p>
           </div>
           <% if target %>
-            <span class="shrink-0 text-xs font-semibold text-indigo-600"><%= current_user.has_role?("admin") ? "Sunting" : "Peta EPA" %> →</span>
+            <span class="shrink-0 text-xs font-semibold text-indigo-600"><%= user.has_role?("mahasiswa") && current_user.can_view_students? ? "Dasbor Mahasiswa" : "Sunting" %> →</span>
           <% end %>
         <% end %>
       <% end %>

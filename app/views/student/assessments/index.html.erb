@@ -21,7 +21,7 @@
                 <% if e.submission_close_at %> · batas <%= l(e.submission_close_at, format: :short) %><% end %>
                 <%= " · boleh diulang" if e.allow_multiple_attempts? %></p>
               <% if mine.any? %>
-                <p class="text-xs text-gray-400 mt-0.5">Percobaan Anda: <%= mine.sort_by(&:attempt_number).map { |i| link_to("ke-#{i.attempt_number} (#{i.status_label}#{i.percentage ? ", #{i.percentage}%" : ''})", student_assessment_path(i), class: "text-indigo-600 hover:underline") }.join(" · ").html_safe %></p>
+                <p class="text-xs text-gray-400 mt-0.5">Percobaan Anda: <%= mine.sort_by(&:attempt_number).map { |i| link_to("ke-#{i.attempt_number} (#{i.status_label}#{i.percentage ? ", #{i.percentage}%" : ''})", student_assessment_path(i, student_scope_params), class: "text-indigo-600 hover:underline") }.join(" · ").html_safe %></p>
               <% end %>
             </div>
             <% if e.case_based? %>
@@ -50,7 +50,7 @@
             <td class="px-5 py-3"><span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= status_cls[i.status] %>"><%= i.status_label %></span></td>
             <td class="px-5 py-3 text-gray-700"><%= i.score ? "#{i.score}/#{i.max_score} (#{i.percentage}%)" : "—" %></td>
             <td class="px-5 py-3 text-gray-600"><%= i.examiner&.full_name || "—" %></td>
-            <td class="px-5 py-3 text-right"><%= link_to "Buka", student_assessment_path(i), class: "text-indigo-600 font-medium hover:underline" %></td>
+            <td class="px-5 py-3 text-right"><%= link_to "Buka", student_assessment_path(i, student_scope_params), class: "text-indigo-600 font-medium hover:underline" %></td>
           </tr>
         <% end %>
         <% if @my_instances.empty? %>

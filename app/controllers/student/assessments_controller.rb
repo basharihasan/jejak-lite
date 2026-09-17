@@ -8,9 +8,10 @@ class Student::AssessmentsController < ApplicationController
   before_action :set_instance, only: %i[show submit]
 
   def index
-    @available_events = AssessmentEvent.published.includes(:academic_period, :study_program).ordered
-                                       .select { |e| e.visible_to?(current_user) && !e.importable? }
-    @my_instances = current_user.assessment_instances.includes(assessment_event: %i[academic_period], examiner: []).recent
+    # Event yang bisa didaftar hanya relevan untuk diri sendiri.
+    @available_events = viewing_other_student? ? [] : AssessmentEvent.published.includes(:academic_period, :study_program).ordered
+                                                                       .select { |e| e.visible_to?(current_user) && !e.importable? }
+    @my_instances = viewed_student.assessment_instances.includes(assessment_event: %i[academic_period], examiner: []).recent
     @attempts_by_event = @my_instances.group_by(&:assessment_event_id)
   end
 
@@ -36,8 +37,10 @@ class Student::AssessmentsController < ApplicationController
 
   private
 
+  # Percobaan mahasiswa lain hanya bisa DILIHAT (show); submit selalu milik sendiri.
   def set_instance
-    @instance = current_user.assessment_instances.includes(:assessment_event, :examiner).find(params[:id])
+    owner = action_name == "show" ? viewed_student : current_user
+    @instance = owner.assessment_instances.includes(:assessment_event, :examiner).find(params[:id])
   end
 
   def notify_examiner

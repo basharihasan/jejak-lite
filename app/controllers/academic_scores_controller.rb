@@ -6,9 +6,9 @@ class AcademicScoresController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    scored = current_user.assessment_instances.scored.includes(assessment_event: :academic_period)
+    scored = viewed_student.assessment_instances.scored.includes(assessment_event: :academic_period)
     @by_type = scored.group_by(&:assessment_type).sort_by { |t, _| AssessmentEvent::TYPES.keys.index(t) || 99 }
-    @pending = current_user.assessment_instances.awaiting_score.includes(:assessment_event).recent
+    @pending = viewed_student.assessment_instances.awaiting_score.includes(:assessment_event).recent
     # Lencana persentil per baris; nil bila kohort event terlalu kecil.
     @positions = scored.to_h { |i| [ i.id, AssessmentCohortProfile.new(i).position ] }
   end

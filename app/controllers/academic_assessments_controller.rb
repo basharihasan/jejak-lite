@@ -17,11 +17,11 @@ class AcademicAssessmentsController < ApplicationController
     end
 
     if @selected_period
-      rotation_ids = ClinicalRotation.for_student(current_user).where(academic_period: @selected_period).pluck(:id)
+      rotation_ids = ClinicalRotation.for_student(viewed_student).where(academic_period: @selected_period).pluck(:id)
 
-      @dops_evaluations = DopsEvaluation.where(student: current_user, clinical_rotation_id: rotation_ids).submitted.recent
-      @mini_cex_evaluations = MiniCexEvaluation.where(student: current_user, clinical_rotation_id: rotation_ids).submitted.recent
-      @exam_scores = current_user.assessment_instances.scored.in_period(@selected_period)
+      @dops_evaluations = DopsEvaluation.where(student: viewed_student, clinical_rotation_id: rotation_ids).submitted.recent
+      @mini_cex_evaluations = MiniCexEvaluation.where(student: viewed_student, clinical_rotation_id: rotation_ids).submitted.recent
+      @exam_scores = viewed_student.assessment_instances.scored.in_period(@selected_period)
                                  .includes(:assessment_event).sort_by(&:effective_date)
 
       @dops_radar = DopsEvaluation.avg_dimension_scores(@dops_evaluations) if @dops_evaluations.any?
@@ -29,14 +29,14 @@ class AcademicAssessmentsController < ApplicationController
       @overall_average = overall_average(@dops_evaluations, @mini_cex_evaluations)
       @milestones = CompetencyMilestone.where(academic_period: @selected_period).includes(:competency_item)
       # Pilar C: nilai blok dari Assessment Matrix & posisi terhadap kohort.
-      @learning_units = LearningUnit.for_student(current_user)
+      @learning_units = LearningUnit.for_student(viewed_student)
                                     .where(academic_period_id: [ nil, @selected_period.id ])
                                     .includes(assessment_mappings: :assessment_event).ordered
-                                    .map { |u| { unit: u, score: u.score_for(current_user), components: u.components_for(current_user) } }
+                                    .map { |u| { unit: u, score: u.score_for(viewed_student), components: u.components_for(viewed_student) } }
                                     .select { |row| row[:score] }
-      @percentiles = CohortPercentileCalculator.new(student: current_user, period: @selected_period).call
+      @percentiles = CohortPercentileCalculator.new(student: viewed_student, period: @selected_period).call
       # Capaian per ranah kompetensi dari dimensi ujian yang sudah dipetakan.
-      @competency_rows = CompetencyAchievementCalculator.new(student: current_user, period: @selected_period).call
+      @competency_rows = CompetencyAchievementCalculator.new(student: viewed_student, period: @selected_period).call
     else
       @dops_evaluations = DopsEvaluation.none
       @mini_cex_evaluations = MiniCexEvaluation.none

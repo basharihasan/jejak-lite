@@ -27,24 +27,24 @@ class SearchControllerTest < ActionDispatch::IntegrationTest
     Nokogiri::HTML5(response.body).css("a, div").find { |el| el["class"].to_s.include?("rounded-xl ring-1") && el.text.include?(user.email) }
   end
 
-  test "kartu mahasiswa mengarah ke Peta EPA bagi dosen" do
+  test "kartu mahasiswa mengarah ke Dasbor Mahasiswa bagi dosen" do
     get search_path, params: { q: "siti" }
     card = card_for(users(:siti))
     assert_equal "a", card.name
-    assert_equal entrustment_decisions_path(student_id: users(:siti).id), card["href"]
+    assert_equal student_dashboard_path(users(:siti)), card["href"]
   end
 
-  test "kartu mahasiswa mengarah ke Peta EPA bagi kaprodi, dan halamannya bisa dibuka" do
+  test "kartu mahasiswa mengarah ke Dasbor Mahasiswa bagi kaprodi, dan Peta EPA-nya bisa dibuka" do
     sign_in users(:dedi)
     get search_path, params: { q: "siti" }
-    assert_equal entrustment_decisions_path(student_id: users(:siti).id), card_for(users(:siti))["href"]
+    assert_equal student_dashboard_path(users(:siti)), card_for(users(:siti))["href"]
 
     get entrustment_decisions_path(student_id: users(:siti).id)
     assert_response :success
     assert_match users(:siti).full_name, response.body
   end
 
-  test "kartu mengarah ke sunting pengguna bagi admin" do
+  test "kartu pengguna non-mahasiswa mengarah ke sunting pengguna bagi admin" do
     users(:budi).roles << roles(:admin)
     get search_path, params: { q: "wati" }
     assert_equal edit_admin_user_path(users(:wati)), card_for(users(:wati))["href"]

@@ -11,9 +11,31 @@ class ApplicationController < ActionController::Base
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
   around_action :switch_locale
 
-  helper_method :unread_notifications_count, :latest_notifications
+  helper_method :unread_notifications_count, :latest_notifications, :viewed_student, :viewing_other_student?, :student_scope_params
 
   protected
+
+  # Halaman asesmen mahasiswa (Evaluasi Akademik, Peta Kompetensi, Jurnal,
+  # dsb.) bisa dibuka pengajar/kaprodi untuk mahasiswa lain lewat
+  # ?student_id= (hanya-baca; pintu masuknya Dasbor Mahasiswa). Tanpa
+  # parameter itu, atau bila tak berhak, selalu diri sendiri.
+  def viewed_student
+    @viewed_student ||= if params[:student_id].present? && current_user.can_view_students?
+      User.find(params[:student_id])
+    else
+      current_user
+    end
+  end
+
+  def viewing_other_student?
+    viewed_student != current_user
+  end
+
+  # Parameter yang harus dibawa tautan antar-halaman mahasiswa supaya
+  # konteks "melihat mahasiswa lain" tidak hilang di tengah jalan.
+  def student_scope_params
+    viewing_other_student? ? { student_id: viewed_student.id } : {}
+  end
 
   # Bahasa antarmuka: preferensi akun bila sudah login, lalu cookie (dipakai
   # halaman Devise sebelum login — cookie, bukan session, karena sign-out

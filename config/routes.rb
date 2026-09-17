@@ -12,6 +12,9 @@ Rails.application.routes.draw do
     end
   end
   get "cari", to: "search#index", as: :search
+  # Dasbor Mahasiswa (hanya-baca) untuk pengajar/kaprodi/admin — pintu masuk
+  # dari hasil pencarian; kartunya membawa ?student_id= ke halaman asesmen.
+  get "mahasiswa/:id", to: "student_dashboards#show", as: :student_dashboard
   get "panduan", to: "panduan#index", as: :panduan
   get "brand", to: "brand#index", as: :brand
 

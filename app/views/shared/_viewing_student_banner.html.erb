@@ -1,0 +1,10 @@
+<%# Tampil di setiap halaman yang dibuka dengan ?student_id= milik orang lain:
+    pengingat bahwa data di bawah bukan milik pengguna yang login. %>
+<div class="mb-4 flex items-center justify-between gap-3 flex-wrap rounded-2xl bg-indigo-600 text-white px-4 py-3" data-testid="viewing-student-banner">
+  <p class="text-sm">
+    <span class="opacity-80">Melihat data mahasiswa:</span>
+    <strong><%= viewed_student.full_name %></strong>
+    <span class="opacity-80 text-xs">· <%= viewed_student.email %> · hanya-baca</span>
+  </p>
+  <%= link_to "← Dasbor Mahasiswa", student_dashboard_path(viewed_student), class: "text-xs font-semibold bg-white/15 hover:bg-white/25 rounded-lg px-3 py-1.5" %>
+</div>

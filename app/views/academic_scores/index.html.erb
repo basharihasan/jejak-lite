@@ -7,7 +7,7 @@
 
   <% if @pending.any? %>
     <div class="bg-amber-50 rounded-2xl ring-1 ring-amber-200 p-4 text-sm text-amber-800">
-      <%= @pending.size %> asesmen menunggu: <%= @pending.map { |i| link_to(i.assessment_event.name, student_assessment_path(i), class: "font-semibold hover:underline") }.join(", ").html_safe %>.
+      <%= @pending.size %> asesmen menunggu: <%= @pending.map { |i| link_to(i.assessment_event.name, student_assessment_path(i, student_scope_params), class: "font-semibold hover:underline") }.join(", ").html_safe %>.
     </div>
   <% end %>
 
@@ -30,7 +30,7 @@
             dimensi). Lencana persentil tampil bila kohort cukup besar. %>
         <% rows.reverse.each do |i| %>
           <% position = @positions[i.id] %>
-          <%= link_to student_assessment_path(i), class: "group py-2 flex items-center justify-between gap-3 text-sm -mx-2 px-2 rounded-lg hover:bg-indigo-50/60 transition-colors" do %>
+          <%= link_to student_assessment_path(i, student_scope_params), class: "group py-2 flex items-center justify-between gap-3 text-sm -mx-2 px-2 rounded-lg hover:bg-indigo-50/60 transition-colors" do %>
             <div class="min-w-0">
               <span class="font-medium text-gray-800 group-hover:text-indigo-700"><%= i.assessment_event.name %></span>
               <span class="text-xs text-gray-400">· <%= l(i.effective_date, format: :long) %><%= " · ke-#{i.attempt_number}" if i.attempt_number > 1 %></span>

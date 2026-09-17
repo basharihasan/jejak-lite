@@ -2,7 +2,7 @@
 <% e = @instance.assessment_event %>
 <div class="<%= @profile&.groups&.any? ? 'max-w-5xl' : 'max-w-2xl' %> space-y-4">
   <div>
-    <%= link_to "← Asesmen Saya", student_assessments_path, class: "text-xs text-gray-500 hover:text-indigo-600" %>
+    <%= link_to "← Asesmen Saya", student_assessments_path(student_scope_params), class: "text-xs text-gray-500 hover:text-indigo-600" %>
     <h1 class="text-xl font-bold text-gray-900 mt-1"><%= e.name %></h1>
     <p class="text-sm text-gray-500 mt-0.5"><%= e.type_label %> · percobaan ke-<%= @instance.attempt_number %> · <%= @instance.status_label %>
       <% if @instance.scheduled_at %> · jadwal <%= l(@instance.scheduled_at, format: :short) %><% end %>
@@ -37,7 +37,7 @@
     <%= render "cohort_profile", profile: @profile %>
   <% end %>
 
-  <% if e.requires_submission? %>
+  <% if e.requires_submission? && !viewing_other_student? %>
     <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
       <p class="text-sm font-semibold text-gray-800">Pengumpulan</p>
       <% if @instance.document.attached? %>
