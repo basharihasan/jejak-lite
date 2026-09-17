@@ -6,6 +6,7 @@
   is_student            = local_assigns[:is_student] || false
   is_instructor         = local_assigns[:is_instructor] || false
   is_config_manager     = local_assigns[:is_config_manager] || false
+  is_prodi_relabeler    = local_assigns[:is_prodi_relabeler] || false
   pending_verifications = local_assigns[:pending_verifications] || 0
   pending_activity_verifications = local_assigns[:pending_activity_verifications] || 0
 
@@ -127,6 +128,12 @@
         active: active_class.call("/analitik") %>
     <%= render "shared/nav_item", label: term("nav.student_directory"), path: search_path,
         active: active_class.call("/cari") %>
+    <%# Kaprodi yang bukan admin tidak melihat grup Konfigurasi, jadi relabel
+        prodi ditawarkan di sini; yang juga admin sudah melihatnya di Konfigurasi. %>
+    <% if is_prodi_relabeler %>
+      <%= render "shared/nav_item", label: term("nav.student_relabel"), path: new_admin_student_relabel_path,
+          active: active_class.call("/admin/student_relabel") %>
+    <% end %>
   </div>
 <% end %>
 
@@ -140,6 +147,8 @@
         active: active_class.call("/study_programs") %>
     <%= render "shared/nav_item", label: term("nav.users"), path: admin_users_path,
         active: active_class.call("/admin/users") %>
+    <%= render "shared/nav_item", label: term("nav.student_relabel"), path: new_admin_student_relabel_path,
+        active: active_class.call("/admin/student_relabel") %>
     <%= render "shared/nav_item", label: term("nav.assessment_events"), path: admin_assessment_events_path,
         active: active_class.call("/admin/assessment_events") %>
     <%= render "shared/nav_item", label: term("nav.evaluation_schedules"), path: admin_evaluation_schedules_path,

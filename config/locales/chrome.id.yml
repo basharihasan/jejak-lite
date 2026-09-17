@@ -53,6 +53,7 @@ id:
     academic_periods: "Tahun/Periode Akademik"
     study_programs: "Program Studi"
     users: "Pengguna"
+    student_relabel: "Relabel Prodi Mahasiswa"
     assessment_events: "Assessment Events"
     evaluation_schedules: "Jadwal DOPS & Mini-CEX"
     feedback_journal: "Jurnal Umpan Balik"

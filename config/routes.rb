@@ -127,6 +127,11 @@ Rails.application.routes.draw do
         post :import, action: :import_create
       end
     end
+    # Relabel massal prodi mahasiswa dari CSV (pindah / label ke prodi saya) —
+    # padanan /management/student_relabel jejak.pro. Pratinjau dulu, lalu terapkan.
+    resource :student_relabel, only: %i[new create] do
+      get :template, on: :collection
+    end
   end
 
   resources :reflection_entries

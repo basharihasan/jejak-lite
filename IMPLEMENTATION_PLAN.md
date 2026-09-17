@@ -221,6 +221,16 @@ Diminta pengguna: "cek kembali semua fitur 🟢, pastikan tersedia & berfungsi, 
 
 **Belum diperiksa mendalam di audit ini** (halaman render 200 OK & test lulus, tapi belum ditelusuri sedalam 4 poin di atas): impor CSV Assessment Event ujung-ke-ujung dengan berkas nyata, Assessment Form Builder → rubrik SOCA/MSP end-to-end, kurva persentil kohort dengan data >3 mahasiswa sungguhan, Assessment Matrix dengan bobot campuran. **Gap arsitektur yang TIDAK ditutup** (di luar cakupan audit, butuh keputusan produk): "Pilihan Academic Club pada asesmen" (🟢 M05) — jejak-lite sengaja tanpa modul komunitas sejak awal (lihat "Yang Sengaja Disederhanakan/Ditunda"), jadi field `academic_club_id` semacam ini tidak punya tempat berlabuh tanpa membangun ulang sebagian modul komunitas.
 
+### ✅ Relabel Prodi Mahasiswa (17 September 2026)
+
+Diminta pengguna: "tambahkan fitur relabel prodi mahasiswa seperti yang ada di jejak.pro". Catatan tingkat: `DAFTAR_FITUR_JEJAK.md` v2.0 mencatat "Relabel status mahasiswa, transfer kohort" sebagai 🟡, bukan 🟢; fitur ini ditambahkan atas permintaan eksplisit.
+
+- `/admin/student_relabel` (`Admin::StudentRelabelsController` + `StudentProgramRelabeler`), padanan `/management/student_relabel` jejak.pro: unggah CSV `email,npm,angkatan` → pratinjau per baris dengan catatan → terapkan dalam satu transaksi. Kolom `email` boleh diisi NPM lama; `npm` = NPM baru; `angkatan` kosong = angkatan default form (atau tidak diubah).
+- Aksi **Pindah** (admin: semua mahasiswa; kaprodi: hanya mahasiswa prodinya) dan **Label ke prodi saya** (khusus kaprodi; tujuan dikunci server-side ke `users.study_program_id` kaprodi). Mode "Tandai Lulus" jejak.pro **tidak dibawa**: jejak-lite tidak punya status/persona alumni.
+- Baris dilewati, tidak menggagalkan batch: tidak ditemukan, NPM lama cocok >1 akun, bukan peran Mahasiswa, akun muncul dua kali, angkatan tak terbaca, di luar prodi kaprodi, NPM baru dobel/dipakai akun lain, tidak ada perubahan, atau data akun tidak lolos validasi model (dicek saat pratinjau).
+- Menu: Konfigurasi (admin) dan Coaching Center (peran aktif kaprodi yang bukan admin). Jejak audit hanya di log aplikasi (`[student_relabel]`) — jejak-lite tidak punya tabel audit umum seperti `AccessAuditLog`.
+- 22 test baru (390 total, hijau); smoke HTTP 8 akun lolos; alur pratinjau → terapkan dicoba lewat HTTP ke DB dev (akun demo dikembalikan).
+
 ### ✅ Taksonomi Logbook Kegiatan & Taksonomi Istilah (17 September 2026)
 
 Diminta pengguna (dengan tangkapan layar menu Konfigurasi): "`/activity_logs/new` belum sesuai dengan jejak.pro, terutama pada kategori dan belum ada sub kategori; di akun admin belum ada menu untuk edit kategori dan sub kategori kalender, dan belum ada edit label menu/istilah". Di jejak.pro, `/activity_logs` tampil sebagai menu "Kalender", jadi "kategori kalender" = taksonomi Logbook Kegiatan.

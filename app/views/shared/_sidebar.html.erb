@@ -20,8 +20,10 @@
   pending_activity_verifications = is_instructor ? ActivityLog.awaiting_verification.count : 0
   brand_title    = "JEJAK"
   brand_subtitle = current_user.study_program&.name || t("chrome.brand_subtitle_default")
+  # Relabel Prodi Mahasiswa juga terbuka untuk kaprodi (terikat prodinya).
+  is_prodi_relabeler = is_kaprodi && !is_config_manager
   nav_locals = { is_student: is_student, is_instructor: is_instructor,
-                 is_config_manager: is_config_manager,
+                 is_config_manager: is_config_manager, is_prodi_relabeler: is_prodi_relabeler,
                  pending_verifications: pending_verifications,
                  pending_activity_verifications: pending_activity_verifications }
 %>
