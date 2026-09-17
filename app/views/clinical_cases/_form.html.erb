@@ -61,9 +61,25 @@
         </div>
       </div>
 
+      <%# Usia & pekerjaan = demografi, BUKAN data sensitif (sama dengan
+          keputusan jejak.pro): tidak dienkripsi, tampil tanpa Break Glass,
+          jadi sengaja di luar kotak "Data sensitif" di bawah. %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        <div>
+          <%= f.label :patient_age, "Usia Pasien (tahun)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+          <%= f.number_field :patient_age, min: 0, max: 149,
+                class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+        </div>
+        <div>
+          <%= f.label :patient_occupation, "Pekerjaan Pasien", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+          <%= f.text_field :patient_occupation,
+                class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+        </div>
+      </div>
+
       <%# Identitas pasien — terenkripsi di basis data dan disamarkan di
           halaman kasus (Privacy Mode); hanya pemilik kasus yang melihatnya
-          di form ini. Usia persis & pekerjaan tidak sensitif. %>
+          di form ini. %>
       <div class="mt-5 rounded-2xl ring-1 ring-amber-200 bg-amber-50/60 p-4">
         <div class="flex items-start justify-between gap-3 flex-wrap">
           <div>
@@ -96,18 +112,6 @@
           <div class="sm:col-span-2">
             <%= f.label :patient_address, "Alamat", class: "block text-sm font-semibold text-gray-700 mb-1" %>
             <%= f.text_field :patient_address, autocomplete: "off",
-                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4 mt-4">
-          <div>
-            <%= f.label :patient_age, "Usia (tahun)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-            <%= f.number_field :patient_age, min: 0, max: 149,
-                  class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
-          </div>
-          <div>
-            <%= f.label :patient_occupation, "Pekerjaan", class: "block text-sm font-semibold text-gray-700 mb-1" %>
-            <%= f.text_field :patient_occupation,
                   class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
           </div>
         </div>

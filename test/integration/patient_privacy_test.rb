@@ -30,6 +30,27 @@ class PatientPrivacyTest < ActionDispatch::IntegrationTest
     assert_match "Break Glass", response.body
   end
 
+  test "usia & pekerjaan pasien bukan data sensitif: tampil saat Privacy Mode dan di luar kotak sensitif form" do
+    @case.update!(patient_age: 47, patient_occupation: "Nelayan")
+    sign_in users(:siti)
+
+    get clinical_case_path(@case)
+    assert_match "(47 th)", response.body
+    assert_match "Nelayan", response.body
+    assert_no_match "Ahmad Fauzi", response.body
+
+    get new_clinical_case_path
+    assert_response :success
+    doc = Nokogiri::HTML5(response.body)
+    kotak_sensitif = doc.css("div.ring-amber-200").find { |div| div.text.include?("Data sensitif") }
+    assert kotak_sensitif, "kotak Data sensitif harus ada"
+    assert kotak_sensitif.at_css("#clinical_case_patient_name")
+    assert_nil kotak_sensitif.at_css("#clinical_case_patient_age")
+    assert_nil kotak_sensitif.at_css("#clinical_case_patient_occupation")
+    assert doc.at_css("#clinical_case_patient_age")
+    assert doc.at_css("#clinical_case_patient_occupation")
+  end
+
   test "Break Glass beralasan membuka identitas 30 menit dan tercatat" do
     sign_in users(:budi)
 
