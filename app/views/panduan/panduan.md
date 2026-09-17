@@ -80,8 +80,10 @@ Panduan ini disusun menurut **peran**: bab awal berlaku untuk semua orang, lalu 
 ### 1.1 Mendaftar akun
 
 1. Buka halaman muka aplikasi, lalu klik **Daftar**.
-2. Isi **Nama Lengkap**, **Email**, pilih **Peran** (Mahasiswa, Dosen, Preseptor, Kaprodi, atau Admin), lalu buat **Kata Sandi** dan ulangi.
+2. Isi **Nama Lengkap**, **Email**, pilih **Peran** (Mahasiswa, Dosen, atau Preseptor), lalu buat **Kata Sandi** dan ulangi.
 3. Klik **Daftar**. Peran yang Anda pilih langsung menjadi peran aktif akun Anda.
+
+Peran **Kaprodi** dan **Admin** tidak dapat dipilih sendiri karena membuka data seluruh prodi/instalasi — admin instansi yang memberikannya lewat **Konfigurasi → Pengguna → Sunting** (atau kolom `peran` pada impor CSV). Permintaan peran itu lewat form yang diubah pun ditolak dan akun tetap menjadi Mahasiswa.
 
 Bila instansi Anda mengaktifkan login Google, tombol **Masuk dengan Google** juga tersedia — akun Google baru otomatis dibuat sebagai pengguna dan dianggap sudah terverifikasi.
 

@@ -53,3 +53,36 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert user.has_role?("mahasiswa")
   end
 end
+
+class RegistrationsSelfRegistrableRoleTest < ActionDispatch::IntegrationTest
+  # Kaprodi/admin membuka data seluruh prodi/instalasi — tidak boleh bisa
+  # diklaim sendiri lewat form Daftar publik, termasuk lewat form yang diubah.
+  %w[admin kaprodi].each do |code|
+    test "role_code #{code} dari form Daftar jatuh ke mahasiswa" do
+      post user_registration_path, params: {
+        user: {
+          full_name: "Eka #{code}",
+          email: "eka.#{code}@example.com",
+          role_code: code,
+          password: "password123",
+          password_confirmation: "password123"
+        }
+      }
+
+      user = User.find_by!(email: "eka.#{code}@example.com")
+      assert_not user.has_role?(code)
+      assert user.has_role?("mahasiswa")
+      assert_equal roles(:mahasiswa), user.active_role
+    end
+  end
+
+  test "form Daftar hanya menawarkan peran yang boleh dipilih sendiri" do
+    get new_user_registration_path
+
+    assert_response :success
+    assert_select "select[name='user[role_code]'] option", count: Role::SELF_REGISTRABLE_CODES.size
+    assert_select "select[name='user[role_code]'] option[value=admin]", count: 0
+    assert_select "select[name='user[role_code]'] option[value=kaprodi]", count: 0
+    assert_select "select[name='user[role_code]'] option[value=mahasiswa]"
+  end
+end

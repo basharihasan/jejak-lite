@@ -17,11 +17,14 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 
   # Form registrasi mengirim satu `role_code` (mis. "mahasiswa"/"dosen").
-  # Peran lain bisa ditambahkan belakangan lewat pengaturan; ini hanya
-  # menjamin akun baru langsung punya minimal satu peran aktif supaya
-  # Dashboard tidak menemui user tanpa peran sama sekali.
+  # Hanya peran Role::SELF_REGISTRABLE_CODES yang diterima — kaprodi/admin
+  # yang dikirim lewat form yang diubah jatuh ke mahasiswa, bukan dikabulkan.
+  # Peran lain diberikan admin belakangan; ini hanya menjamin akun baru
+  # langsung punya minimal satu peran aktif supaya Dashboard tidak menemui
+  # user tanpa peran sama sekali.
   def assign_initial_role(user)
-    role = Role.find_by(code: params.dig(:user, :role_code))
+    requested = params.dig(:user, :role_code)
+    role = Role.find_by(code: requested) if Role.self_registrable?(requested)
     role ||= Role.find_by(code: "mahasiswa")
     return if role.nil?
 
