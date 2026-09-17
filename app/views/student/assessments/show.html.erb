@@ -1,6 +1,6 @@
 <% content_for :title, @instance.assessment_event.name %>
 <% e = @instance.assessment_event %>
-<div class="max-w-2xl space-y-4">
+<div class="<%= @profile&.groups&.any? ? 'max-w-5xl' : 'max-w-2xl' %> space-y-4">
   <div>
     <%= link_to "← Asesmen Saya", student_assessments_path, class: "text-xs text-gray-500 hover:text-indigo-600" %>
     <h1 class="text-xl font-bold text-gray-900 mt-1"><%= e.name %></h1>
@@ -33,6 +33,8 @@
         </div>
       <% end %>
     </div>
+
+    <%= render "cohort_profile", profile: @profile %>
   <% end %>
 
   <% if e.requires_submission? %>

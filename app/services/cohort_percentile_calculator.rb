@@ -52,21 +52,6 @@ class CohortPercentileCalculator
 
   private
 
-  # Persentil = porsi kohort yang nilainya di bawah nilai saya (metode
-  # "percentile rank", dibulatkan).
-  def percentile_rank(sorted, value)
-    below = sorted.count { |v| v < value }
-    same = sorted.count { |v| v == value }
-    (((below + (same / 2.0)) / sorted.size) * 100).round
-  end
-
-  # Interpolasi linear antar-titik, seperti kurva persentil kohort jejak.pro.
-  def percentile_value(sorted, pct)
-    return sorted.first if sorted.size == 1
-
-    rank = (pct / 100.0) * (sorted.size - 1)
-    low = sorted[rank.floor]
-    high = sorted[rank.ceil]
-    (low + ((high - low) * (rank - rank.floor))).round(1)
-  end
+  def percentile_rank(sorted, value) = CohortStats.percentile_rank(sorted, value)
+  def percentile_value(sorted, pct) = CohortStats.percentile_value(sorted, pct)
 end

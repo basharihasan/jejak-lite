@@ -14,7 +14,9 @@ class Student::AssessmentsController < ApplicationController
     @attempts_by_event = @my_instances.group_by(&:assessment_event_id)
   end
 
-  def show; end
+  def show
+    @profile = AssessmentCohortProfile.new(@instance) if @instance.status == "scored"
+  end
 
   def submit
     unless @instance.assessment_event.submission_open? && @instance.status != "scored"

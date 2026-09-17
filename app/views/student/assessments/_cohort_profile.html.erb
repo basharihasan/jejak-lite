@@ -1,0 +1,58 @@
+<%# Posisi di kohort ujian + radar per kategori dimensi — meniru halaman
+    nilai jejak.pro (Skor Kamu / Rerata Kohort / P90 Kohort). Kohort di
+    bawah AssessmentCohortProfile::MIN_COHORT mahasiswa: posisi disembunyikan
+    dan radar hanya memuat skor sendiri (privasi). %>
+<% pos = profile.position %>
+<% if pos %>
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5" data-testid="cohort-position">
+    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Posisi di Kohort Ujian</p>
+    <div class="mt-3 relative">
+      <div class="flex justify-between text-[11px] text-gray-500 mb-1"><span>Rendah</span><span>Sedang</span><span>Tinggi</span></div>
+      <div class="h-3 rounded-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-500"></div>
+      <div class="absolute" style="left: <%= pos.percentile %>%; top: 1.05rem; transform: translateX(-50%)">
+        <span class="block h-5 w-5 rounded-full bg-white ring-4 ring-gray-900 shadow"></span>
+      </div>
+      <p class="mt-3 text-center text-xs font-semibold text-gray-700" style="margin-left: <%= pos.percentile %>%; transform: translateX(-50%); width: max-content">Persentil <%= pos.percentile %></p>
+    </div>
+    <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 divide-x divide-gray-100">
+      <% [ [ pos.my_percentage, "Skor kamu", "text-gray-900" ], [ pos.mean, "Rerata kohort", "text-amber-600" ],
+           [ pos.p90, "P90 kohort", "text-violet-600" ], [ pos.cohort_size, "Total peserta", "text-sky-700" ] ].each_with_index do |(val, label, cls), i| %>
+        <div class="<%= 'pl-3' if i.positive? %>">
+          <p class="text-2xl font-bold <%= cls %>"><%= val %></p>
+          <p class="text-[10px] font-semibold uppercase tracking-wide text-gray-400"><%= label %></p>
+        </div>
+      <% end %>
+    </div>
+    <p class="mt-2 text-[11px] text-gray-400">Skor dalam persen dari nilai maksimum; satu nilai wakil (tertinggi) per mahasiswa.</p>
+  </div>
+<% end %>
+
+<% if profile.groups.any? %>
+  <div data-testid="dimension-profile">
+    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-2">Profil Dimensi per Kategori</p>
+    <% unless pos %>
+      <p class="text-[11px] text-gray-400 mt-1">Pembanding kohort ditampilkan bila minimal <%= AssessmentCohortProfile::MIN_COHORT %> mahasiswa sudah dinilai.</p>
+    <% end %>
+    <% headers = %w[from-sky-500\ to-cyan-400 from-violet-500\ to-purple-400 from-rose-500\ to-pink-400 from-emerald-500\ to-lime-400 from-amber-500\ to-orange-400] %>
+    <div class="mt-3 grid grid-cols-1 <%= profile.groups.size > 1 ? 'md:grid-cols-2 xl:grid-cols-3' : '' %> gap-4">
+      <% profile.groups.each_with_index do |group, i| %>
+        <%
+          datasets = [ { label: "Skor Kamu", data: group.mine, borderColor: "#0ea5e9", backgroundColor: "rgba(14,165,233,0.25)" } ]
+          datasets << { label: "Rerata Kohort", data: group.mean, borderColor: "#a855f7", backgroundColor: "rgba(168,85,247,0.08)", fill: false } if group.mean
+          datasets << { label: "P90 Kohort", data: group.p90, borderColor: "#e11d48", backgroundColor: "rgba(225,29,72,0.05)", fill: false } if group.p90
+        %>
+        <div class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r <%= headers[i % headers.size] %> text-white">
+            <p class="text-xs font-bold uppercase tracking-wide truncate"><%= group.name %></p>
+            <span class="shrink-0 text-[10px] font-semibold bg-white/25 rounded-full px-2 py-0.5"><%= group.size %> dimensi</span>
+          </div>
+          <div class="p-4" data-controller="radar-chart" data-radar-chart-max-value="100"
+               data-radar-chart-labels-value="<%= group.labels.to_json %>"
+               data-radar-chart-datasets-value="<%= datasets.to_json %>">
+            <canvas data-radar-chart-target="canvas" height="<%= profile.groups.size > 1 ? 220 : 300 %>"></canvas>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

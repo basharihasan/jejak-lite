@@ -137,6 +137,30 @@ class AssessmentPipelineTest < ActionDispatch::IntegrationTest
     assert_equal 85, instance.score.to_f
   end
 
+  test "halaman asesmen mahasiswa menampilkan radar dimensi dan posisi kohort" do
+    event = assessment_events(:cbt_blok)
+    event.update!(allow_multiple_attempts: false)
+    dim = event.assessment_dimensions.create!(name: "Penalaran Klinis", max_score: 100)
+    mine = assessment_instances(:siti_cbt_1)
+    AssessmentDimensionScore.create!(assessment_instance: mine, assessment_dimension: dim, score: 62)
+
+    sign_in users(:siti)
+    get student_assessment_path(mine)
+    assert_response :success
+    assert_select '[data-testid="dimension-profile"]'
+    assert_select '[data-testid="cohort-position"]', 0 # kohort baru 1 orang
+
+    2.times do |i|
+      u = User.create!(full_name: "Kohort #{i}", email: "kohort#{i}@example.com", password: "password123", confirmed_at: Time.current)
+      AssessmentInstance.create!(assessment_event: event, student: u, attempt_number: 1, status: "scored", source: "import",
+                                 score: 70 + i * 10, max_score: 100, scored_at: Time.current)
+    end
+    get student_assessment_path(mine)
+    assert_select '[data-testid="cohort-position"]'
+    assert_match "Persentil", response.body
+    assert_match "Rerata Kohort", response.body
+  end
+
   test "bukan admin tidak bisa membuka Assessment Events" do
     sign_in users(:siti)
     get admin_assessment_events_path
