@@ -25,13 +25,26 @@ export default class extends Controller {
     this.element.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
+  // Penanda langkah bisa diklik untuk lompat langsung — aman karena wizard
+  // ini tidak memvalidasi per langkah; validasi tetap di server saat simpan.
+  goTo({ params: { index } }) {
+    if (index === undefined || index === this.currentValue) return
+    this.currentValue = Math.max(0, Math.min(index, this.stepTargets.length - 1))
+    this.render()
+    this.element.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
   render() {
     const total = this.stepTargets.length
 
     this.stepTargets.forEach((el, i) => { el.hidden = i !== this.currentValue })
     this.dotTargets.forEach((el, i) => {
-      el.classList.toggle("bg-indigo-600", i <= this.currentValue)
-      el.classList.toggle("bg-gray-200", i > this.currentValue)
+      // Penanda berupa tombol berisi garis; warnanya ada di garis dalamnya.
+      const bar = el.firstElementChild || el
+      bar.classList.toggle("bg-indigo-600", i <= this.currentValue)
+      bar.classList.toggle("bg-gray-200", i > this.currentValue)
+      if (i === this.currentValue) el.setAttribute("aria-current", "step")
+      else el.removeAttribute("aria-current")
     })
     if (this.hasLabelTarget) this.labelTarget.textContent = `Langkah ${this.currentValue + 1} dari ${total}`
     if (this.hasPrevButtonTarget) this.prevButtonTarget.hidden = this.currentValue === 0

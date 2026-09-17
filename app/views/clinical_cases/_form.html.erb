@@ -15,11 +15,18 @@
 <div data-controller="wizard" data-wizard-current-value="<%= initial_step %>" class="bg-white rounded-2xl ring-1 ring-gray-200 p-6">
   <div class="flex items-center justify-between mb-4">
     <p data-wizard-target="label" class="text-xs font-bold text-indigo-600 uppercase tracking-wide">Langkah <%= initial_step + 1 %> dari <%= wizard_steps.size %></p>
-    <div class="flex items-center gap-1.5">
-      <% wizard_steps.size.times do %>
-        <span data-wizard-target="dot" class="h-1.5 w-8 rounded-full bg-gray-200"></span>
+    <%# Tiap penanda = tombol lompat langsung ke langkahnya. Area klik dibuat
+        lebih tinggi dari garisnya supaya mudah disentuh di ponsel. %>
+    <nav aria-label="Langkah formulir" class="flex items-center gap-1.5">
+      <% wizard_steps.each_with_index do |name, i| %>
+        <button type="button" data-wizard-target="dot"
+                data-action="wizard#goTo" data-wizard-index-param="<%= i %>"
+                title="Langkah <%= i + 1 %> · <%= name %>" aria-label="Ke langkah <%= i + 1 %>: <%= name %>"
+                class="group py-2 cursor-pointer rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+          <span class="block h-1.5 w-8 rounded-full bg-gray-200 transition-colors group-hover:bg-indigo-400"></span>
+        </button>
       <% end %>
-    </div>
+    </nav>
   </div>
 
   <%= form_with model: clinical_case, class: "space-y-4" do |f| %>

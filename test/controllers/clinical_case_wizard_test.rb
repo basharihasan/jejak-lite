@@ -24,6 +24,23 @@ class ClinicalCaseWizardTest < ActionDispatch::IntegrationTest
     assert_match "MTB terdeteksi", response.body
   end
 
+  test "penanda langkah adalah tombol lompat ke langkah masing-masing" do
+    get new_clinical_case_path
+    assert_response :success
+
+    doc = Nokogiri::HTML5(response.body)
+    dots = doc.css('[data-wizard-target="dot"]')
+    assert_equal ClinicalCase::WIZARD_STEPS.size, dots.size
+    dots.each_with_index do |dot, i|
+      assert_equal "button", dot.name
+      assert_equal "button", dot["type"]
+      assert_equal "wizard#goTo", dot["data-action"]
+      assert_equal i.to_s, dot["data-wizard-index-param"]
+      assert_includes dot["aria-label"], ClinicalCase::WIZARD_STEPS[i]
+      assert_nil dot.ancestors("form").first, "penanda di luar <form> supaya tak ikut submit"
+    end
+  end
+
   test "draf tersimpan hanya dengan isian langkah pertama" do
     assert_difference "ClinicalCase.count", 1 do
       post clinical_cases_path, params: { clinical_case: { case_date: Date.current, chief_complaint: "Demam" } }
