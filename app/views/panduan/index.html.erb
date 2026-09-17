@@ -1,16 +1,80 @@
+<% content_for :title, "Panduan Pengguna" %>
 <style>
   /* Tailwind belum memasang plugin typography — gaya markdown ditulis manual
-     di sini alih-alih bergantung pada kelas `prose` yang tidak akan berefek. */
-  .markdown-body h1 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 0.75rem; }
-  .markdown-body h2 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
-  .markdown-body h3 { font-size: 1.1rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
-  .markdown-body p { margin: 0.75rem 0; line-height: 1.6; color: #374151; }
-  .markdown-body ul, .markdown-body ol { margin: 0.75rem 0; padding-left: 1.5rem; color: #374151; }
-  .markdown-body li { margin: 0.25rem 0; }
-  .markdown-body a { color: #4f46e5; text-decoration: underline; }
-  .markdown-body code { background: #f3f4f6; padding: 0.1rem 0.3rem; border-radius: 0.25rem; font-size: 0.85em; }
+     di sini alih-alih bergantung pada kelas `prose` yang tidak akan berefek.
+     Warna memakai variabel supaya mode gelap (html.dark) cukup menimpa
+     variabelnya, bukan tiap aturan. */
+  .markdown-body {
+    --pd-text: #374151; --pd-heading: #111827;
+    --pd-border: #e5e7eb; --pd-code-bg: #f3f4f6; --pd-quote-bg: #eef2ff;
+    --pd-quote-border: #6366f1; --pd-th-bg: #f9fafb; --pd-link: #4f46e5;
+    --pd-toc-bg: #f8fafc;
+    color: var(--pd-text);
+  }
+  html.dark .markdown-body {
+    --pd-text: #cbd5e1; --pd-heading: #f1f5f9;
+    --pd-border: #334155; --pd-code-bg: #1e293b; --pd-quote-bg: #1e2447;
+    --pd-quote-border: #818cf8; --pd-th-bg: #1e293b; --pd-link: #a5b4fc;
+    --pd-toc-bg: #0f172a;
+  }
+  .markdown-body h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 1rem; color: var(--pd-heading); letter-spacing: -0.01em; }
+  .markdown-body h2 { font-size: 1.3rem; font-weight: 700; margin: 2.25rem 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--pd-border); color: var(--pd-heading); scroll-margin-top: 5rem; }
+  .markdown-body h3 { font-size: 1.1rem; font-weight: 600; margin: 1.75rem 0 0.5rem; color: var(--pd-heading); scroll-margin-top: 5rem; }
+  .markdown-body h4 { font-size: 0.8rem; font-weight: 600; margin: 1.25rem 0 0.4rem; color: var(--pd-heading); text-transform: uppercase; letter-spacing: 0.04em; scroll-margin-top: 5rem; }
+  .markdown-body p { margin: 0.75rem 0; line-height: 1.65; }
+  .markdown-body ul, .markdown-body ol { margin: 0.75rem 0; padding-left: 1.5rem; line-height: 1.6; }
+  .markdown-body ul { list-style: disc; }
+  .markdown-body ol { list-style: decimal; }
+  .markdown-body li { margin: 0.3rem 0; }
+  .markdown-body li > p { margin: 0.25rem 0; }
+  .markdown-body a { color: var(--pd-link); text-decoration: underline; text-underline-offset: 2px; }
+  .markdown-body strong { color: var(--pd-heading); font-weight: 600; }
+  .markdown-body code { background: var(--pd-code-bg); padding: 0.1rem 0.35rem; border-radius: 0.3rem; font-size: 0.85em; }
+  .markdown-body pre { background: var(--pd-code-bg); border: 1px solid var(--pd-border); border-radius: 0.5rem; padding: 0.75rem 1rem; overflow-x: auto; font-size: 0.85em; line-height: 1.5; margin: 0.75rem 0; }
+  .markdown-body pre code { background: transparent; padding: 0; }
+  .markdown-body blockquote { margin: 1rem 0; padding: 0.6rem 1rem; background: var(--pd-quote-bg); border-left: 4px solid var(--pd-quote-border); border-radius: 0.4rem; }
+  .markdown-body blockquote p { margin: 0.25rem 0; }
+  .markdown-body hr { border: 0; border-top: 1px solid var(--pd-border); margin: 2.5rem 0; }
+  .markdown-body table { width: 100%; border-collapse: collapse; margin: 0.75rem 0 1.25rem; font-size: 0.875rem; display: block; overflow-x: auto; }
+  .markdown-body thead th { background: var(--pd-th-bg); color: var(--pd-heading); font-weight: 600; text-align: left; }
+  .markdown-body th, .markdown-body td { border: 1px solid var(--pd-border); padding: 0.45rem 0.65rem; vertical-align: top; line-height: 1.5; }
+
+  /* Daftar isi: dua kolom di layar lebar. */
+  .markdown-body h2#daftar-isi + ul { columns: 2; column-gap: 2rem; background: var(--pd-toc-bg); border: 1px solid var(--pd-border); border-radius: 0.75rem; padding: 1rem 1.25rem 1rem 2.5rem; font-size: 0.9rem; }
+  .markdown-body h2#daftar-isi + ul > li { break-inside: avoid; }
+  .markdown-body h2#daftar-isi + ul ul { margin: 0.2rem 0 0.4rem; padding-left: 1rem; font-size: 0.85rem; }
+  @media (max-width: 768px) { .markdown-body h2#daftar-isi + ul { columns: 1; } }
+
+  /* Diagram SVG inline: warna kotak ditanam sendiri (bukan warna halaman)
+     supaya tetap terbaca di mode terang & gelap; hanya label lepas mengikuti
+     tema. Ditulis di panduan.md sebagai HTML mentah yang lolos kramdown. */
+  .markdown-body svg.dg { display: block; width: 100%; height: auto; max-width: 780px; margin: 1rem auto 1.25rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+  .markdown-body .dg-frame { fill: none; stroke: #cbd5e1; stroke-width: 1; }
+  .markdown-body .dg-dark { fill: #0f172a; }
+  .markdown-body .dg-dark2 { fill: #1e293b; }
+  .markdown-body .dg-topbar { fill: #ffffff; stroke: #e2e8f0; }
+  .markdown-body .dg-accent { fill: #6366f1; }
+  .markdown-body .dg-line-w { stroke: #334155; stroke-width: 1; }
+  .markdown-body .dg-box { fill: #eef2ff; stroke: #6366f1; stroke-width: 1.2; }
+  .markdown-body .dg-box-green { fill: #ecfdf5; stroke: #10b981; stroke-width: 1.2; }
+  .markdown-body .dg-box-amber { fill: #fffbeb; stroke: #f59e0b; stroke-width: 1.2; }
+  .markdown-body .dg-box-red { fill: #fff1f2; stroke: #f43f5e; stroke-width: 1.2; }
+  .markdown-body .dg-box-gray { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.2; }
+  .markdown-body .dg-t { fill: #1f2937; font-size: 12px; }
+  .markdown-body .dg-ts { fill: #4b5563; font-size: 10px; }
+  .markdown-body .dg-tw { fill: #f8fafc; font-size: 12px; }
+  .markdown-body .dg-s { font-size: 9.5px; }
+  .markdown-body .dg-b { font-weight: 600; }
+  .markdown-body .dg-lbl { fill: #475569; font-size: 10.5px; }
+  html.dark .markdown-body .dg-lbl { fill: #cbd5e1; }
+  html.dark .markdown-body .dg-frame { stroke: #475569; }
+  .markdown-body .dg-arrow { stroke: #64748b; stroke-width: 1.4; fill: none; }
+  html.dark .markdown-body .dg-arrow { stroke: #94a3b8; }
+  .markdown-body .dg-dash { stroke-dasharray: 4 3; }
+  .markdown-body .dg-arrowhead { fill: #64748b; }
+  html.dark .markdown-body .dg-arrowhead { fill: #94a3b8; }
 </style>
 
-<div class="bg-white rounded-2xl ring-1 ring-gray-200 p-8 markdown-body">
+<div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5 sm:p-8 markdown-body">
   <%= @content_html %>
 </div>
