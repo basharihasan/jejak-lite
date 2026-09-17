@@ -104,6 +104,7 @@ Rails.application.routes.draw do
     resources :assessment_events do
       member do
         get  :import
+        get  :import_template
         post :import_preview
         post :import_create
         post :add_instance

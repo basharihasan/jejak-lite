@@ -48,6 +48,56 @@ class AssessmentPipelineTest < ActionDispatch::IntegrationTest
     assert_equal 90, assessment_instances(:siti_cbt_1).reload.score.to_f
   end
 
+  test "templat CSV berisi daftar mahasiswa event dan headernya langsung terpetakan" do
+    sign_in @admin
+    event = assessment_events(:cbt_blok)
+
+    get import_admin_assessment_event_path(event)
+    assert_select "a[href=?]", import_template_admin_assessment_event_path(event, format: :csv)
+
+    get import_template_admin_assessment_event_path(event, format: :csv)
+    assert_response :success
+    assert_match "text/csv", response.media_type
+    assert_match "attachment", response.headers["Content-Disposition"]
+
+    rows = CSV.parse(response.body.delete_prefix("\uFEFF"))
+    assert_equal %w[email nama_mahasiswa npm skor percobaan], rows.first
+    assert_includes rows.map(&:first), users(:siti).email
+    assert rows.drop(1).all? { |r| r[3].nil? }, "kolom nilai templat harus kosong"
+
+    post import_preview_admin_assessment_event_path(event),
+         params: { file: Rack::Test::UploadedFile.new(StringIO.new(response.body), "text/csv", original_filename: "t.csv") }
+    assert_select "select[name='mapping[email]'] option[selected][value='email']"
+    assert_select "select[name='mapping[score]'] option[selected][value='skor']"
+    assert_select "select[name='mapping[attempt]'] option[selected][value='percobaan']"
+    assert_select "input[name='create_dimensions[]'][value='nama_mahasiswa']", 0
+    assert_select "input[name='create_dimensions[]'][value='npm']", 0
+  end
+
+  test "templat event berdimensi memuat kolom per dimensi, tanpa kolom skor total" do
+    sign_in @admin
+    event = assessment_events(:cbt_blok)
+    event.update!(allow_multiple_attempts: false)
+    event.assessment_dimensions.create!(name: "Penalaran Klinis", max_score: 100)
+
+    get import_template_admin_assessment_event_path(event, format: :csv)
+    assert_equal %w[email nama_mahasiswa npm Penalaran\ Klinis], CSV.parse(response.body.delete_prefix("\uFEFF")).first
+  end
+
+  test "baris tanpa nilai dilewati dan tidak menimpa nilai yang sudah ada" do
+    sign_in @admin
+    event = assessment_events(:cbt_blok)
+    event.update!(allow_multiple_attempts: false)
+    before = assessment_instances(:siti_cbt_1).score
+
+    assert_no_difference "AssessmentInstance.count" do
+      post import_create_admin_assessment_event_path(event),
+           params: { csv_text: "email,nama_mahasiswa,skor\nsiti@example.com,Siti,\n", mapping: { email: "email", score: "skor" } }
+    end
+    assert_equal before, assessment_instances(:siti_cbt_1).reload.score
+    assert_match "1 baris tanpa nilai dilewati", response.body
+  end
+
   test "impor tanpa pemetaan email/skor ditolak dengan pesan" do
     sign_in @admin
     post import_create_admin_assessment_event_path(assessment_events(:cbt_blok)), params: { csv_text: "a,b\n1,2\n", mapping: { email: "", score: "" } }

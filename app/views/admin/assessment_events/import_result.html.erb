@@ -6,6 +6,9 @@
   </div>
   <div class="rounded-2xl ring-1 p-5 <%= @result.errors.any? ? 'bg-amber-50 ring-amber-200' : 'bg-emerald-50 ring-emerald-200' %>">
     <p class="text-sm font-semibold text-gray-800"><%= @result.created %> nilai baru, <%= @result.updated %> diperbarui, <%= @result.dimension_scores %> nilai per dimensi, <%= @result.unmatched.size %> email tak dikenal, <%= @result.errors.size %> baris gagal.</p>
+    <% if @result.skipped.to_i.positive? %>
+      <p class="text-xs text-gray-600 mt-1"><%= @result.skipped %> baris tanpa nilai dilewati (nilai yang sudah ada tidak diubah).</p>
+    <% end %>
     <% if @result.unmatched.any? %>
       <p class="text-xs text-gray-700 mt-2"><strong>Tidak ditemukan:</strong> <%= @result.unmatched.uniq.join(", ") %></p>
     <% end %>

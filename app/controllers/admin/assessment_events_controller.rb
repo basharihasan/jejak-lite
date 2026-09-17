@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
+require "csv"
+
 # Konfigurasi → Assessment Events: buat/terbitkan event, daftarkan percobaan,
 # tugaskan penguji, isi nilai manual, dan impor CSV berpemetaan kolom.
 class Admin::AssessmentEventsController < ApplicationController
   before_action :authenticate_user!
   before_action :require_admin!
-  before_action :set_event, only: %i[show edit update destroy import import_preview import_create add_instance]
-  before_action :require_importable_event!, only: %i[import import_preview import_create]
+  before_action :set_event, only: %i[show edit update destroy import import_template import_preview import_create add_instance]
+  before_action :require_importable_event!, only: %i[import import_template import_preview import_create]
 
   def index
     @events = AssessmentEvent.includes(:academic_period, :study_program).ordered.page(params[:page]).per(30)
@@ -84,6 +86,36 @@ class Admin::AssessmentEventsController < ApplicationController
 
   # ── Impor CSV 3 langkah: unggah → petakan kolom → jalankan ──
   def import; end
+
+  # Kolom templat impor nilai. Header sengaja memakai nama yang dikenali
+  # suggest_mapping / suggest_dimension_mapping supaya langkah pemetaan
+  # terisi otomatis. Kolom nama & NPM hanya penanda bagi pengisi.
+  INFO_HEADERS = %w[nama_mahasiswa npm].freeze
+
+  # GET /admin/assessment_events/:id/import_template.csv — berisi daftar
+  # mahasiswa (yang sudah punya nilai di event ini, atau mahasiswa prodi
+  # event) dengan kolom nilai kosong; baris yang dibiarkan kosong dilewati
+  # saat impor.
+  def import_template
+    dimensions = @event.assessment_dimensions.to_a
+    headers = %w[email] + INFO_HEADERS
+    headers << "skor" if dimensions.empty?
+    headers << "percobaan" if @event.allow_multiple_attempts?
+    headers += dimensions.map(&:name)
+
+    students = template_students
+    csv = CSV.generate do |rows|
+      rows << headers
+      if students.any?
+        students.each { |s| rows << [ s.email, s.full_name, s.identifier_number ] + Array.new(headers.size - 3) }
+      else
+        rows << [ "mahasiswa@kampus.ac.id", "Contoh Mahasiswa", "2206000123" ] + Array.new(headers.size - 3)
+      end
+    end
+    # BOM di depan supaya Excel membaca UTF-8 (nama beraksen tidak rusak);
+    # importer sudah membuangnya lagi saat unggah.
+    send_data "\uFEFF#{csv}", filename: "template_nilai_#{@event.name.parameterize}.csv", type: "text/csv; charset=utf-8"
+  end
 
   def import_preview
     file = params[:file]
@@ -188,6 +220,14 @@ class Admin::AssessmentEventsController < ApplicationController
       match = normalized[dimension.name.to_s.downcase] || normalized[dimension.code.to_s.downcase]
       acc[dimension.id] = match if match
     end
+  end
+
+  def template_students
+    registered = User.where(id: @event.assessment_instances.select(:student_id))
+    return registered.order(:full_name) if registered.exists?
+    return User.none if @event.study_program_id.blank?
+
+    User.joins(:roles).where(roles: { code: "mahasiswa" }, study_program_id: @event.study_program_id).distinct.order(:full_name)
   end
 
   # Tebakan awal pemetaan dari nama header (admin tetap bisa mengubah).

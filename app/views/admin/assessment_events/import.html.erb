@@ -15,7 +15,24 @@
     <%= f.submit "Lanjut ke pemetaan kolom →", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
   <% end %>
   <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-6 text-xs text-gray-600 space-y-1">
-    <p class="font-semibold text-gray-800">Yang dibutuhkan</p>
+    <div class="flex items-start justify-between gap-3 flex-wrap mb-2">
+      <div>
+        <p class="font-semibold text-gray-800">Templat CSV</p>
+        <p class="mt-0.5">
+          Berisi daftar mahasiswa<%= @event.assessment_instances.exists? ? " yang sudah punya nilai di event ini" : (@event.study_program ? " #{@event.study_program.name}" : "") %>
+          dengan kolom
+          <% cols = [ "email", "nama_mahasiswa", "npm" ] %>
+          <% cols << "skor" if @event.assessment_dimensions.empty? %>
+          <% cols << "percobaan" if @event.allow_multiple_attempts? %>
+          <% cols += @event.assessment_dimensions.map(&:name) %>
+          <code class="bg-gray-100 px-1 rounded"><%= cols.join(", ") %></code>.
+          Isi nilainya lalu unggah; baris yang dibiarkan kosong dilewati.
+        </p>
+      </div>
+      <%= link_to "Unduh templat CSV", import_template_admin_assessment_event_path(@event, format: :csv),
+            class: "shrink-0 rounded-xl bg-white ring-1 ring-indigo-200 text-indigo-700 hover:bg-indigo-50 font-semibold px-3 py-2 text-xs", data: { turbo: false } %>
+    </div>
+    <p class="font-semibold text-gray-800 pt-2 border-t border-gray-100">Yang dibutuhkan</p>
     <p>Baris pertama = header. Harus ada kolom <strong>email mahasiswa</strong> dan <strong>skor</strong>; kolom nilai maksimum dan nomor percobaan opsional. Nama kolom bebas — dipetakan di langkah berikutnya.</p>
     <p>Mahasiswa yang emailnya tidak ditemukan dilaporkan, bukan dibuat otomatis.</p>
   </div>

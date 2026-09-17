@@ -15,7 +15,7 @@ require "csv"
 #   - event berpercobaan-ulang → pakai kolom percobaan bila dipetakan, kalau
 #     tidak, percobaan berikutnya untuk mahasiswa itu.
 class AssessmentScoreImporter
-  Result = Struct.new(:created, :updated, :unmatched, :errors, :dimension_scores, keyword_init: true) do
+  Result = Struct.new(:created, :updated, :unmatched, :errors, :dimension_scores, :skipped, keyword_init: true) do
     def imported = created + updated
   end
 
@@ -43,7 +43,7 @@ class AssessmentScoreImporter
   end
 
   def call
-    result = Result.new(created: 0, updated: 0, unmatched: [], errors: [], dimension_scores: 0)
+    result = Result.new(created: 0, updated: 0, unmatched: [], errors: [], dimension_scores: 0, skipped: 0)
     if @mapping["email"].blank?
       result.errors << "Kolom email wajib dipetakan."
       return result
@@ -58,6 +58,14 @@ class AssessmentScoreImporter
       line = idx + 2
       email = row[@mapping["email"]].to_s.strip.downcase
       next if email.blank? && row.fields.compact.empty?
+
+      # Baris tanpa nilai sama sekali (mis. dari templat berisi daftar
+      # mahasiswa yang belum diisi) dilewati — dulu tercatat sebagai skor 0
+      # dan menimpa nilai yang sudah ada.
+      unless row_has_value?(row)
+        result.skipped += 1
+        next
+      end
 
       student = User.find_by(email: email)
       if student.nil?
@@ -88,10 +96,14 @@ class AssessmentScoreImporter
     end
     result
   rescue CSV::MalformedCSVError => e
-    Result.new(created: 0, updated: 0, unmatched: [], errors: [ "CSV tidak dapat dibaca: #{e.message}" ], dimension_scores: 0)
+    Result.new(created: 0, updated: 0, unmatched: [], errors: [ "CSV tidak dapat dibaca: #{e.message}" ], dimension_scores: 0, skipped: 0)
   end
 
   private
+
+  def row_has_value?(row)
+    ([ @mapping["score"] ] + @dimension_mapping.values).compact.any? { |column| row[column].to_s.strip.present? }
+  end
 
   def write_dimension_scores(instance, row, line, result)
     written = 0
