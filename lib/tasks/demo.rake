@@ -10,20 +10,23 @@ namespace :demo do
   task seed: :environment do
     # Instance publik wajib menimpa lewat DEMO_PASSWORD; bawaannya sengaja
     # lemah supaya mencoba di komputer sendiri tetap sederhana.
-    demo_password = ENV.fetch("DEMO_PASSWORD", "password123")
+    demo_password = (ENV["DEMO_PASSWORD"].presence || "password123")
     if Rails.env.production?
       puts "Peringatan: menjalankan data DEMO di production."
       puts "Hanya lakukan ini untuk instance demo/showcase, bukan deployment sungguhan."
     end
 
-    def demo_user(email, full_name:, roles:, study_program: nil, password: ENV.fetch("DEMO_PASSWORD", "password123"))
+    def demo_user(email, full_name:, roles:, study_program: nil, password: (ENV["DEMO_PASSWORD"].presence || "password123"))
       user = User.find_or_initialize_by(email: email)
       user.full_name = full_name
       user.study_program = study_program if study_program
-      if user.new_record?
+      # Kata sandi disetel ulang bila berbeda, supaya DEMO_PASSWORD yang
+      # diganti belakangan ikut berlaku ke akun demo yang sudah ada (dulu
+      # hanya akun baru yang kena, akun lama tetap memakai sandi lama).
+      unless !user.new_record? && user.valid_password?(password)
         user.password = user.password_confirmation = password
-        user.confirmed_at = Time.current
       end
+      user.confirmed_at ||= Time.current
       user.save!(validate: false)
 
       roles.each do |code|
@@ -215,7 +218,9 @@ namespace :demo do
       r.content = "Refleksi demo: belajar pentingnya komunikasi empatik dengan pasien."
     end
 
-    puts "Data demo siap. Akun (password: #{demo_password}):"
+    # Sandi kustom tidak dicetak supaya tidak tertinggal di log build Render.
+    shown_password = ENV["DEMO_PASSWORD"].present? ? "sesuai DEMO_PASSWORD" : demo_password
+    puts "Data demo siap. Akun (password: #{shown_password}):"
     [ admin, dosen, preseptor, kaprodi, multirole, mahasiswa1, mahasiswa2 ].each do |u|
       puts "  #{u.email.ljust(32)} #{u.roles.pluck(:code).join(', ')}"
     end

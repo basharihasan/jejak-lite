@@ -61,6 +61,15 @@ services:
         sync: false
       - key: ADMIN_NAME
         sync: false
+      # Opsional, akun & data demo (lib/tasks/demo.rake) — dijalankan
+      # bin/render-build.sh saat build HANYA bila DEMO_SEED terisi (mis.
+      # "1"). Isi DEMO_PASSWORD dengan sandi sendiri; tanpa itu akun demo
+      # memakai password123 yang tercantum publik. Setelah mengubah
+      # keduanya, jalankan deploy ulang supaya seed berjalan.
+      # - key: DEMO_SEED
+      #   sync: false
+      # - key: DEMO_PASSWORD
+      #   sync: false
       # Opsional, server email keluar (konfirmasi akun & lupa kata sandi).
       # Tanpa SMTP_ADDRESS konfirmasi email TIDAK diwajibkan dan tautan
       # "Lupa kata sandi" disembunyikan — reset kata sandi lewat admin.
