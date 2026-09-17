@@ -1,7 +1,7 @@
 <div class="max-w-md mx-auto bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-8">
   <h2 class="text-xl font-bold mb-6">Daftar Akun</h2>
 
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-4" }) do |f| %>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-4", data: { turbo: false } }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
     <div>
@@ -43,8 +43,12 @@
 
   <% if Devise.omniauth_providers.include?(:google_oauth2) %>
     <div class="mt-4">
-      <%= link_to "Daftar dengan Google", user_google_oauth2_omniauth_authorize_path, method: :post,
-            class: "block text-center w-full border border-gray-300 hover:bg-gray-50 font-semibold py-2.5 rounded-xl text-sm" %>
+      <%# OmniAuth hanya menerima POST dan mengarahkan ke domain Google — tanpa
+          rails-ujs, link_to method: :post terkirim sebagai GET (gagal), dan
+          fetch Turbo tak bisa mengikuti redirect lintas domain. %>
+      <%= button_to "Daftar dengan Google", user_google_oauth2_omniauth_authorize_path, method: :post,
+            form: { data: { turbo: false } },
+            class: "block text-center w-full border border-gray-300 hover:bg-gray-50 font-semibold py-2.5 rounded-xl text-sm cursor-pointer" %>
     </div>
   <% end %>
 
