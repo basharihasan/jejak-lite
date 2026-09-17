@@ -161,6 +161,25 @@ class AssessmentPipelineTest < ActionDispatch::IntegrationTest
     assert_match "Rerata Kohort", response.body
   end
 
+  test "baris Evaluasi Akademik menaut ke detail percobaan dan memuat lencana persentil bila kohort cukup" do
+    event = assessment_events(:cbt_blok)
+    mine = assessment_instances(:siti_cbt_1)
+    sign_in users(:siti)
+
+    get exam_scores_path
+    assert_select "a[href=?]", student_assessment_path(mine), text: /Detail & radar/
+    assert_no_match "Persentil", response.body
+
+    2.times do |i|
+      u = User.create!(full_name: "Kohort #{i}", email: "kohort#{i}@example.com", password: "password123", confirmed_at: Time.current)
+      AssessmentInstance.create!(assessment_event: event, student: u, attempt_number: 1, status: "scored", source: "import",
+                                 score: 70 + i * 10, max_score: 100, scored_at: Time.current)
+    end
+    get exam_scores_path
+    assert_match "Persentil", response.body
+    assert_match "3 peserta", response.body
+  end
+
   test "bukan admin tidak bisa membuka Assessment Events" do
     sign_in users(:siti)
     get admin_assessment_events_path
