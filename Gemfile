@@ -3,7 +3,7 @@ source "https://rubygems.org"
 gem "dotenv-rails", groups: [ :development, :test ]
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.1.3", ">= 8.1.3.1"
+gem "rails", "~> 8.1.4"
 # json 3.x memutus ActiveSupport::JSON.decode (dipakai dekripsi cookie sesi)
 # di Rails 8.1.3.1 — kunci ke seri 2.x yang terbukti kompatibel.
 gem "json", "~> 2.7"
