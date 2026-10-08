@@ -1,0 +1,52 @@
+<%# Rincian station OSCE (impor CSV Glide) — padanan kartu station halaman
+    nilai OSCE jejak.pro: 8 dimensi klinis 0–3, nilai checklist, global
+    rating, dan umpan balik penguji per station. %>
+<div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5" data-testid="osce-stations">
+  <div class="flex items-baseline justify-between gap-2 flex-wrap">
+    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Rincian Station OSCE</p>
+    <p class="text-[11px] text-gray-400"><%= stations.size %> station · skala dimensi 0–<%= OsceStationScore::MAX_DIMENSION_SCORE %></p>
+  </div>
+  <div class="mt-3 space-y-3">
+    <% stations.each do |station| %>
+      <div class="rounded-xl ring-1 ring-gray-100 p-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-gray-800"><%= station.label %></p>
+            <p class="text-[11px] text-gray-400">
+              <%= l(station.assessed_at, format: :short) if station.assessed_at %>
+              <% examiner = station.examiner&.full_name || station.details["nama_penguji"] %>
+              <%= " · penguji #{examiner}" if examiner.present? %>
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <% if station.global_rating %><span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= station.global_rating_tone %>"><%= station.global_rating %></span><% end %>
+            <% if station.checklist_score %><span class="text-sm font-bold text-gray-900"><%= station.checklist_score.to_f.round(1) %>%</span><% end %>
+          </div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <% OsceStationScore::DIMENSIONS.each do |key, label| %>
+            <% value = station.score_for(key) %>
+            <% next if value.nil? %>
+            <div class="rounded-lg bg-gray-50 px-2.5 py-1.5">
+              <p class="text-[10px] text-gray-500 truncate" title="<%= label %>"><%= label %></p>
+              <p class="text-sm font-semibold <%= value.to_f < 2 ? 'text-rose-600' : 'text-gray-800' %>"><%= value.to_f.round(1).to_s.delete_suffix(".0") %><span class="text-[10px] font-normal text-gray-400"> / <%= OsceStationScore::MAX_DIMENSION_SCORE %></span></p>
+            </div>
+          <% end %>
+        </div>
+        <% if station.has_feedback? %>
+          <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <% if station.feedback_keep.present? %>
+              <div class="rounded-lg bg-emerald-50 p-2.5"><p class="text-[10px] font-bold uppercase text-emerald-700">Yang sudah baik</p><p class="text-xs text-gray-700 mt-0.5 whitespace-pre-line"><%= station.feedback_keep %></p></div>
+            <% end %>
+            <% if station.feedback_improve.present? %>
+              <div class="rounded-lg bg-amber-50 p-2.5"><p class="text-[10px] font-bold uppercase text-amber-700">Perlu ditingkatkan</p><p class="text-xs text-gray-700 mt-0.5 whitespace-pre-line"><%= station.feedback_improve %></p></div>
+            <% end %>
+          </div>
+        <% end %>
+        <% if station.reflection.present? %>
+          <p class="mt-2 text-xs text-gray-600"><span class="font-semibold">Refleksi:</span> <%= station.reflection %></p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

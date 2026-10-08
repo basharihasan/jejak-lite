@@ -37,7 +37,7 @@ class MigrationExporter
     activity_logs activity_log_competency_tags reflection_entries
     competency_frameworks competency_items competency_milestones
     assessment_blueprints assessment_blueprint_mappings
-    assessment_events assessment_dimensions assessment_instances assessment_dimension_scores
+    assessment_events assessment_dimensions assessment_instances assessment_dimension_scores osce_station_scores
     assessment_form_templates assessment_form_fields assessment_form_submissions assessment_form_answers
     entrustment_decisions evaluation_schedules
     dops_evaluations mini_cex_evaluations
@@ -48,7 +48,9 @@ class MigrationExporter
     terminology_overrides
   ].freeze
   # Sengaja tidak ikut: device_push_tokens (kunci perangkat, tak berguna di
-  # server lain) dan tabel Active Storage (berkasnya diekspor ke lampiran/).
+  # server lain), glide_imports (log unggahan CSV lokal — pesan galatnya
+  # memuat email mahasiswa, dan rollback-nya tak berlaku di server lain), dan
+  # tabel Active Storage (berkasnya diekspor ke lampiran/).
 
   # Kolom yang tidak pernah ikut: rahasia autentikasi.
   SECRET_COLUMNS = %w[encrypted_password reset_password_token confirmation_token calendar_feed_token].freeze

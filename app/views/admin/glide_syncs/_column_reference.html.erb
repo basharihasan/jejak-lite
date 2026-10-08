@@ -1,0 +1,48 @@
+<%# Referensi kolom kedua format — ejaan persis ekspor Glide. Header dibaca
+    tanpa memedulikan huruf besar/kecil, spasi, dan tanda baca. %>
+<% references = {
+     "cbt" => [
+       [ "email", "Email mahasiswa (wajib)" ],
+       [ "exam_code", "Kode ujian — satu kode = satu event. Kosong: dibentuk dari judul/nama berkas + tanggal" ],
+       [ "exam_title", "Judul ujian → nama event" ],
+       [ "exam_type", "summative / formative → CBT Sumatif/Formatif; progress_test → event Progress Test" ],
+       [ "total_score", "Nilai total skala 100 (juga dibaca: final_score, nilai, nilai_akhir)" ],
+       [ "held_at", "Tanggal ujian (2026-06-06 atau 06/06/2026) → periode akademik yang memuatnya" ],
+       [ "kolom lain", "Setiap kolom lain = satu dimensi (mata uji/tinjauan) skala 100, dikelompokkan otomatis: Area Kompetensi, Sistem Organ, Sistem Kesehatan, Proses Klinis, Patomekanisme, dst." ]
+     ],
+     "osce" => [
+       [ "$rowID", "ID unik baris Glide — kunci agar baris tidak terimpor dua kali" ],
+       [ "emailYangDiuji", "Email mahasiswa (cadangan: emailMahasiswa2…5)" ],
+       [ "emailPenguji / namaPenguji", "Penguji station (dicocokkan bila akunnya terdaftar)" ],
+       [ "tanggalUjianX / tanggalEntry", "Waktu ujian (ISO UTC dari Glide → WIB); menentukan sesi per hari" ],
+       [ "station, kasus, IDSoal", "Identitas station" ],
+       [ "Anamnesis … PerilakuProfesional", "8 dimensi klinis skala 0–3: Anamnesis, PemeriksaanFisik, InterpretasiData, PenegakanDiagnosis, TatalaksanaNonFarmakoterapi, TatalaksanaFarmakoterapi, KomunikasiDanEdukasiPasien, PerilakuProfesional" ],
+       [ "globalRating", "Fail / Borderline / Good / Superior" ],
+       [ "halBaik, perluDitingkatkan, refleksi", "Umpan balik penguji & refleksi — tampil ke mahasiswa per station" ],
+       [ "Diagnosis, Resep…, Laboratorium, …", "Disimpan sebagai rincian station" ]
+     ]
+   } %>
+<div class="grid grid-cols-1 gap-4">
+  <% references.each do |key, rows| %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-hidden">
+      <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+        <p class="text-sm font-semibold text-gray-800">Referensi kolom — <%= GlideImport::IMPORTERS.dig(key, :label) %>
+          <span class="font-mono text-[11px] text-gray-400 font-normal"><%= GlideImport::IMPORTERS.dig(key, :file) %></span></p>
+        <%= link_to "Unduh templat CSV", template_admin_glide_syncs_path(type: key, format: :csv), data: { turbo: false },
+              class: "shrink-0 rounded-xl bg-white ring-1 ring-indigo-200 text-indigo-700 hover:bg-indigo-50 font-semibold px-3 py-1.5 text-xs" %>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-xs">
+          <tbody class="divide-y divide-gray-100">
+            <% rows.each do |column, note| %>
+              <tr>
+                <td class="px-5 py-2 font-mono text-indigo-700 whitespace-nowrap align-top"><%= column %></td>
+                <td class="px-5 py-2 text-gray-600"><%= note %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+</div>

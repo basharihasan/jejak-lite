@@ -117,6 +117,18 @@ Rails.application.routes.draw do
         collection { patch :bulk_map }
       end
     end
+    # Unggah CSV hasil CBT & OSCE berformat ekspor Glide (berkas .csv, bukan
+    # API Glide) — padanan /admin/glide_syncs/csv_import dan /admin/cbt_exams
+    # jejak.pro. Indeks glide_syncs = riwayat unggahan + rollback.
+    resources :glide_syncs, only: %i[index show], constraints: { id: /\d+/ } do
+      collection do
+        get  :csv_import
+        post :csv_import, action: :process_csv_import
+        get  :template
+      end
+      member { post :rollback }
+    end
+    resources :cbt_exams, only: %i[index edit update destroy]
     resources :evaluation_schedules, except: %i[show]
     resources :learning_units do
       member do

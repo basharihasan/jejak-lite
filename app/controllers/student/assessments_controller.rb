@@ -17,6 +17,7 @@ class Student::AssessmentsController < ApplicationController
 
   def show
     @profile = AssessmentCohortProfile.new(@instance) if @instance.status == "scored"
+    @osce_stations = @instance.osce_station_scores.includes(:examiner).to_a
   end
 
   def submit

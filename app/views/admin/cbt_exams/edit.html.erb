@@ -1,0 +1,14 @@
+<%# Sunting di tempat dari Kelola Ujian CBT. Simpan → redirect ke indeks;
+    Turbo mengambil frame yang sama dari halaman indeks itu. %>
+<% cls = "rounded-lg border-0 py-1 px-2 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-xs" %>
+<%= turbo_frame_tag dom_id(@exam, @field.to_sym) do %>
+  <%= form_with model: @exam, url: admin_cbt_exam_path(@exam, q: params[:q].presence), method: :patch, class: "flex items-center gap-1.5" do |f| %>
+    <% if @field == "exam_date" %>
+      <%= f.date_field :exam_date, required: true, class: "#{cls} w-36" %>
+    <% else %>
+      <%= f.text_field :name, required: true, class: "#{cls} w-64" %>
+    <% end %>
+    <%= f.submit "Simpan", class: "rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-2 py-1 cursor-pointer" %>
+    <%= link_to "Batal", admin_cbt_exams_path(q: params[:q].presence), class: "text-xs text-gray-500 hover:text-gray-700" %>
+  <% end %>
+<% end %>

@@ -34,6 +34,7 @@
       <% end %>
     </div>
 
+    <%= render "osce_stations", stations: @osce_stations if @osce_stations.any? %>
     <%= render "cohort_profile", profile: @profile %>
   <% end %>
 

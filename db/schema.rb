@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_010001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -172,6 +172,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
 
   create_table "assessment_dimensions", force: :cascade do |t|
     t.bigint "assessment_event_id", null: false
+    t.string "category"
     t.string "code"
     t.bigint "competency_item_id"
     t.datetime "created_at", null: false
@@ -195,6 +196,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
     t.bigint "created_by_id"
     t.text "description"
     t.date "exam_date"
+    t.string "exam_purpose"
+    t.string "external_code"
     t.decimal "max_score", precision: 6, scale: 2, default: "100.0", null: false
     t.string "name", null: false
     t.string "status", default: "draft", null: false
@@ -205,6 +208,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
     t.index ["academic_period_id"], name: "index_assessment_events_on_academic_period_id"
     t.index ["assessment_form_template_id"], name: "index_assessment_events_on_assessment_form_template_id"
     t.index ["created_by_id"], name: "index_assessment_events_on_created_by_id"
+    t.index ["external_code"], name: "index_assessment_events_on_external_code", unique: true, where: "(external_code IS NOT NULL)"
     t.index ["study_program_id"], name: "index_assessment_events_on_study_program_id"
   end
 
@@ -553,6 +557,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
     t.index ["supervisor_id"], name: "index_final_projects_on_supervisor_id"
   end
 
+  create_table "glide_imports", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "created_count", default: 0, null: false
+    t.jsonb "created_event_ids", default: [], null: false
+    t.jsonb "created_instance_ids", default: [], null: false
+    t.integer "error_count", default: 0, null: false
+    t.jsonb "error_messages", default: [], null: false
+    t.string "filename"
+    t.jsonb "filled_instance_ids", default: [], null: false
+    t.bigint "imported_by_id"
+    t.string "importer_key", null: false
+    t.jsonb "options", default: {}, null: false
+    t.datetime "rolled_back_at"
+    t.bigint "rolled_back_by_id"
+    t.jsonb "skip_reasons", default: {}, null: false
+    t.integer "skipped_count", default: 0, null: false
+    t.string "status", default: "completed", null: false
+    t.integer "total_rows", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.integer "updated_count", default: 0, null: false
+    t.index ["imported_by_id"], name: "index_glide_imports_on_imported_by_id"
+    t.index ["rolled_back_by_id"], name: "index_glide_imports_on_rolled_back_by_id"
+  end
+
   create_table "learning_units", force: :cascade do |t|
     t.bigint "academic_period_id"
     t.bigint "assessment_blueprint_id"
@@ -637,6 +665,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
     t.index ["recipient_id", "read_at"], name: "index_notifications_on_recipient_id_and_read_at"
     t.index ["recipient_id"], name: "index_notifications_on_recipient_id"
     t.index ["sender_id"], name: "index_notifications_on_sender_id"
+  end
+
+  create_table "osce_station_scores", force: :cascade do |t|
+    t.datetime "assessed_at"
+    t.bigint "assessment_instance_id", null: false
+    t.string "case_title"
+    t.decimal "checklist_score", precision: 6, scale: 2
+    t.datetime "created_at", null: false
+    t.jsonb "details", default: {}, null: false
+    t.bigint "examiner_id"
+    t.string "external_row_id"
+    t.text "feedback_improve"
+    t.text "feedback_keep"
+    t.bigint "glide_import_id"
+    t.string "global_rating"
+    t.string "question_code"
+    t.text "reflection"
+    t.jsonb "scores", default: {}, null: false
+    t.string "station"
+    t.datetime "updated_at", null: false
+    t.index ["assessment_instance_id"], name: "index_osce_station_scores_on_assessment_instance_id"
+    t.index ["examiner_id"], name: "index_osce_station_scores_on_examiner_id"
+    t.index ["external_row_id"], name: "index_osce_station_scores_on_external_row_id", unique: true, where: "(external_row_id IS NOT NULL)"
+    t.index ["glide_import_id"], name: "index_osce_station_scores_on_glide_import_id"
   end
 
   create_table "patient_consents", force: :cascade do |t|
@@ -868,6 +920,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
   add_foreign_key "final_project_milestones", "final_projects"
   add_foreign_key "final_projects", "users", column: "student_id"
   add_foreign_key "final_projects", "users", column: "supervisor_id"
+  add_foreign_key "glide_imports", "users", column: "imported_by_id"
+  add_foreign_key "glide_imports", "users", column: "rolled_back_by_id"
   add_foreign_key "learning_units", "academic_periods"
   add_foreign_key "learning_units", "assessment_blueprints"
   add_foreign_key "learning_units", "study_programs"
@@ -879,6 +933,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_17_010005) do
   add_foreign_key "mini_cex_evaluations", "users", column: "student_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "notifications", "users", column: "sender_id"
+  add_foreign_key "osce_station_scores", "assessment_instances"
+  add_foreign_key "osce_station_scores", "glide_imports"
+  add_foreign_key "osce_station_scores", "users", column: "examiner_id"
   add_foreign_key "patient_consents", "clinical_cases"
   add_foreign_key "prescription_items", "clinical_cases"
   add_foreign_key "reflection_entries", "activity_logs"

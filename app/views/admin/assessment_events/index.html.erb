@@ -4,7 +4,10 @@
     <h1 class="text-xl font-bold text-gray-900">Assessment Events</h1>
     <p class="text-sm text-gray-500 mt-0.5">Wadah semua nilai: impor CBT/OSCE/Progress Test, rubrik penguji (SOCA/MSP, esai, refleksi), CBD & Long Case.</p>
   </div>
-  <%= link_to "+ Event Baru", new_admin_assessment_event_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+  <div class="flex items-center gap-3">
+    <%= link_to "Impor CSV CBT/OSCE (Glide)", csv_import_admin_glide_syncs_path, class: "text-sm text-indigo-600 font-medium hover:underline" %>
+    <%= link_to "+ Event Baru", new_admin_assessment_event_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
+  </div>
 </div>
 
 <div class="mt-4 bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">

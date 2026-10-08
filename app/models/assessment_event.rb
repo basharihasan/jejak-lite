@@ -25,6 +25,11 @@ class AssessmentEvent < ApplicationRecord
   }.freeze
   STATUSES = { "draft" => "Draf", "published" => "Terbit", "closed" => "Ditutup" }.freeze
   FAMILY_LABELS = { written: "Ujian tulis", practical: "Ujian praktik", rubric: "Rubrik penguji", case: "Berbasis kasus" }.freeze
+  # Kolom exam_type berkas CBT Glide (formative/summative; progress_test
+  # menjadi tipe event tersendiri).
+  EXAM_PURPOSES = { "formative" => "Formatif", "summative" => "Sumatif" }.freeze
+  # Tipe yang tampil di Kelola Ujian CBT — yang dihasilkan impor CBT Glide.
+  CBT_EXAM_TYPES = %w[cbt progress_test].freeze
 
   belongs_to :academic_period
   belongs_to :study_program, optional: true
@@ -35,15 +40,20 @@ class AssessmentEvent < ApplicationRecord
   has_many :assessment_dimensions, -> { ordered }, dependent: :destroy, inverse_of: :assessment_event
   # Baris Assessment Matrix unit pembelajaran yang menunjuk event ini.
   has_many :assessment_mappings, dependent: :destroy
+  # Rincian station OSCE (impor Glide) seluruh peserta event ini.
+  has_many :osce_station_scores, through: :assessment_instances
 
   validates :name, presence: true
   validates :assessment_type, inclusion: { in: TYPES.keys }
   validates :status, inclusion: { in: STATUSES.keys }
   validates :max_score, numericality: { greater_than: 0 }
+  validates :exam_purpose, inclusion: { in: EXAM_PURPOSES.keys }, allow_nil: true
+  validates :external_code, uniqueness: true, allow_nil: true
 
   scope :published, -> { where(status: "published") }
   scope :ordered, -> { order(exam_date: :desc, created_at: :desc) }
   scope :of_type, ->(t) { where(assessment_type: t) }
+  scope :cbt_exams, -> { where(assessment_type: CBT_EXAM_TYPES) }
   scope :for_student, ->(user) {
     published.where(study_program_id: [ nil, user.study_program_id ])
   }
@@ -52,6 +62,7 @@ class AssessmentEvent < ApplicationRecord
   def family = TYPES.dig(assessment_type, 1)
   def status_label = STATUSES.fetch(status, status)
   def family_label = FAMILY_LABELS[family]
+  def exam_purpose_label = EXAM_PURPOSES[exam_purpose]
 
   # Mahasiswa mengunggah dokumen/evaluasi diri lalu penguji menilai.
   def requires_submission?

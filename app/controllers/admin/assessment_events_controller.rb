@@ -15,7 +15,10 @@ class Admin::AssessmentEventsController < ApplicationController
   end
 
   def show
-    @tab = params[:tab] == "dimensi" ? "dimensi" : "peserta"
+    @tab = params[:tab].in?(%w[dimensi station]) ? params[:tab] : "peserta"
+    @station_count = @event.osce_station_scores.count
+    @tab = "peserta" if @tab == "station" && @station_count.zero?
+    load_osce_stations if @tab == "station"
     @dimensions = @event.assessment_dimensions.includes(:competency_item, :assessment_dimension_scores)
     @competency_items = competency_item_choices
     @instances = @event.assessment_instances.includes(:student, :examiner, assessment_dimension_scores: :assessment_dimension)
@@ -232,6 +235,19 @@ class Admin::AssessmentEventsController < ApplicationController
     @event.assessment_dimensions.each_with_object({}) do |dimension, acc|
       match = normalized[dimension.name.to_s.downcase] || normalized[dimension.code.to_s.downcase]
       acc[dimension.id] = match if match
+    end
+  end
+
+  # Tab Station OSCE (impor CSV Glide): rincian per station + rangkuman
+  # rata-rata tiap dimensi klinis dan sebaran global rating seluruh event.
+  def load_osce_stations
+    scope = OsceStationScore.for_event(@event)
+    @stations = scope.includes(:examiner, assessment_instance: :student)
+                     .reorder("users.full_name", :assessed_at, :station).joins(assessment_instance: :student)
+                     .page(params[:page]).per(50)
+    @global_ratings = scope.reorder(nil).group(:global_rating).count.sort_by { |rating, _| rating.to_s }
+    @dimension_means = OsceStationScore::DIMENSIONS.keys.index_with do |key|
+      scope.reorder(nil).where("scores ? :key", key: key).average(Arel.sql("(scores->>#{OsceStationScore.connection.quote(key)})::numeric"))&.to_f&.round(2)
     end
   end
 

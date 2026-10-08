@@ -459,10 +459,12 @@ Empat belas tipe instrumen yang dikenal:
 
 | Keluarga | Tipe | Cara nilai masuk |
 |---|---|---|
-| Ujian tulis | Ujian Tulis / CBT, Nilai Tutor, Ujian Tinjauan, TMEX, Progress Test | Impor CSV admin |
-| Ujian praktik | OSCE | Impor CSV admin (bisa per station) |
+| Ujian tulis | Ujian Tulis / CBT, Nilai Tutor, Ujian Tinjauan, TMEX, Progress Test | Impor CSV admin (termasuk berkas *CBT Exam Results* format Glide) |
+| Ujian praktik | OSCE | Impor CSV admin (bisa per station, atau berkas *Penilaian OSCE* format Glide — 8 dimensi klinis) |
 | Rubrik penguji | SOCA/MSP, Essay Gagasan, Festival Gagasan, Community Project, Refleksi Mahasiswa (dinilai), EBCR | Mahasiswa mengumpulkan → penguji menilai |
 | Berbasis kasus | CBD, Long Case | Diinisiasi dari Kasus Klinis → penguji menilai |
+
+Membuka satu nilai menampilkan **posisi Anda di kohort ujian** (persentil, rerata, P90) dan **radar per kategori dimensi**. Untuk CBT hasil impor, radar dikelompokkan per kategori tinjauan — Area Kompetensi, Sistem Organ, Sistem Kesehatan, Proses Klinis & Kognitif, Patomekanisme, dst. Untuk OSCE, halaman yang sama memuat **Rincian Station OSCE**: tiap station dengan kasus, penguji, delapan dimensi klinis (skala 0–3; nilai di bawah 2 ditandai merah), nilai checklist, *global rating* (Fail / Borderline / Good / Superior), serta umpan balik **Yang sudah baik** dan **Perlu ditingkatkan** dari penguji. Nilai OSCE Anda adalah rata-rata nilai checklist seluruh station pada sesi itu.
 
 ### 4.9 Workplace Assessment (DOPS & Mini-CEX)
 
@@ -745,6 +747,32 @@ Halaman event memuat:
 </svg>
 
 Templat CSV dari tombol **Unduh templat** memuat kolom `email,nama_mahasiswa,npm,skor[,percobaan],tanggal[,<nama dimensi>…]` — kolom nama & NPM hanya penanda, baris yang nilainya dibiarkan kosong dilewati, dan `tanggal` (bawaan = tanggal ujian event) bisa diubah per baris untuk ujian susulan. Event tanpa percobaan berulang **menimpa** percobaan 1; event berulang menambah percobaan baru. Laporan impor menyebut jumlah nilai baru, diperbarui, nilai per dimensi, email tak dikenal, dan baris gagal; baris yang bernilai tetapi kolom emailnya kosong dilaporkan sebagai *(baris N tanpa email)*.
+
+#### Impor CSV CBT & OSCE (format Glide)
+
+**Konfigurasi → Impor CSV CBT & OSCE** (`/admin/glide_syncs`, padanan `/admin/glide_syncs/csv_import` jejak.pro) menerima **berkas .csv** hasil ekspor tabel Glide — tanpa koneksi API Glide. Berkas yang sama juga diterima jejak.pro, jadi data dapat dipindahkan bolak-balik. Tombol **+ Upload CSV** membuka formulir: pilih tipe data, unggah berkas (hingga 50 MB, pemisah koma/titik koma), lalu **Mulai Impor**. Tiap tipe punya tombol **Unduh templat CSV** berisi header persis ekspor Glide.
+
+| Tipe | Berkas | Isi |
+|---|---|---|
+| **CBT Exam Results** | `data_cbt_exams_glide.csv` | `email`, `exam_code`, `exam_title`, `exam_type` (summative/formative/progress_test), `total_score` (skala 100), `held_at`, lalu **satu kolom per dimensi** (mata uji/tinjauan, skala 100) |
+| **OSCE** | `data_osce_glide.csv` | satu baris = satu station: `$rowID`, `emailYangDiuji`, `emailPenguji`, `tanggalEntry`, `station`, `kasus`, `IDSoal`, delapan dimensi klinis skala 0–3 (`Anamnesis`, `PemeriksaanFisik`, `InterpretasiData`, `PenegakanDiagnosis`, `TatalaksanaNonFarmakoterapi`, `TatalaksanaFarmakoterapi`, `KomunikasiDanEdukasiPasien`, `PerilakuProfesional`), `globalRating`, `halBaik`, `perluDitingkatkan`, `refleksi` |
+
+Cara data masuk:
+
+- **CBT** — satu `exam_code` = satu Assessment Event (dibuat otomatis bila belum ada; tipe *Progress Test* bila `exam_type` = progress_test, selain itu CBT Sumatif/Formatif). Periode akademik = periode yang memuat tanggal ujian. Setiap kolom selain kolom identitas menjadi **dimensi** yang otomatis dikelompokkan ke kategori tinjauan; dimensi yang namanya sama persis dengan ranah kompetensi (mis. "Komunikasi efektif") langsung dipetakan. Opsi khusus CBT: **Judul ujian** dan **Tanggal ujian** menimpa isi berkas; berkas tanpa `exam_code` memakai kode dari judul (atau nama berkas) + tanggal.
+- **OSCE** — bawaan: **satu event per hari ujian** ("OSCE 20 Oktober 2025", tanggal entri dalam WIB), seperti rekap Sesi OSCE jejak.pro; atau pilih **Event tujuan** bila seluruh berkas adalah satu ujian. Delapan dimensi klinis dibuat sebagai dimensi event (maks 3). Nilai tiap mahasiswa = rata-rata nilai checklist station-nya; nilai per dimensi = rata-rata station yang menilainya. Halaman event mendapat tab **Station OSCE** berisi rincian per station, rata-rata dimensi, dan sebaran global rating.
+- Opsi bersama: **Program studi** dan **Periode akademik** untuk event yang baru dibuat.
+
+Aturan pengaman:
+
+- **Idempoten** — OSCE berdasarkan `$rowID` (baris tanpa `$rowID`: mahasiswa + soal + penguji + hari), CBT berdasarkan mahasiswa + `exam_code`. Mengunggah ulang berkas yang sama tidak menggandakan nilai; nilai yang sudah ada **tidak ditimpa**.
+- Email yang belum terdaftar sebagai **mahasiswa** dilewati (tidak dibuat akun). Nilai di luar skala, tanggal tak terbaca atau tak wajar (mis. tahun 2116), dan sel nilai bukan angka dilaporkan per baris.
+- Mahasiswa yang sudah punya nilai OSCE dari sumber lain (input manual / impor generik) pada event tujuan tidak ditimpa station Glide.
+- Setelah impor, halaman **ringkasan** menampilkan baris dibaca, nilai/station masuk, alasan dilewati, contoh galat, dan event yang terisi. **Rollback** di halaman itu menghapus semua yang dibuat unggahan tersebut (station, peserta, event baru yang kosong) dan mengembalikan peserta yang sebelumnya terdaftar ke status *Terdaftar*. Untuk mengoreksi nilai: rollback, perbaiki berkas, lalu unggah ulang.
+
+#### Kelola Ujian CBT
+
+**Konfigurasi → Kelola Ujian CBT** (`/admin/cbt_exams`) mendaftar seluruh event CBT & Progress Test beserta kode ujian, tipe, jumlah peserta, tanggal, dan progres pemetaan dimensi. Klik **judul** atau **tanggal** untuk menyunting di tempat; mengoreksi tanggal ikut memindahkan tanggal nilai hasil impor sehingga grafik tren tetap benar. **Kelola Pemetaan** membuka tab Dimensi event untuk memetakan dimensi ke ranah kompetensi. Berbeda dari jejak.pro, ujian yang sudah bernilai **tidak dapat dihapus** dari sini — batalkan lewat rollback impor, atau ubah status event menjadi Ditutup.
 
 ### 6.6 Jadwal DOPS & Mini-CEX
 

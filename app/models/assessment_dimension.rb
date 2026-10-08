@@ -9,6 +9,21 @@
 # dipetakan tetap dihitung untuk nilai total, tetapi TIDAK ikut ke peta
 # kompetensi — lebih baik kosong daripada salah atribusi.
 class AssessmentDimension < ApplicationRecord
+  # Kelompok tinjauan untuk radar per kategori — kode dari impor Glide
+  # (CbtExam::DIMENSION_CATEGORY_MAP / CATEGORY_META jejak.pro).
+  CATEGORY_LABELS = {
+    "kompetensi"       => "Area Kompetensi",
+    "sistem_organ"     => "Sistem Organ",
+    "siklus_kehidupan" => "Siklus Kehidupan",
+    "sistem_kesehatan" => "Sistem Kesehatan",
+    "proses_klinis"    => "Proses Klinis & Kognitif",
+    "patomekanisme"    => "Patomekanisme Penyakit",
+    "setting_klinis"   => "Setting Klinis",
+    "aspek"            => "Aspek Tinjauan",
+    "osce_klinis"      => "Dimensi Klinis OSCE",
+    "lainnya"          => "Lainnya"
+  }.freeze
+
   belongs_to :assessment_event
   belongs_to :competency_item, optional: true
   has_many :assessment_dimension_scores, dependent: :destroy
@@ -25,6 +40,10 @@ class AssessmentDimension < ApplicationRecord
 
   def label
     [ code.presence, name ].compact.join(" — ")
+  end
+
+  def category_label
+    CATEGORY_LABELS.fetch(category, category) if category.present?
   end
 
   def mapped?

@@ -151,6 +151,10 @@
         active: active_class.call("/admin/student_relabel") %>
     <%= render "shared/nav_item", label: term("nav.assessment_events"), path: admin_assessment_events_path,
         active: active_class.call("/admin/assessment_events") %>
+    <%= render "shared/nav_item", label: term("nav.cbt_exams"), path: admin_cbt_exams_path,
+        active: active_class.call("/admin/cbt_exams") %>
+    <%= render "shared/nav_item", label: term("nav.glide_imports"), path: admin_glide_syncs_path,
+        active: active_class.call("/admin/glide_syncs") %>
     <%= render "shared/nav_item", label: term("nav.evaluation_schedules"), path: admin_evaluation_schedules_path,
         active: active_class.call("/admin/evaluation_schedules") %>
     <%= render "shared/nav_item", label: term("nav.competency_frameworks"), path: competency_frameworks_path,

@@ -16,6 +16,8 @@ class AssessmentInstance < ApplicationRecord
 
   has_many :assessment_dimension_scores, dependent: :destroy
   has_many :assessment_dimensions, through: :assessment_dimension_scores
+  # Station OSCE dari impor Glide; nilai percobaan ini rangkumannya.
+  has_many :osce_station_scores, -> { ordered }, dependent: :destroy, inverse_of: :assessment_instance
 
   has_one_attached :document
 
@@ -95,6 +97,21 @@ class AssessmentInstance < ApplicationRecord
     return nil if total_weight.zero?
 
     update!(score: ((weighted / total_weight) / 100.0 * max_score).round(2))
+  end
+
+  # Rangkum ulang nilai dari station OSCE-nya — lihat OsceStationSummary.
+  def recalculate_from_osce_stations!
+    OsceStationSummary.refresh!([ id ])
+    reload
+  end
+
+  # Kosongkan nilai hasil impor (rollback impor Glide pada percobaan yang
+  # sebelumnya sudah didaftarkan admin).
+  def reset_to_registered!
+    transaction do
+      assessment_dimension_scores.destroy_all
+      update!(status: "registered", score: nil, scored_at: nil, source: "manual")
+    end
   end
 
   def dimension_scores_by_competency

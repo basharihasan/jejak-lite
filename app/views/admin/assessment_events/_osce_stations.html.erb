@@ -1,0 +1,64 @@
+<%# Rincian station OSCE hasil impor CSV Glide — satu baris per station yang
+    diuji. Dimensi klinis skala 0–3; checklist = rata-rata dimensi terisi ÷ 3. %>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5 lg:col-span-2">
+    <p class="text-sm font-semibold text-gray-800">Rata-rata dimensi klinis <span class="text-gray-400 font-normal">(skala 0–3, seluruh station)</span></p>
+    <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+      <% OsceStationScore::DIMENSIONS.each do |key, label| %>
+        <% mean = dimension_means[key] %>
+        <div>
+          <div class="flex justify-between text-xs"><span class="text-gray-600"><%= label %></span><span class="font-semibold text-gray-800"><%= mean || "—" %></span></div>
+          <div class="mt-1 h-1.5 rounded-full bg-gray-100"><div class="h-1.5 rounded-full bg-indigo-500" style="width: <%= mean ? (mean / OsceStationScore::MAX_DIMENSION_SCORE * 100).round : 0 %>%"></div></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+    <p class="text-sm font-semibold text-gray-800">Global rating</p>
+    <ul class="mt-3 space-y-1.5">
+      <% global_ratings.each do |rating, count| %>
+        <li class="flex items-center justify-between text-xs">
+          <span class="px-2 py-0.5 rounded-full font-semibold <%= OsceStationScore.new(global_rating: rating).global_rating_tone %>"><%= rating || "tanpa rating" %></span>
+          <span class="font-semibold text-gray-700"><%= count %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<div class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+  <table class="min-w-full text-xs">
+    <thead class="bg-gray-50 uppercase tracking-wide text-gray-500">
+      <tr>
+        <th class="text-left px-3 py-2.5">Mahasiswa</th>
+        <th class="text-left px-3 py-2.5">Station · kasus</th>
+        <th class="text-left px-3 py-2.5">Penguji · waktu</th>
+        <% OsceStationScore::DIMENSIONS.each_value do |label| %>
+          <th class="px-1.5 py-2.5 text-center" title="<%= label %>"><%= label.split.map(&:first).join %></th>
+        <% end %>
+        <th class="text-right px-3 py-2.5">Checklist</th>
+        <th class="text-left px-3 py-2.5">Global</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      <% stations.each do |station| %>
+        <tr>
+          <td class="px-3 py-2 font-medium text-gray-800 whitespace-nowrap"><%= station.assessment_instance.student.full_name %></td>
+          <td class="px-3 py-2 text-gray-700 max-w-56"><span class="block truncate" title="<%= station.label %>"><%= station.label %></span></td>
+          <td class="px-3 py-2 text-gray-500 whitespace-nowrap">
+            <%= station.examiner&.full_name || station.details["nama_penguji"] || "—" %>
+            <span class="block text-[10px] text-gray-400"><%= l(station.assessed_at, format: :short) if station.assessed_at %></span>
+          </td>
+          <% OsceStationScore::DIMENSIONS.each_key do |key| %>
+            <% value = station.score_for(key) %>
+            <td class="px-1.5 py-2 text-center <%= value.nil? ? 'text-gray-300' : (value.to_f < 2 ? 'text-rose-600 font-semibold' : 'text-gray-700') %>"><%= value.nil? ? "–" : value.to_f.round(1).to_s.delete_suffix(".0") %></td>
+          <% end %>
+          <td class="px-3 py-2 text-right font-semibold text-gray-800"><%= station.checklist_score ? "#{station.checklist_score.to_f.round(1)}%" : "—" %></td>
+          <td class="px-3 py-2"><% if station.global_rating %><span class="px-2 py-0.5 rounded-full font-semibold <%= station.global_rating_tone %>"><%= station.global_rating %></span><% end %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<p class="text-[11px] text-gray-400">Singkatan kolom: <%= OsceStationScore::DIMENSIONS.values.map { |label| "#{label.split.map(&:first).join} = #{label}" }.join(" · ") %>.</p>
+<div><%= paginate stations, params: { tab: "station" } %></div>

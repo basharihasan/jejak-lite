@@ -55,6 +55,8 @@ en:
     users: "Users"
     student_relabel: "Student Program Relabel"
     assessment_events: "Assessment Events"
+    cbt_exams: "Manage CBT Exams"
+    glide_imports: "CBT & OSCE CSV Import"
     evaluation_schedules: "DOPS & Mini-CEX Schedule"
     feedback_journal: "Feedback Journal"
     form_templates: "Assessment Form Builder"

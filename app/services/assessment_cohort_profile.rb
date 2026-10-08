@@ -5,9 +5,9 @@
 # jejak.pro). Kohort = semua mahasiswa yang sudah dinilai pada event ini,
 # satu nilai wakil (tertinggi) per mahasiswa.
 #
-# Dimensi dikelompokkan per kategori bila namanya memakai pola
-# "Kategori: Nama" (mis. "Siklus Kehidupan: Dewasa"); tanpa pola itu semua
-# dimensi masuk satu radar. Semua angka dalam persen supaya dimensi dengan
+# Dimensi dikelompokkan per kategori tersimpan (impor Glide: Area Kompetensi,
+# Sistem Organ, …) atau bila namanya memakai pola "Kategori: Nama" (mis.
+# "Siklus Kehidupan: Dewasa"); tanpa keduanya semua dimensi masuk satu radar. Semua angka dalam persen supaya dimensi dengan
 # skala berbeda tetap sebanding.
 class AssessmentCohortProfile
   MIN_COHORT = CohortPercentileCalculator::MIN_COHORT
@@ -83,11 +83,17 @@ class AssessmentCohortProfile
                             .transform_values { |rows| rows.filter_map(&:percentage) }
   end
 
+  # Kategori tersimpan (impor Glide) didahulukan; selain itu pola
+  # "Kategori: Nama" pada nama dimensi.
   def category_of(dimension)
+    return dimension.category_label if dimension.category.present?
+
     dimension.name.include?(":") ? dimension.name.split(":", 2).first.strip : DEFAULT_GROUP
   end
 
   def display_name(dimension)
+    return dimension.name if dimension.category.present?
+
     dimension.name.include?(":") ? dimension.name.split(":", 2).last.strip : dimension.name
   end
 end

@@ -9,6 +9,8 @@
         <%= @event.type_label %> · <%= @event.family_label %> · <%= @event.academic_period.name %> · <%= @event.study_program&.name || "Semua prodi" %>
         <%= " · #{@event.block_name}" if @event.block_name.present? %> · maks <%= @event.max_score %>
         <%= " · percobaan berulang" if @event.allow_multiple_attempts? %>
+        <%= " · #{@event.exam_purpose_label}" if @event.exam_purpose %>
+        <% if @event.external_code %> · kode <span class="font-mono"><%= @event.external_code %></span><% end %>
       </p>
       <span class="mt-1 inline-block text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= { 'draft' => 'bg-gray-100 text-gray-600', 'published' => 'bg-emerald-50 text-emerald-700', 'closed' => 'bg-rose-50 text-rose-700' }[@event.status] %>"><%= @event.status_label %></span>
     </div>
@@ -28,10 +30,16 @@
           class: "text-xs px-3 py-1.5 rounded-full font-medium #{@tab == 'peserta' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
     <%= link_to "Dimensi & Pemetaan Kompetensi (#{@dimensions.size})", admin_assessment_event_path(@event, tab: "dimensi"),
           class: "text-xs px-3 py-1.5 rounded-full font-medium #{@tab == 'dimensi' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+    <% if @station_count.positive? %>
+      <%= link_to "Station OSCE (#{@station_count})", admin_assessment_event_path(@event, tab: "station"),
+            class: "text-xs px-3 py-1.5 rounded-full font-medium #{@tab == 'station' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+    <% end %>
   </div>
 
   <% if @tab == "dimensi" %>
     <%= render "dimensions", event: @event, dimensions: @dimensions, competency_items: @competency_items %>
+  <% elsif @tab == "station" %>
+    <%= render "osce_stations", stations: @stations, global_ratings: @global_ratings, dimension_means: @dimension_means %>
   <% else %>
   <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
     <p class="text-sm font-semibold text-gray-800 mb-3">Daftarkan mahasiswa <span class="text-gray-400 font-normal">(percobaan baru / ujian ulang)</span></p>

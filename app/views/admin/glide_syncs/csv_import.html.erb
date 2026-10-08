@@ -1,0 +1,95 @@
+<% content_for :title, "Impor CSV CBT & OSCE" %>
+<% cls = "rounded-xl border-0 py-2 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+<div class="max-w-3xl space-y-5">
+  <div class="flex items-start justify-between gap-3 flex-wrap">
+    <div>
+      <%= link_to "← Riwayat Impor", admin_glide_syncs_path, class: "text-xs text-gray-500 hover:text-indigo-600" %>
+      <h1 class="text-xl font-bold text-gray-900 mt-1">Upload CSV Manual — CBT & OSCE</h1>
+      <p class="text-sm text-gray-500 mt-0.5">Unggah berkas <strong>.csv</strong> hasil ekspor tabel Glide (atau berkas dengan kolom yang sama) — tanpa koneksi ke API Glide. Berkas yang sama juga diterima jejak.pro.</p>
+    </div>
+    <%= link_to "Kelola Ujian CBT", admin_cbt_exams_path, class: "text-sm text-indigo-600 font-medium hover:underline" %>
+  </div>
+
+  <%= form_with url: csv_import_admin_glide_syncs_path, method: :post, multipart: true,
+        class: "group bg-white rounded-2xl ring-1 ring-gray-200 p-6 space-y-5" do |f| %>
+    <div>
+      <p class="block text-sm font-semibold text-gray-700 mb-2">Tipe data <span class="text-rose-500">*</span></p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <% GlideImport::IMPORTERS.each do |key, meta| %>
+          <label class="flex cursor-pointer rounded-xl ring-1 ring-inset ring-gray-200 bg-gray-50 p-4 hover:bg-indigo-50 has-[:checked]:ring-2 has-[:checked]:ring-indigo-500 has-[:checked]:bg-indigo-50">
+            <%= f.radio_button :importer_type, key, id: "importer-type-#{key}", class: "sr-only", required: true, checked: params[:type] == key %>
+            <span class="min-w-0">
+              <span class="block text-sm font-semibold text-gray-800"><%= meta[:label] %></span>
+              <span class="block text-[11px] font-mono text-gray-400 mt-0.5"><%= meta[:file] %></span>
+              <span class="block text-xs text-gray-500 mt-1"><%= meta[:description] %></span>
+            </span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.label :csv_file, "Berkas CSV", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.file_field :csv_file, accept: ".csv,text/csv", required: true,
+            class: "block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-indigo-700" %>
+      <p class="text-[11px] text-gray-400 mt-1">Hingga 50 MB. Pemisah koma atau titik koma; UTF-8 atau simpanan Excel.</p>
+    </div>
+
+    <%# Opsi khusus CBT — tampil bila CBT Exam Results dipilih. %>
+    <div class="hidden group-has-[#importer-type-cbt:checked]:block rounded-xl bg-indigo-50/60 ring-1 ring-indigo-100 p-4 space-y-3">
+      <p class="text-xs font-semibold text-indigo-700 uppercase tracking-wide">Opsi khusus CBT (opsional)</p>
+      <p class="text-xs text-indigo-700/80">Bila diisi, menimpa kolom <code>exam_title</code> / <code>held_at</code> untuk seluruh baris. Berkas tanpa kolom <code>exam_code</code> memakai kode dari judul (atau nama berkas) + tanggal ujian.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <%= f.label :exam_title, "Judul ujian", class: "block text-xs font-semibold text-gray-600 mb-1" %>
+          <%= f.text_field :exam_title, placeholder: "cth: Ujian CBT Blok 3.1 Genap 2025/2026", class: "#{cls} w-full" %>
+        </div>
+        <div>
+          <%= f.label :exam_date, "Tanggal ujian", class: "block text-xs font-semibold text-gray-600 mb-1" %>
+          <%= f.date_field :exam_date, class: "#{cls} w-full" %>
+        </div>
+      </div>
+    </div>
+
+    <%# Opsi khusus OSCE — tampil bila OSCE dipilih. %>
+    <div class="hidden group-has-[#importer-type-osce:checked]:block rounded-xl bg-emerald-50/60 ring-1 ring-emerald-100 p-4 space-y-3">
+      <p class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Opsi khusus OSCE</p>
+      <div>
+        <%= f.label :target_event_id, "Event tujuan", class: "block text-xs font-semibold text-gray-600 mb-1" %>
+        <%= f.select :target_event_id,
+              options_for_select(@osce_events.map { |e| [ "#{e.name} — #{e.academic_period.name}", e.id ] }),
+              { include_blank: "Otomatis: satu event OSCE per hari ujian" }, class: "#{cls} w-full" %>
+        <p class="text-[11px] text-emerald-700/80 mt-1">Otomatis = baris dikelompokkan per tanggal ujian (WIB) menjadi event "OSCE &lt;tanggal&gt;", seperti rekap Sesi OSCE jejak.pro. Pilih event bila seluruh berkas adalah satu ujian.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <%= f.label :study_program_id, "Program studi event baru", class: "block text-xs font-semibold text-gray-600 mb-1" %>
+        <%= f.select :study_program_id, options_from_collection_for_select(@study_programs, :id, :name),
+              { include_blank: "Semua prodi" }, class: "#{cls} w-full" %>
+      </div>
+      <div>
+        <%= f.label :academic_period_id, "Periode akademik event baru", class: "block text-xs font-semibold text-gray-600 mb-1" %>
+        <%= f.select :academic_period_id, options_from_collection_for_select(@academic_periods, :id, :name),
+              { include_blank: "Otomatis dari tanggal ujian" }, class: "#{cls} w-full" %>
+      </div>
+    </div>
+
+    <div class="rounded-xl bg-amber-50 ring-1 ring-amber-200 px-4 py-3 text-xs text-amber-800 space-y-0.5">
+      <p class="font-semibold">Catatan penting</p>
+      <ul class="list-disc pl-4 space-y-0.5">
+        <li>Baris yang sudah pernah diimpor dilewati otomatis — OSCE berdasarkan <code>$rowID</code>, CBT berdasarkan mahasiswa + <code>exam_code</code>. Mengunggah ulang berkas yang sama aman.</li>
+        <li>Email yang belum terdaftar sebagai <strong>mahasiswa</strong> dilewati dan dihitung di ringkasan, bukan dibuat otomatis.</li>
+        <li>Setiap unggahan bisa di-rollback dari Riwayat Impor. Untuk mengoreksi nilai: rollback, perbaiki berkas, lalu unggah ulang.</li>
+      </ul>
+    </div>
+
+    <div class="flex justify-end">
+      <%= f.submit "Mulai Impor", data: { turbo_submits_with: "Mengimpor… (berkas besar bisa beberapa puluh detik)" },
+            class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer disabled:opacity-60" %>
+    </div>
+  <% end %>
+
+  <%= render "column_reference" %>
+</div>
