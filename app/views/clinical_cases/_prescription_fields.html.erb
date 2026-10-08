@@ -16,7 +16,11 @@
     </div>
     <div class="sm:col-span-2">
       <label class="block text-[11px] font-semibold text-gray-500 mb-1">Sediaan</label>
-      <%= f.select :dosage_form, MedicationDefinition::DOSAGE_FORMS, { include_blank: "—" },
+      <%# data-abbr: singkatan resep (tab, syr, ...) yang dipakai pratinjau R/ —
+          sama dengan PrescriptionItem#dosage_form_abbr di sisi server. %>
+      <%= f.select :dosage_form,
+            options_for_select(MedicationDefinition::DOSAGE_FORMS.map { |form| [ form, form, { data: { abbr: MedicationDefinition.new(dosage_form: form).dosage_form_abbr } } ] }, f.object.dosage_form),
+            { include_blank: "—" },
             class: cell, data: { field: "dosage_form", action: "change->prescription#renderPreview" } %>
     </div>
     <div class="sm:col-span-2">

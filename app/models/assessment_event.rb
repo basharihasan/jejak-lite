@@ -33,6 +33,8 @@ class AssessmentEvent < ApplicationRecord
   has_many :assessment_instances, dependent: :destroy
   # Mata uji CBT / station OSCE beserta pemetaannya ke ranah kompetensi.
   has_many :assessment_dimensions, -> { ordered }, dependent: :destroy, inverse_of: :assessment_event
+  # Baris Assessment Matrix unit pembelajaran yang menunjuk event ini.
+  has_many :assessment_mappings, dependent: :destroy
 
   validates :name, presence: true
   validates :assessment_type, inclusion: { in: TYPES.keys }

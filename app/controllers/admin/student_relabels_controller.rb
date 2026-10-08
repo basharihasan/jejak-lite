@@ -91,7 +91,7 @@ class Admin::StudentRelabelsController < ApplicationController
   def prodi_bound_viewer?
     return @prodi_bound_viewer if defined?(@prodi_bound_viewer)
 
-    @prodi_bound_viewer = !current_user.has_role?("admin") && current_user.has_role?("kaprodi")
+    @prodi_bound_viewer = current_user.study_program_bound?
   end
 
   def own_study_program

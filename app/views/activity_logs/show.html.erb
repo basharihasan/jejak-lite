@@ -109,9 +109,11 @@
             <p class="text-xs text-gray-400 mt-1">Tempel/pindai kode ini untuk menautkan kegiatan lain ke pasien yang sama — tanpa menyimpan identitas pasien.</p>
           </div>
         </div>
-      <% else %>
+      <% elsif policy(@activity_log).update? %>
         <%= button_to "Buat Kode Pasien", generate_patient_code_activity_log_path(@activity_log), method: :post,
               class: "text-sm bg-indigo-50 text-indigo-700 font-medium px-4 py-2 rounded-xl hover:bg-indigo-100" %>
+      <% else %>
+        <p class="text-sm text-gray-400">Pemilik kegiatan belum membuat kode pasien.</p>
       <% end %>
     </div>
   <% end %>

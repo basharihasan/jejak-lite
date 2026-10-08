@@ -243,4 +243,12 @@ class ActivityLogsControllerTest < ActionDispatch::IntegrationTest
       title: "Kegiatan Bulan Ini", category: "non_klinis", activity_date: Date.current
     )
   end
+
+  test "pengajar yang membuka kegiatan klinis mahasiswa tidak ditawari tombol Buat Kode Pasien" do
+    sign_in users(:budi)
+    get activity_log_path(activity_logs(:kegiatan_siti))
+
+    assert_response :success
+    assert_select "form[action=?]", generate_patient_code_activity_log_path(activity_logs(:kegiatan_siti)), count: 0
+  end
 end

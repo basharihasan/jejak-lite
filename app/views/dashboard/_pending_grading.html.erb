@@ -1,0 +1,89 @@
+<%# Panel "Perlu Dinilai" — dua jenis tugas penilaian dalam satu daftar:
+      1. DOPS / Mini-CEX yang diminta mahasiswa atau masih draf, dengan saya
+         sebagai penilai (sama dengan daftar di halaman Workplace Assessment).
+      2. Percobaan asesmen (rubrik, CBD/Long Case) yang sudah dikumpulkan
+         mahasiswa dan ditugaskan kepada saya sebagai penguji.
+    Panel hilang sendiri bila keduanya kosong. %>
+<% total = @pending_workplace_evaluations.size + @pending_examiner_instances.size %>
+<% if total.positive? %>
+  <div id="perlu-dinilai" class="rounded-xl bg-white shadow-sm border border-amber-300 overflow-hidden scroll-mt-24" data-testid="pending-grading">
+    <div class="border-b border-amber-200 px-5 py-4 bg-amber-50 flex justify-between items-start gap-3">
+      <div>
+        <h3 class="text-sm font-bold text-amber-900 flex items-center gap-2">
+          <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          Perlu Dinilai
+        </h3>
+        <p class="mt-1 text-xs text-amber-800">DOPS, Mini-CEX, dan asesmen yang menunggu penilaian Anda. Klik <em>Isi Penilaian</em> untuk mengerjakannya.</p>
+      </div>
+      <div class="shrink-0 flex flex-col items-end gap-2">
+        <span class="inline-flex items-center rounded-full bg-amber-600 px-2.5 py-0.5 text-[11px] font-bold text-white"><%= total %> tugas</span>
+        <% if @pending_examiner_instances.any? %>
+          <%= link_to "Lembar penguji →", examiner_evaluations_path,
+                class: "inline-flex items-center rounded-lg border border-amber-300 bg-white px-3 py-1 text-xs font-semibold text-amber-800 shadow-sm hover:border-amber-500 transition" %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="max-h-[28rem] overflow-auto">
+      <table class="min-w-full text-sm">
+        <thead class="sticky top-0 z-10 bg-amber-50">
+          <tr class="border-b border-amber-200">
+            <th scope="col" class="px-4 sm:px-5 py-2.5 text-left text-[11px] font-bold uppercase tracking-wide text-amber-900">Tanggal</th>
+            <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wide text-amber-900">Penilaian</th>
+            <th scope="col" class="px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wide text-amber-900">Mahasiswa</th>
+            <th scope="col" class="px-4 sm:px-5 py-2.5"><span class="sr-only">Aksi</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-500/10">
+          <% @pending_workplace_evaluations.each do |evaluation| %>
+            <% is_dops = evaluation.is_a?(DopsEvaluation) %>
+            <tr class="align-top hover:bg-slate-500/5 transition-colors">
+              <td class="px-4 sm:px-5 py-3 whitespace-nowrap text-xs">
+                <p class="text-slate-500"><%= evaluation.requested? ? "Diminta" : "Draf" %></p>
+                <p class="font-semibold text-slate-900"><%= agenda_date(evaluation.evaluated_at) %></p>
+              </td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide <%= is_dops ? 'bg-blue-100 text-blue-800' : 'bg-violet-100 text-violet-800' %>"><%= is_dops ? "DOPS" : "Mini-CEX" %></span>
+                <p class="mt-0.5 font-bold text-slate-900"><%= truncate(is_dops ? evaluation.procedure_name : evaluation.case_description, length: 70) %></p>
+              </td>
+              <td class="px-4 py-3 text-xs">
+                <p class="font-semibold text-slate-800"><%= evaluation.student.full_name %></p>
+                <p class="text-slate-500"><%= evaluation.clinical_rotation&.station_name %></p>
+              </td>
+              <td class="px-4 sm:px-5 py-3 text-right whitespace-nowrap">
+                <%= link_to "Isi Penilaian →", is_dops ? edit_dops_evaluation_path(evaluation) : edit_mini_cex_evaluation_path(evaluation),
+                      class: "inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-500 transition" %>
+              </td>
+            </tr>
+          <% end %>
+
+          <% @pending_examiner_instances.each do |instance| %>
+            <% event = instance.assessment_event %>
+            <tr class="align-top hover:bg-slate-500/5 transition-colors">
+              <td class="px-4 sm:px-5 py-3 whitespace-nowrap text-xs">
+                <p class="text-slate-500">Dikumpulkan</p>
+                <p class="font-semibold text-slate-900"><%= instance.submitted_at ? agenda_date(instance.submitted_at.to_date) : "—" %></p>
+              </td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-800"><%= event.type_label %></span>
+                <p class="mt-0.5 font-bold text-slate-900"><%= event.name %><% if event.allow_multiple_attempts? %> <span class="font-medium text-emerald-700">(percobaan <%= instance.attempt_number %>)</span><% end %></p>
+              </td>
+              <td class="px-4 py-3 text-xs">
+                <p class="font-semibold text-slate-800"><%= instance.student.full_name %></p>
+                <% if instance.student.identifier_number.present? %><p class="text-slate-500"><%= instance.student.identifier_number %></p><% end %>
+              </td>
+              <td class="px-4 sm:px-5 py-3 text-right whitespace-nowrap">
+                <%= link_to "Isi Penilaian →", examiner_evaluation_path(instance),
+                      class: "inline-flex items-center justify-center rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-amber-500 transition" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="px-5 py-2.5 border-t border-amber-100 bg-amber-50">
+      <p class="text-[11px] text-amber-800 text-center">Panel ini hilang otomatis setelah semua penilaian dikirim.</p>
+    </div>
+  </div>
+<% end %>

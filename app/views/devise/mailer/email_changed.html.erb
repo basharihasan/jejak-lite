@@ -1,7 +1,9 @@
-<p>Hello <%= @email %>!</p>
+<p>Halo <%= @email %>,</p>
 
 <% if @resource.try(:unconfirmed_email?) %>
-  <p>We're contacting you to notify you that your email is being changed to <%= @resource.unconfirmed_email %>.</p>
+  <p>Kami memberi tahu bahwa email akun Anda sedang diubah menjadi <%= @resource.unconfirmed_email %>.</p>
 <% else %>
-  <p>We're contacting you to notify you that your email has been changed to <%= @resource.email %>.</p>
+  <p>Kami memberi tahu bahwa email akun Anda telah diubah menjadi <%= @resource.email %>.</p>
 <% end %>
+
+<p>Bila Anda tidak melakukan perubahan ini, segera hubungi admin program studi.</p>

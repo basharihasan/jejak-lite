@@ -1,0 +1,41 @@
+<%# Panel "Jadwal Evaluasi Bulan Ini" — jadwal DOPS/Mini-CEX dari prodi
+    (EvaluationSchedule) dengan saya sebagai penilai yang belum ditunaikan.
+    Lihat DashboardController#load_scheduled_evaluations untuk aturan "tunai". %>
+<% if @scheduled_evaluations.any? %>
+  <div id="jadwal-evaluasi" class="rounded-xl bg-white shadow-sm border border-violet-200 overflow-hidden scroll-mt-24" data-testid="scheduled-evaluations">
+    <div class="border-b border-violet-100 px-5 py-4 bg-violet-50 flex justify-between items-center gap-3">
+      <h3 class="text-sm font-bold text-violet-900 flex items-center gap-2">
+        <svg class="w-4 h-4 text-violet-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+        Jadwal Evaluasi Bulan Ini
+      </h3>
+      <span class="inline-flex items-center rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-bold text-violet-700"><%= @scheduled_evaluations.size %> tertunda</span>
+    </div>
+
+    <div class="divide-y divide-slate-500/10">
+      <% @scheduled_evaluations.each do |schedule| %>
+        <% is_dops = schedule.kind == "dops" %>
+        <% overdue = schedule.scheduled_at < Time.current.beginning_of_day %>
+        <div class="flex items-center gap-4 px-5 py-4">
+          <span class="h-10 w-10 shrink-0 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold"><%= schedule.student.full_name.first.upcase %></span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-slate-800 truncate"><%= schedule.student.full_name %></p>
+            <p class="text-xs text-slate-500 truncate">
+              <span class="<%= overdue ? 'font-semibold text-rose-600' : '' %>"><%= overdue ? "Lewat jadwal · " : "" %><%= agenda_date(schedule.scheduled_at.to_date) %></span>
+              <% if schedule.clinical_rotation %><span class="mx-1 text-slate-300">•</span><%= schedule.clinical_rotation.station_name %><% end %>
+              <% if schedule.topic.present? %><span class="mx-1 text-slate-300">•</span><%= schedule.topic %><% end %>
+            </p>
+          </div>
+          <span class="hidden sm:inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset <%= is_dops ? 'bg-blue-50 text-blue-700 ring-blue-600/20' : 'bg-violet-50 text-violet-700 ring-violet-600/20' %>"><%= schedule.kind_label %></span>
+          <%= link_to "Buat #{schedule.kind_label}", is_dops ? new_dops_evaluation_path : new_mini_cex_evaluation_path,
+                class: "shrink-0 rounded-xl px-3 py-1.5 text-xs font-bold text-white shadow-sm transition #{is_dops ? 'bg-blue-600 hover:bg-blue-500' : 'bg-violet-600 hover:bg-violet-500'}" %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="px-5 py-3 bg-slate-50 border-t border-slate-100">
+      <p class="text-[11px] text-slate-400">
+        Jadwal ini ditetapkan prodi. Jadwal hilang dari sini setelah Anda mengirim penilaian sejenis untuk mahasiswa tersebut.
+      </p>
+    </div>
+  </div>
+<% end %>

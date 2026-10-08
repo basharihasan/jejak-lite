@@ -47,6 +47,12 @@ class User < ApplicationRecord
     instructor? || has_role?("kaprodi")
   end
 
+  # Kaprodi (bukan admin) terikat ke prodi akunnya: prodi itu membatasi apa
+  # yang boleh ia lihat & ubah, jadi hanya admin yang boleh menggantinya.
+  def study_program_bound?
+    has_role?("kaprodi") && !has_role?("admin")
+  end
+
   # Kata sandi bawaan akun hasil impor CSV / reset admin — publik & lemah,
   # jadi halaman Pengaturan Akun tetap satu-satunya tempat menggantinya.
   DEFAULT_PASSWORD = "password123"

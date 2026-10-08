@@ -30,7 +30,8 @@ class WorkplaceAssessmentFromCaseTest < ActionDispatch::IntegrationTest
 
     sign_in users(:wati)
     get dashboard_path
-    assert_match "Evaluasi Draf Belum Dikirim", response.body
+    grading = Nokogiri::HTML5(response.body).at_css('[data-testid="pending-grading"]')
+    assert grading.at_css(%(a[href="#{edit_mini_cex_evaluation_path(evaluation)}"])), "Perlu Dinilai menaut ke lembar Mini-CEX"
     get mini_cex_evaluation_path(evaluation)
     assert_match "Isi Penilaian", response.body
 

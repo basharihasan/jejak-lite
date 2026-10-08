@@ -1,0 +1,71 @@
+<%# Kasus klinis yang tertahan di tangan mahasiswa — padanan
+    dashboard/_draft_case_alert jejak.pro, ditambah kasus yang diminta
+    diperbaiki preseptor (status needs_revision) karena bolanya juga kembali
+    ke mahasiswa. Keduanya hanya terlihat oleh pemiliknya; beranda adalah
+    halaman yang pasti dibuka, jadi angkanya diletakkan di sini.
+    Memakai @draft_cases/@draft_case_count & @revision_cases/@revision_case_count
+    dari DashboardController#load_student_dashboard. %>
+<% case_title = ->(kasus) { truncate(kasus.diagnosis.presence || kasus.chief_complaint, length: 80) } %>
+
+<% if @revision_case_count.to_i.positive? %>
+  <div class="rounded-2xl border border-rose-200 bg-rose-50 p-4 shadow-sm" data-testid="revision-case-alert">
+    <div class="flex items-start gap-3">
+      <svg class="h-5 w-5 shrink-0 text-rose-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+      </svg>
+      <div class="min-w-0 flex-1">
+        <h3 class="text-sm font-bold text-rose-900"><%= @revision_case_count %> kasus klinis diminta diperbaiki</h3>
+        <p class="mt-1 text-sm text-rose-800 leading-relaxed">
+          Preseptor sudah meninjau dan meminta perbaikan. Baca catatannya di kasus, perbaiki, lalu tekan
+          <strong>“Kirim untuk Verifikasi”</strong> lagi — kasus baru terhitung di logbook setelah diverifikasi.
+        </p>
+        <ul class="mt-3 space-y-1.5">
+          <% @revision_cases.each do |kasus| %>
+            <li class="text-xs">
+              <%= link_to case_title.call(kasus), clinical_case_path(kasus),
+                    class: "font-semibold text-rose-900 underline decoration-rose-300 underline-offset-2 hover:decoration-rose-600" %>
+              <span class="text-rose-700">
+                · diminta <%= kasus.verified_by ? "oleh #{kasus.verified_by.full_name} " : "" %><%= agenda_date(kasus.updated_at.to_date) %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+        <% if @revision_case_count > @revision_cases.size %>
+          <p class="mt-2 text-xs text-rose-700">dan <%= @revision_case_count - @revision_cases.size %> kasus lainnya.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @draft_case_count.to_i.positive? %>
+  <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm" data-testid="draft-case-alert">
+    <div class="flex items-start gap-3">
+      <svg class="h-5 w-5 shrink-0 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-2.032-1.5-2.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+      </svg>
+      <div class="min-w-0 flex-1">
+        <h3 class="text-sm font-bold text-amber-900"><%= @draft_case_count %> kasus klinis masih berupa draft</h3>
+        <p class="mt-1 text-sm text-amber-800 leading-relaxed">
+          Draft hanya tersimpan untuk Anda sendiri — preseptor belum menerimanya dan
+          <strong>belum bisa memverifikasinya</strong>. Buka kasusnya, lalu tekan “Kirim untuk Verifikasi”.
+        </p>
+        <ul class="mt-3 space-y-1.5">
+          <% @draft_cases.each do |kasus| %>
+            <li class="text-xs">
+              <%= link_to case_title.call(kasus), clinical_case_path(kasus),
+                    class: "font-semibold text-amber-900 underline decoration-amber-300 underline-offset-2 hover:decoration-amber-600" %>
+              <span class="text-amber-700">· dicatat <%= agenda_date(kasus.created_at.to_date) %></span>
+            </li>
+          <% end %>
+        </ul>
+        <% if @draft_case_count > @draft_cases.size %>
+          <p class="mt-2 text-xs text-amber-700">dan <%= @draft_case_count - @draft_cases.size %> draft lainnya.</p>
+        <% end %>
+        <div class="mt-3">
+          <%= link_to "Buka logbook kasus saya →", clinical_cases_path, class: "text-xs font-semibold text-amber-900 underline hover:text-amber-950" %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

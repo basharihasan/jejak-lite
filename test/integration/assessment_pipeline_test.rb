@@ -48,6 +48,37 @@ class AssessmentPipelineTest < ActionDispatch::IntegrationTest
     assert_equal 90, assessment_instances(:siti_cbt_1).reload.score.to_f
   end
 
+  test "baris bernilai tanpa email dilaporkan dengan nomor barisnya" do
+    sign_in @admin
+    event = assessment_events(:cbt_blok)
+    post import_create_admin_assessment_event_path(event), params: { csv_text: "email,score\n,75\n", mapping: { email: "email", score: "score" } }
+
+    assert_response :success
+    assert_match "(baris 2 tanpa email)", response.body
+  end
+
+  test "mendaftarkan percobaan tanpa memilih mahasiswa kembali dengan pesan, bukan 404" do
+    sign_in @admin
+    event = assessment_events(:cbt_blok)
+    assert_no_difference "AssessmentInstance.count" do
+      post add_instance_admin_assessment_event_path(event), params: { student_id: "" }
+    end
+    assert_redirected_to admin_assessment_event_path(event)
+    assert_equal "Pilih mahasiswa terlebih dahulu.", flash[:alert]
+  end
+
+  test "event yang dipetakan ke unit pembelajaran tetap bisa dihapus selama belum bernilai" do
+    sign_in @admin
+    event = assessment_events(:draft_event)
+    unit = LearningUnit.create!(name: "Blok Uji", study_program: study_programs(:sarjana_kedokteran))
+    unit.assessment_mappings.create!(assessment_event: event, weight: 50)
+
+    assert_difference [ "AssessmentEvent.count", "AssessmentMapping.count" ], -1 do
+      delete admin_assessment_event_path(event)
+    end
+    assert_redirected_to admin_assessment_events_path
+  end
+
   test "templat CSV berisi daftar mahasiswa event dan headernya langsung terpetakan" do
     sign_in @admin
     event = assessment_events(:cbt_blok)
@@ -295,10 +326,12 @@ class AssessmentPipelineTest < ActionDispatch::IntegrationTest
     assert Notification.where(recipient: users(:siti)).where("title LIKE ?", "%Jadwal Mini-CEX%").exists?
     assert Notification.where(recipient: users(:wati)).where("title LIKE ?", "%Jadwal Mini-CEX%").exists?
 
-    sign_in users(:wati)
-    get dashboard_path
-    assert_match "Jadwal DOPS / Mini-CEX Mendatang", response.body
-    assert_match "Nyeri dada", response.body
+    %i[wati siti].each do |user|
+      sign_in users(user)
+      get dashboard_path
+      agenda = Nokogiri::HTML5(response.body).at_css('[data-testid="upcoming-agenda"]')
+      assert_match "Mini-CEX — Nyeri dada", agenda.text, user
+    end
   end
 
   # ── Peta EPA ──

@@ -1,0 +1,25 @@
+<%# Judul seksi beranda pengajar — pemisah visual antar kelompok panel.
+    Locals: title (wajib), subtitle, tone ("amber" | "indigo" | "emerald" |
+    "slate"), link_label + link_path (tautan opsional di kanan). %>
+<%
+  bar_class = {
+    "amber"   => "bg-amber-400",
+    "indigo"  => "bg-indigo-500",
+    "emerald" => "bg-emerald-500",
+    "slate"   => "bg-slate-400"
+  }.fetch(local_assigns.fetch(:tone, "slate"), "bg-slate-400")
+%>
+<div class="flex items-end justify-between gap-3 pt-2">
+  <div class="flex items-stretch gap-3 min-w-0">
+    <span class="w-1 shrink-0 rounded-full <%= bar_class %>"></span>
+    <div class="min-w-0">
+      <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-tight"><%= title %></h2>
+      <% if local_assigns[:subtitle].present? %>
+        <p class="mt-0.5 text-xs text-slate-500"><%= subtitle %></p>
+      <% end %>
+    </div>
+  </div>
+  <% if local_assigns[:link_path].present? %>
+    <%= link_to link_label, link_path, class: "shrink-0 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline whitespace-nowrap" %>
+  <% end %>
+</div>

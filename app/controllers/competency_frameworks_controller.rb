@@ -46,8 +46,12 @@ class CompetencyFrameworksController < ApplicationController
 
   def destroy
     authorize @competency_framework
-    @competency_framework.destroy
-    redirect_to competency_frameworks_path, notice: "Peta kompetensi dihapus.", status: :see_other
+    if @competency_framework.destroy
+      redirect_to competency_frameworks_path, notice: "Peta kompetensi dihapus.", status: :see_other
+    else
+      redirect_to competency_framework_path(@competency_framework), status: :see_other,
+                  alert: "Peta kompetensi “#{@competency_framework.name}” tidak dapat dihapus: #{@competency_framework.errors.full_messages.to_sentence}."
+    end
   end
 
   private

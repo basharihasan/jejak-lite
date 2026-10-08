@@ -35,4 +35,16 @@ class CompetencyMilestonesControllerTest < ActionDispatch::IntegrationTest
       delete competency_item_competency_milestone_path(milestone.competency_item, milestone)
     end
   end
+
+  test "formulir target di halaman peta kompetensi mengirim parameter yang diterima controller" do
+    admin = users(:budi)
+    admin.roles << roles(:admin)
+    sign_in admin
+
+    get competency_framework_path(competency_frameworks(:skdi_ringkas))
+    assert_select "form[action=?]", competency_item_competency_milestones_path(competency_items(:domain_komunikasi)) do
+      assert_select "select[name=?]", "competency_milestone[academic_period_id]"
+      assert_select "input[name=?]", "competency_milestone[expected_score]"
+    end
+  end
 end

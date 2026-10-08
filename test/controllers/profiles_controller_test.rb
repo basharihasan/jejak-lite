@@ -132,4 +132,13 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_match tutorial_enrollments(:siti_kardio).block_name, response.body
     assert_match clinical_rotations(:ongoing_rotation_siti).station_name, response.body
   end
+
+  test "kaprodi tidak bisa mengganti prodi binaannya sendiri — itu batas hak aksesnya" do
+    sign_in users(:dedi)
+    get edit_profile_path
+    assert_select "select[name=?]", "user[study_program_id]", count: 0
+
+    patch profile_path, params: { user: { full_name: "Dedi Kaprodi", study_program_id: study_programs(:profesi_dokter).id } }
+    assert_equal study_programs(:sarjana_kedokteran), users(:dedi).reload.study_program
+  end
 end

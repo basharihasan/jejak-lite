@@ -7,6 +7,15 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
   end
 
+  # Hapus akun mandiri (bawaan Devise) dimatikan: logbook, kasus, dan nilai
+  # adalah rekam jejak pendidikan milik program studi, dan akun yang sudah
+  # punya riwayat (komentar verifikasi, notifikasi terkirim, templat formulir,
+  # dsb.) memang tidak bisa dihapus — foreign key menolaknya dengan galat 500.
+  def destroy
+    redirect_to edit_user_registration_path, alert: "Akun tidak dapat dihapus sendiri. Hubungi admin program studi Anda.",
+                                             status: :see_other
+  end
+
   private
 
   # role_code cuma dipakai assign_initial_role, bukan kolom User — kalau

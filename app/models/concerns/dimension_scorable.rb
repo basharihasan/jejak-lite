@@ -28,6 +28,7 @@ module DimensionScorable
     validates :video_recording_url, format: { with: VIDEO_URL_FORMAT }, allow_blank: true
     validate :required_dimensions_scored, unless: :requested?
     validate :scores_in_range
+    validate :rotation_belongs_to_student
 
     scope :draft, -> { where(status: "draft") }
     scope :requested, -> { where(status: "requested") }
@@ -94,6 +95,15 @@ module DimensionScorable
 
       errors.add(:scores, "#{self.class::DIMENSIONS[dim]} wajib diisi (tidak boleh N/A)")
     end
+  end
+
+  # Pilihan rotasi di form memuat rotasi semua mahasiswa; rotasi milik
+  # mahasiswa lain membuat nilai salah atribusi (dan hilang dari Analitik,
+  # yang menghitung per rotasi mahasiswa itu sendiri).
+  def rotation_belongs_to_student
+    return if clinical_rotation.nil? || student_id.nil? || clinical_rotation.user_id == student_id
+
+    errors.add(:clinical_rotation, "bukan rotasi milik mahasiswa yang dinilai")
   end
 
   def scores_in_range

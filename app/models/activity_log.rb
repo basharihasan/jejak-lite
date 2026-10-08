@@ -18,6 +18,8 @@ class ActivityLog < ApplicationRecord
 
   has_many :activity_log_competency_tags, dependent: :destroy
   has_many :competency_items, through: :activity_log_competency_tags
+  # Refleksi yang menautkan kegiatan ini tetap ada saat kegiatannya dihapus.
+  has_many :reflection_entries, dependent: :nullify
 
   has_many_attached :evidence_files
 

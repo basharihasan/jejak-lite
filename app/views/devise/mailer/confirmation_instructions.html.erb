@@ -1,5 +1,5 @@
-<p>Welcome <%= @email %>!</p>
+<p>Halo <%= @email %>,</p>
 
-<p>You can confirm your account email through the link below:</p>
+<p>Konfirmasi alamat email akun JEJAK Essential Anda melalui tautan di bawah ini:</p>
 
-<p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>
+<p><%= link_to "Konfirmasi akun saya", confirmation_url(@resource, confirmation_token: @token) %></p>

@@ -1,0 +1,50 @@
+<%# Panel "Mahasiswa Perlu Perhatian Khusus" — pengganti panel Tutor Note/EWS
+    jejak.pro. Sinyalnya dari data Essential (lihat
+    DashboardController#attention_reasons_for): rekomendasi remediasi saat
+    verifikasi kasus, rata-rata DOPS/Mini-CEX di bawah harapan, dan (bagi
+    preseptor) logbook kasus yang sepi selama rotasinya. %>
+<% if @attention_students.any? %>
+  <div id="perhatian-khusus" class="rounded-xl bg-rose-50 shadow-sm border border-rose-200 overflow-hidden scroll-mt-24" data-testid="attention-students">
+    <div class="border-b border-rose-200 px-5 py-4 bg-rose-100 flex justify-between items-start gap-3">
+      <div>
+        <h3 class="text-sm font-bold text-rose-900 flex items-center gap-2">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
+          </span>
+          Mahasiswa Perlu Perhatian Khusus
+        </h3>
+        <p class="mt-1 text-xs text-rose-800">
+          <%= @active_code == "kaprodi" ? "Mahasiswa bimbingan dan mahasiswa prodi Anda" : "Mahasiswa bimbingan Anda" %>
+          dengan rekomendasi remediasi, skor penilaian di bawah harapan, atau logbook kasus yang sepi.
+        </p>
+      </div>
+      <span class="shrink-0 inline-flex items-center rounded-full bg-rose-600 px-2.5 py-0.5 text-[11px] font-bold text-white"><%= @attention_students.size %> mahasiswa</span>
+    </div>
+    <div class="max-h-96 overflow-y-auto">
+      <ul class="divide-y divide-rose-500/20">
+        <% @attention_students.each do |entry| %>
+          <% student = entry[:user] %>
+          <li class="p-4">
+            <p class="text-sm font-bold text-slate-900"><%= link_to student.full_name, student_dashboard_path(student), class: "hover:text-rose-800 hover:underline" %></p>
+            <p class="text-xs text-rose-700 font-medium mt-0.5">
+              <%= student.identifier_number.presence || "—" %><% if student.study_program %> <span class="mx-1">•</span> <%= student.study_program.name %><% end %>
+            </p>
+            <ul class="mt-2 space-y-1">
+              <% entry[:reasons].each do |reason| %>
+                <li class="flex items-start gap-2 text-xs text-rose-900">
+                  <span class="mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white <%= reason[:severity] == :high ? 'bg-rose-600' : 'bg-amber-500' %>"><%= reason[:severity] == :high ? "Tinggi" : "Sedang" %></span>
+                  <span><span class="font-semibold"><%= reason[:label] %></span> — <%= reason[:detail] %></span>
+                </li>
+              <% end %>
+            </ul>
+            <div class="flex gap-2 mt-3">
+              <%= link_to "Dasbor Mahasiswa", student_dashboard_path(student), class: "flex-1 text-center rounded border border-rose-400 bg-rose-600 px-2 py-1.5 text-xs font-bold text-white hover:bg-rose-700 shadow-sm" %>
+              <%= link_to "DOPS & Mini-CEX", assessments_path(student_id: student.id), class: "flex-1 text-center rounded border border-rose-300 bg-white px-2 py-1.5 text-xs font-bold text-rose-800 hover:border-rose-500" %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>

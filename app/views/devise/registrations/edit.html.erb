@@ -1,42 +1,65 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
+<% content_for :title, "Pengaturan Akun" %>
+<%
+  cls = "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm"
+  lbl = "block text-sm font-semibold text-gray-700 mb-1"
+%>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
-
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+<div class="max-w-2xl space-y-5">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Pengaturan Akun</h1>
+    <p class="text-sm text-gray-500 mt-0.5">
+      Ganti email masuk atau kata sandi. Nama dan biodata diubah di <%= link_to "Sunting Profil", edit_profile_path, class: "text-indigo-600 font-medium" %>.
+    </p>
   </div>
 
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
+  <%# Dikirim tanpa Turbo, sama seperti formulir login/daftar: Devise
+      me-redirect setelah berhasil dan merender ulang (422) bila gagal. %>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name),
+        html: { method: :put, class: "bg-white rounded-2xl ring-1 ring-gray-200 p-6 space-y-5", data: { turbo: false } }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div>
+      <%= f.label :email, "Email", class: lbl %>
+      <%= f.email_field :email, autocomplete: "email", class: cls %>
+      <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+        <p class="text-xs text-amber-700 mt-1">Menunggu konfirmasi untuk <strong><%= resource.unconfirmed_email %></strong> — buka tautan di email tersebut.</p>
+      <% end %>
+    </div>
+
+    <div class="border-t border-gray-100 pt-5 space-y-4">
+      <div>
+        <h2 class="text-base font-semibold text-gray-900">Ganti Kata Sandi</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Kosongkan bila tidak ingin mengganti kata sandi.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :password, "Kata Sandi Baru", class: lbl %>
+          <%= f.password_field :password, autocomplete: "new-password", class: cls %>
+          <% if @minimum_password_length %>
+            <p class="text-xs text-gray-400 mt-1">Minimal <%= @minimum_password_length %> karakter.</p>
+          <% end %>
+        </div>
+        <div>
+          <%= f.label :password_confirmation, "Ulangi Kata Sandi Baru", class: lbl %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: cls %>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-100 pt-5">
+      <%= f.label :current_password, "Kata Sandi Saat Ini", class: lbl %>
+      <%= f.password_field :current_password, autocomplete: "current-password", required: true, class: cls %>
+      <p class="text-xs text-gray-400 mt-1">Wajib diisi untuk menyimpan perubahan apa pun di halaman ini.</p>
+    </div>
+
+    <div class="flex justify-end">
+      <%= f.submit "Simpan Perubahan",
+            class: "inline-flex items-center rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 text-sm font-semibold text-white cursor-pointer" %>
+    </div>
   <% end %>
 
-  <div class="field">
-    <p><%= f.label :password %> <i>(leave blank if you don't want to change it)</i></p>
-    <p><%= f.password_field :password, autocomplete: "new-password" %></p>
-    <% if @minimum_password_length %>
-      <p><em><%= @minimum_password_length %> characters minimum</em></p>
-    <% end %>
-  </div>
-
-  <div class="field">
-    <p><%= f.label :password_confirmation %></p>
-    <p><%= f.password_field :password_confirmation, autocomplete: "new-password" %></p>
-  </div>
-
-  <div class="field">
-    <p><%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i></p>
-    <p><%= f.password_field :current_password, autocomplete: "current-password" %></p>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Update" %>
-  </div>
-<% end %>
-
-<h3>Cancel my account</h3>
-
-<div>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }, method: :delete %></div>
-
-<%= link_to "Back", :back %>
+  <%# Tidak ada tombol "hapus akun": logbook, kasus, dan nilai adalah rekam
+      jejak pendidikan milik program studi (lihat
+      Users::RegistrationsController#destroy). %>
+  <p class="text-xs text-gray-400">Ingin menutup akun? Hubungi admin program studi Anda.</p>
+</div>

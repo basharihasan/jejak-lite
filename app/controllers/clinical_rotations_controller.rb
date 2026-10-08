@@ -43,8 +43,12 @@ class ClinicalRotationsController < ApplicationController
 
   def destroy
     authorize @clinical_rotation
-    @clinical_rotation.destroy
-    redirect_to clinical_rotations_path, notice: "Rotasi dihapus.", status: :see_other
+    if @clinical_rotation.destroy
+      redirect_to clinical_rotations_path, notice: "Rotasi dihapus.", status: :see_other
+    else
+      redirect_to clinical_rotations_path, status: :see_other,
+                  alert: "Rotasi #{@clinical_rotation.station_name} tidak dapat dihapus karena sudah punya penilaian DOPS/Mini-CEX."
+    end
   end
 
   private

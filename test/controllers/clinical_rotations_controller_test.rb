@@ -47,4 +47,16 @@ class ClinicalRotationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to clinical_rotations_path
   end
+
+  test "rotasi yang sudah punya penilaian DOPS/Mini-CEX tidak bisa dihapus" do
+    admin = users(:budi)
+    admin.roles << roles(:admin)
+    sign_in admin
+
+    assert_no_difference [ "ClinicalRotation.count", "DopsEvaluation.count" ] do
+      delete clinical_rotation_path(clinical_rotations(:ongoing_rotation_siti))
+    end
+    assert_redirected_to clinical_rotations_path
+    assert_match "DOPS/Mini-CEX", flash[:alert]
+  end
 end

@@ -74,4 +74,16 @@ class DopsEvaluationTest < ActiveSupport::TestCase
     assert_equal 7.0, averages["persiapan"]
     assert_equal 7.0, averages["persetujuan_tindakan"]
   end
+
+  test "rotasi harus milik mahasiswa yang dinilai" do
+    other = User.create!(full_name: "Mahasiswa Lain", email: "dops.lain@example.com", password: "password123", confirmed_at: Time.current)
+    dops = DopsEvaluation.new(
+      student: other, evaluator: users(:budi), clinical_rotation: clinical_rotations(:ongoing_rotation_siti),
+      procedure_name: "Jahit Luka", evaluated_at: Date.current,
+      scores: { "komunikasi" => 7, "profesionalisme" => 8, "penilaian_global" => 7 }
+    )
+
+    assert_not dops.valid?
+    assert_includes dops.errors[:clinical_rotation], "bukan rotasi milik mahasiswa yang dinilai"
+  end
 end

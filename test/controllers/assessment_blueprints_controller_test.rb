@@ -54,4 +54,30 @@ class AssessmentBlueprintsControllerTest < ActionDispatch::IntegrationTest
       }
     end
   end
+
+  test "formulir tambah mapping di halaman detail mengirim parameter yang diterima controller" do
+    admin = users(:budi)
+    admin.roles << roles(:admin)
+    sign_in admin
+    blueprint = AssessmentBlueprint.create!(name: "Blueprint Kosong")
+
+    get assessment_blueprint_path(blueprint)
+    assert_select "form[action=?]", assessment_blueprint_assessment_blueprint_mappings_path(blueprint) do
+      assert_select "select[name=?]", "assessment_blueprint_mapping[competency_item_id]"
+      assert_select "input[name=?]", "assessment_blueprint_mapping[weight]"
+    end
+  end
+
+  test "blueprint yang dipakai unit pembelajaran bisa dihapus; unitnya tetap ada" do
+    admin = users(:budi)
+    admin.roles << roles(:admin)
+    sign_in admin
+    blueprint = AssessmentBlueprint.create!(name: "Blueprint Lepas")
+    unit = LearningUnit.create!(name: "Blok Uji", study_program: study_programs(:sarjana_kedokteran), assessment_blueprint: blueprint)
+
+    assert_difference "AssessmentBlueprint.count", -1 do
+      delete assessment_blueprint_path(blueprint)
+    end
+    assert_nil unit.reload.assessment_blueprint_id
+  end
 end

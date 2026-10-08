@@ -1,25 +1,30 @@
-<h2>Change your password</h2>
+<div class="max-w-md mx-auto bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-8">
+  <h2 class="text-xl font-bold mb-6">Atur Kata Sandi Baru</h2>
 
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, data: { turbo: false } }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
-  <%= f.hidden_field :reset_password_token %>
+  <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: "space-y-4", data: { turbo: false } }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+    <%= f.hidden_field :reset_password_token %>
 
-  <div class="field">
-    <p><%= f.label :password, "New password" %></p>
-    <% if @minimum_password_length %>
-      <p><em>(<%= @minimum_password_length %> characters minimum)</em></p>
-    <% end %>
-    <p><%= f.password_field :password, autofocus: true, autocomplete: "new-password" %></p>
+    <div>
+      <%= f.label :password, "Kata Sandi Baru", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <% if @minimum_password_length %>
+        <p class="text-xs text-gray-400 mb-1">(minimal <%= @minimum_password_length %> karakter)</p>
+      <% end %>
+      <%= f.password_field :password, autofocus: true, autocomplete: "new-password",
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <div>
+      <%= f.label :password_confirmation, "Ulangi Kata Sandi Baru", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password",
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+    </div>
+
+    <%= f.submit "Simpan Kata Sandi",
+          class: "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl text-sm cursor-pointer" %>
+  <% end %>
+
+  <div class="mt-6 text-sm text-gray-500">
+    <%= render "devise/shared/links" %>
   </div>
-
-  <div class="field">
-    <p><%= f.label :password_confirmation, "Confirm new password" %></p>
-    <p><%= f.password_field :password_confirmation, autocomplete: "new-password" %></p>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Change my password" %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+</div>

@@ -59,7 +59,7 @@
         <% end %>
 
         <% if policy(CompetencyMilestone.new).create? && @academic_periods.any? %>
-          <%= form_with url: competency_item_competency_milestones_path(domain), class: "mt-2 flex flex-wrap gap-2 items-center" do |f| %>
+          <%= form_with url: competency_item_competency_milestones_path(domain), scope: :competency_milestone, class: "mt-2 flex flex-wrap gap-2 items-center" do |f| %>
             <%= f.select :academic_period_id, @academic_periods.map { |p| [ p.name, p.id ] }, { include_blank: "Target periode…" },
                   class: "rounded-lg border-0 py-1.5 px-2 text-xs ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
             <%= f.number_field :expected_score, min: 1, max: 9, placeholder: "Skor",

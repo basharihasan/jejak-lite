@@ -70,7 +70,9 @@ class Admin::AssessmentEventsController < ApplicationController
   # Daftarkan percobaan (baru) untuk seorang mahasiswa — juga dipakai untuk
   # ujian ulang pada event berpercobaan-ulang.
   def add_instance
-    student = User.find(params[:student_id])
+    student = User.find_by(id: params[:student_id])
+    return redirect_to(admin_assessment_event_path(@event), alert: "Pilih mahasiswa terlebih dahulu.") if student.nil?
+
     attempt = @event.allow_multiple_attempts? ? AssessmentInstance.next_attempt_number(@event, student) : 1
     instance = AssessmentInstance.find_or_initialize_by(assessment_event: @event, student: student, attempt_number: attempt)
     if instance.new_record?

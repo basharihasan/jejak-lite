@@ -6,6 +6,7 @@
 class AssessmentBlueprint < ApplicationRecord
   has_many :assessment_blueprint_mappings, dependent: :destroy
   has_many :competency_items, through: :assessment_blueprint_mappings
+  has_many :learning_units, dependent: :nullify
 
   validates :name, presence: true
   validate :mapping_weights_sum_to_100, if: -> { assessment_blueprint_mappings.any? }

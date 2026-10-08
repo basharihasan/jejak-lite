@@ -40,8 +40,12 @@ class AcademicPeriodsController < ApplicationController
 
   def destroy
     authorize @academic_period
-    @academic_period.destroy
-    redirect_to academic_periods_path, notice: "Periode akademik dihapus.", status: :see_other
+    if @academic_period.destroy
+      redirect_to academic_periods_path, notice: "Periode akademik dihapus.", status: :see_other
+    else
+      redirect_to academic_periods_path, status: :see_other,
+                  alert: "Periode “#{@academic_period.name}” tidak dapat dihapus karena masih dipakai #{@academic_period.usage_summary}."
+    end
   end
 
   private

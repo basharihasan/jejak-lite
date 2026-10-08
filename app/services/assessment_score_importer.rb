@@ -70,7 +70,7 @@ class AssessmentScoreImporter
 
       student = User.find_by(email: email)
       if student.nil?
-        result.unmatched << email.presence || "(baris #{line} tanpa email)"
+        result.unmatched << (email.presence || "(baris #{line} tanpa email)")
         next
       end
 

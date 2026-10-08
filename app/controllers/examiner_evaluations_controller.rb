@@ -62,12 +62,22 @@ class ExaminerEvaluationsController < ApplicationController
     @template.assessment_form_fields.any?(&:scorable?)
   end
 
+  # Mengisi ulang rubrik menggantikan lembar sebelumnya, bukan menumpuk lembar
+  # yatim: satu percobaan = satu lembar rubrik yang berlaku. Lembar lama
+  # dibuang DI DALAM transaksi — bila lembar baru gagal validasi, lembar lama
+  # (dasar nilai yang sudah keluar) tetap utuh.
   def score_with_rubric
+    previous = @instance.assessment_form_submission
     submission = build_submission
 
     AssessmentInstance.transaction do
+      previous&.destroy!
       submission.save!
       percentage = submission.score_percentage
+      if percentage.nil?
+        submission.errors.add(:base, "Isi minimal satu pertanyaan bernilai pada rubrik.")
+        raise ActiveRecord::RecordInvalid, submission
+      end
       score = (percentage / 100.0 * @instance.max_score).round(2)
       @instance.assessment_form_submission = submission
       @instance.score!(score: score, examiner: current_user, source: "rubric",
@@ -93,10 +103,7 @@ class ExaminerEvaluationsController < ApplicationController
     redirect_to examiner_evaluations_path, notice: "Nilai #{@instance.student.full_name} tersimpan."
   end
 
-  # Mengisi ulang rubrik menggantikan lembar sebelumnya, bukan menumpuk lembar
-  # yatim: satu percobaan = satu lembar rubrik yang berlaku.
   def build_submission
-    @instance.assessment_form_submission&.destroy
     submitted = params[:answers] || {}
     submission = @template.assessment_form_submissions.build(
       respondent: current_user, subject_user: @instance.student, submitted_at: Time.current,

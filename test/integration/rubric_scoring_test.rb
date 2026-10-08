@@ -96,6 +96,32 @@ class RubricScoringTest < ActionDispatch::IntegrationTest
     assert_nil AssessmentFormSubmission.find_by(id: first_submission.id)
   end
 
+  test "isian ulang yang gagal validasi tidak menghapus lembar rubrik lama" do
+    sign_in users(:budi)
+    patch examiner_evaluation_path(@instance), params: { answers: { @anamnesis.id.to_s => "4", @penalaran.id.to_s => "8" } }
+    first_submission = @instance.reload.assessment_form_submission
+
+    patch examiner_evaluation_path(@instance), params: { answers: { @anamnesis.id.to_s => "5" } }
+    assert_response :unprocessable_entity
+
+    @instance.reload
+    assert_equal first_submission, @instance.assessment_form_submission
+    assert_equal 80.0, @instance.score.to_f
+  end
+
+  test "rubrik bernilai yang semua pertanyaan skornya opsional lalu dikosongkan ditolak, bukan galat" do
+    @anamnesis.update!(required: false)
+    @penalaran.update!(required: false)
+    sign_in users(:budi)
+
+    assert_no_difference "AssessmentFormSubmission.count" do
+      patch examiner_evaluation_path(@instance), params: { answers: { @catatan.id.to_s => "Hanya catatan." } }
+    end
+    assert_response :unprocessable_entity
+    assert_match "Isi minimal satu pertanyaan bernilai", response.body
+    assert_nil @instance.reload.score
+  end
+
   test "event tanpa rubrik tetap dinilai manual" do
     @event.update!(assessment_form_template: nil)
     sign_in users(:budi)

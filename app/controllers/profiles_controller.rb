@@ -23,10 +23,14 @@ class ProfilesController < ApplicationController
   private
 
   def profile_params
-    params.require(:user).permit(
+    permitted = params.require(:user).permit(
       :full_name, :avatar, :study_program_id,
       :identifier_number, :phone, :gender, :birth_place, :birth_date, :address,
       :cohort_year, :work_unit, :position, :profession_category, :specialization
     )
+    # Prodi kaprodi adalah batas hak aksesnya (Analitik prodi, Relabel Prodi)
+    # — hanya admin yang boleh mengubahnya, lewat Konfigurasi → Pengguna.
+    permitted.delete(:study_program_id) if current_user.study_program_bound?
+    permitted
   end
 end

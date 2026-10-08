@@ -1,6 +1,8 @@
 require "test_helper"
 
 class RegistrationsControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
   test "daftar akun baru memberi peran sesuai role_code, tanpa menyentuh kolom User" do
     assert_difference "User.count", 1 do
       post user_registration_path, params: {
@@ -51,6 +53,25 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     user = User.order(:id).last
     assert_equal "Dedi Baru", user.full_name
     assert user.has_role?("mahasiswa")
+  end
+
+  test "Pengaturan Akun tampil berbahasa Indonesia tanpa tombol hapus akun" do
+    sign_in users(:siti)
+    get edit_user_registration_path
+
+    assert_response :success
+    assert_select "h1", "Pengaturan Akun"
+    assert_select "input[name=?]", "user[current_password]"
+    assert_select "form[action=?] input[name=_method][value=delete]", user_registration_path, count: 0
+  end
+
+  test "hapus akun mandiri ditolak dengan pesan, bukan galat foreign key" do
+    sign_in users(:budi)
+    assert_no_difference "User.count" do
+      delete user_registration_path
+    end
+    assert_redirected_to edit_user_registration_path
+    assert_match "Hubungi admin", flash[:alert]
   end
 end
 

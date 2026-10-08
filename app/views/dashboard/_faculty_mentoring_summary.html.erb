@@ -1,0 +1,56 @@
+<%# Kartu samping "Ringkasan Bimbingan" — berapa mahasiswa yang ditautkan ke
+    pengajar ini menurut perannya, plus rekam jejak umpan balik naratif
+    (DOPS, Mini-CEX, lembar penguji). %>
+<%
+  role_rows = [
+    [ "Preseptor Klinis", @preceptor_rotations.map(&:user_id).uniq.size, "bg-emerald-500", clinical_rotations_path ],
+    [ "Tutor Blok", @tutor_enrollments.map(&:user_id).uniq.size, "bg-sky-500", tutorial_enrollments_path ],
+    [ "Pembimbing Tugas Akhir", @supervised_projects.map(&:student_id).uniq.size, "bg-amber-500", final_projects_path ]
+  ].select { |_, count, _, _| count.positive? }
+%>
+<div class="rounded-xl bg-white shadow-sm border border-slate-200 overflow-hidden" data-testid="mentoring-summary">
+  <div class="border-b border-slate-100 px-5 py-4 bg-slate-50">
+    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+      <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+      Ringkasan Bimbingan
+    </h3>
+    <p class="mt-1 text-xs text-slate-500">Mahasiswa yang ditautkan ke Anda, menurut peran.</p>
+  </div>
+
+  <div class="px-5 py-4">
+    <div class="flex items-baseline gap-2">
+      <span class="text-3xl font-black text-slate-900 tabular-nums"><%= @mentee_ids.size %></span>
+      <span class="text-xs text-slate-500">mahasiswa aktif dalam bimbingan Anda</span>
+    </div>
+    <% if role_rows.any? %>
+      <ul class="mt-3 space-y-2">
+        <% role_rows.each do |label, count, dot, path| %>
+          <li class="flex items-center justify-between gap-3 text-sm">
+            <span class="flex items-center gap-2 min-w-0 text-slate-700">
+              <span class="h-2 w-2 shrink-0 rounded-full <%= dot %>"></span>
+              <%= link_to label, path, class: "truncate hover:text-indigo-600 hover:underline" %>
+            </span>
+            <span class="shrink-0 font-bold tabular-nums text-slate-900"><%= count %></span>
+          </li>
+        <% end %>
+      </ul>
+      <p class="mt-2 text-[11px] text-slate-400">Satu mahasiswa bisa terhitung di lebih dari satu peran.</p>
+    <% else %>
+      <p class="mt-3 text-xs text-slate-500">Belum ada mahasiswa yang ditautkan ke Anda sebagai preseptor, tutor, atau pembimbing.</p>
+    <% end %>
+  </div>
+
+  <div class="border-t border-slate-100 px-5 py-4 bg-slate-50">
+    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rekam Umpan Balik Anda</p>
+    <dl class="mt-2 grid grid-cols-2 gap-3">
+      <div>
+        <dd class="text-xl font-black text-indigo-700 tabular-nums"><%= @feedback_count %></dd>
+        <dt class="text-[11px] text-slate-500 leading-snug">umpan balik naratif diberikan</dt>
+      </div>
+      <div>
+        <dd class="text-xl font-black text-indigo-700 tabular-nums"><%= @feedback_avg_words %></dd>
+        <dt class="text-[11px] text-slate-500 leading-snug">rata-rata kata per umpan balik</dt>
+      </div>
+    </dl>
+  </div>
+</div>

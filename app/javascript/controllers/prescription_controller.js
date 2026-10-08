@@ -50,7 +50,8 @@ export default class extends Controller {
       const name = value("medication_name")
       if (!name) return
 
-      const head = ["R/", name, value("dosage_form_abbr"), value("strength"), value("quantity") && `No. ${value("quantity")}`]
+      const dosageForm = row.querySelector("[data-field='dosage_form']")?.selectedOptions?.[0]?.dataset.abbr || ""
+      const head = ["R/", name, dosageForm, value("strength"), value("quantity") && `No. ${value("quantity")}`]
         .filter(Boolean)
         .join(" ")
       lines.push(head)

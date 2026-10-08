@@ -67,6 +67,8 @@ class ClinicalCase < ApplicationRecord
   has_many :assessment_instances, dependent: :nullify # CBD / Long Case yang berangkat dari kasus ini
   has_many :dops_evaluations, dependent: :nullify      # DOPS / Mini-CEX yang diinisiasi dari kasus ini
   has_many :mini_cex_evaluations, dependent: :nullify
+  has_many :entrustment_decisions, dependent: :nullify
+  has_many :reflection_entries, dependent: :nullify    # refleksi tetap ada saat draf kasusnya dihapus
 
   before_save :sync_diagnosis_definition
 

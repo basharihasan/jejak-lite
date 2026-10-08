@@ -8,6 +8,11 @@ class ClinicalRotation < ApplicationRecord
   belongs_to :academic_period
   belongs_to :preceptor, class_name: "User", optional: true
   has_many :activity_logs, dependent: :nullify
+  # DOPS/Mini-CEX adalah nilai mahasiswa yang wajib bertaut ke rotasinya —
+  # rotasi yang sudah dinilai tidak bisa dihapus.
+  has_many :dops_evaluations, dependent: :restrict_with_error
+  has_many :mini_cex_evaluations, dependent: :restrict_with_error
+  has_many :evaluation_schedules, dependent: :nullify
 
   validates :station_name, :start_date, :end_date, presence: true
   validate :end_date_after_start_date

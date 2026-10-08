@@ -1,0 +1,56 @@
+<%# Logbook yang menunggu verifikasi pengajar — kasus klinis (dengan daftar
+    yang terlama menunggu) dan kegiatan. Angkanya = isi tab "Perlu
+    Diverifikasi" di Logbook Kasus / Logbook Kegiatan, jadi tombolnya selalu
+    mendarat di daftar yang sama. Tidak dirender bila nol — tile ringkasan
+    sudah menunjukkan "✓ Beres". %>
+<% if @can_verify && @pending_case_count.to_i.positive? %>
+  <div id="verifikasi-kasus" class="rounded-xl border border-orange-300 bg-orange-50 shadow-sm overflow-hidden scroll-mt-24" data-testid="pending-case-verifications">
+    <div class="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="h-12 w-12 shrink-0 rounded-2xl bg-orange-500 text-white flex items-center justify-center shadow-sm">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0 1 18 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3 1.5 1.5 3-3.75"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-sm font-bold text-orange-900 flex flex-wrap items-center gap-2">
+          <span><%= @pending_case_count %> kasus klinis menunggu verifikasi</span>
+          <span class="inline-flex items-center rounded-full bg-orange-600 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white">Perlu Verifikasi</span>
+        </h3>
+        <p class="mt-1 text-xs text-orange-800">
+          Kasus baru dihitung ke logbook mahasiswa setelah diverifikasi, diminta perbaikan, atau ditolak. Yang paling lama menunggu ada di atas.
+        </p>
+      </div>
+      <%= link_to clinical_cases_path(scope: "to_verify"),
+            class: "shrink-0 inline-flex items-center justify-center gap-1.5 rounded-lg bg-orange-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-orange-500 transition" do %>
+        Verifikasi Sekarang
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+      <% end %>
+    </div>
+    <ul class="border-t border-orange-200 bg-white divide-y divide-slate-500/10">
+      <% @pending_cases.each do |kasus| %>
+        <li>
+          <%= link_to clinical_case_path(kasus), class: "flex items-center gap-3 px-5 py-3 hover:bg-slate-500/5 transition-colors" do %>
+            <span class="h-8 w-8 shrink-0 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center text-xs font-bold"><%= kasus.user.full_name.first.upcase %></span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-semibold text-slate-800 truncate"><%= truncate(kasus.diagnosis.presence || kasus.chief_complaint, length: 70) %></span>
+              <span class="block text-xs text-slate-500 truncate"><%= kasus.user.full_name %> · kasus <%= agenda_date(kasus.case_date) %></span>
+            </span>
+            <span class="shrink-0 text-[11px] font-semibold text-orange-700">menunggu <%= time_ago_in_words(kasus.updated_at) %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<% if @can_verify && @pending_activity_count.to_i.positive? %>
+  <div class="rounded-xl border border-teal-200 bg-teal-50 shadow-sm p-5 flex flex-col sm:flex-row sm:items-center gap-4" data-testid="pending-activity-verifications">
+    <div class="h-10 w-10 shrink-0 rounded-2xl bg-teal-500 text-white flex items-center justify-center shadow-sm">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-3.75 1.5 1.5 3-3"/></svg>
+    </div>
+    <div class="flex-1 min-w-0">
+      <h3 class="text-sm font-bold text-teal-900"><%= @pending_activity_count %> kegiatan logbook belum divalidasi</h3>
+      <p class="mt-1 text-xs text-teal-800">Kuliah, tutorial, jaga, dan kegiatan lain yang dicatat mahasiswa menunggu validasi pengajar.</p>
+    </div>
+    <%= link_to "Validasi Kegiatan →", activity_logs_path(scope: "to_verify"),
+          class: "shrink-0 inline-flex items-center justify-center rounded-lg border border-teal-300 bg-white px-4 py-2 text-xs font-bold text-teal-800 shadow-sm hover:border-teal-500 transition" %>
+  </div>
+<% end %>

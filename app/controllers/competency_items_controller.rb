@@ -21,8 +21,12 @@ class CompetencyItemsController < ApplicationController
 
   def destroy
     authorize @competency_item
-    @competency_item.destroy
-    redirect_to competency_framework_path(@competency_framework), notice: "Simpul kompetensi dihapus.", status: :see_other
+    if @competency_item.destroy
+      redirect_to competency_framework_path(@competency_framework), notice: "Simpul kompetensi dihapus.", status: :see_other
+    else
+      redirect_to competency_framework_path(@competency_framework), status: :see_other,
+                  alert: "“#{@competency_item.title}” tidak dapat dihapus: #{@competency_item.errors.full_messages.to_sentence}."
+    end
   end
 
   private

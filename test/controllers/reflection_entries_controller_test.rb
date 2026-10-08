@@ -41,4 +41,29 @@ class ReflectionEntriesControllerTest < ActionDispatch::IntegrationTest
     assert_equal activity_logs(:kegiatan_siti), entry.activity_log
     assert_redirected_to reflection_entry_path(entry)
   end
+
+  test "tidak bisa menautkan kegiatan atau kasus milik mahasiswa lain" do
+    assert_no_difference "ReflectionEntry.count" do
+      post reflection_entries_path, params: {
+        reflection_entry: { entry_date: Date.current, content: "Coba tautan orang lain.", activity_log_id: activity_logs(:jaga_igd).id }
+      }
+    end
+    assert_response :unprocessable_entity
+    assert_match "bukan kegiatan milik Anda", response.body
+  end
+
+  test "kegiatan dan draf kasus yang ditautkan refleksi tetap bisa dihapus; refleksinya tetap ada" do
+    entry = ReflectionEntry.create!(user: users(:siti), entry_date: Date.current, content: "Tertaut.",
+                                    activity_log: activity_logs(:kegiatan_siti), clinical_case: clinical_cases(:draft_case_siti))
+
+    assert_difference "ActivityLog.count", -1 do
+      delete activity_log_path(activity_logs(:kegiatan_siti))
+    end
+    assert_difference "ClinicalCase.count", -1 do
+      delete clinical_case_path(clinical_cases(:draft_case_siti))
+    end
+    entry.reload
+    assert_nil entry.activity_log_id
+    assert_nil entry.clinical_case_id
+  end
 end

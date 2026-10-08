@@ -125,8 +125,14 @@
             <%= f.text_field :specialization, placeholder: "Kardiologi", class: cls %>
           </div>
           <div>
-            <%= f.label :study_program_id, "Program Studi Binaan (opsional)", class: lbl %>
-            <%= f.collection_select :study_program_id, StudyProgram.ordered, :id, :name, { include_blank: "—" }, class: cls %>
+            <% if @user.study_program_bound? %>
+              <label class="<%= lbl %>">Program Studi Binaan</label>
+              <p class="rounded-xl bg-gray-50 py-2.5 px-3.5 text-sm text-gray-500 ring-1 ring-inset ring-gray-200"><%= @user.study_program&.name || "Belum diatur" %></p>
+              <p class="text-[11px] text-gray-400 mt-1">Menentukan cakupan akses Kaprodi — hanya admin yang dapat mengubahnya.</p>
+            <% else %>
+              <%= f.label :study_program_id, "Program Studi Binaan (opsional)", class: lbl %>
+              <%= f.collection_select :study_program_id, StudyProgram.ordered, :id, :name, { include_blank: "—" }, class: cls %>
+            <% end %>
           </div>
         </div>
       </div>

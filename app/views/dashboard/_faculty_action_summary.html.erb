@@ -1,0 +1,95 @@
+<%# Strip "Ringkasan Hari Ini" beranda pengajar — "apa yang menunggu saya
+    hari ini?". Padanan _faculty_action_summary jejak.pro, hanya untuk
+    antrean yang ada di Essential. Setiap tile mengarah ke panel/halaman tempat
+    tugasnya dikerjakan; warna hanya "menyala" bila ada yang harus dikerjakan.
+    Angka dari DashboardController#load_faculty_dashboard (@action_counts). %>
+<%
+  counts = @action_counts
+  tiles = []
+
+  if @can_verify
+    tiles << { label: "Kasus Perlu Diverifikasi", hint: "logbook kasus klinis mahasiswa",
+               count: counts[:cases], path: clinical_cases_path(scope: "to_verify"), tone: "orange",
+               icon: "M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0 1 18 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3 1.5 1.5 3-3.75" }
+    tiles << { label: "Kegiatan Perlu Divalidasi", hint: "logbook kegiatan mahasiswa",
+               count: counts[:activities], path: activity_logs_path(scope: "to_verify"), tone: "teal",
+               icon: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-3.75 1.5 1.5 3-3" }
+  end
+
+  tiles << { label: "Perlu Dinilai", hint: "DOPS, Mini-CEX, lembar penguji",
+             count: counts[:grading], path: "#perlu-dinilai", tone: "amber",
+             icon: "M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" }
+  tiles << { label: "Mahasiswa Perlu Perhatian",
+             hint: (@active_code == "kaprodi" ? "remediasi / skor rendah di prodi" : "remediasi, skor rendah, logbook sepi"),
+             count: counts[:attention], path: "#perhatian-khusus", tone: "rose",
+             icon: "M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" }
+
+  if @show_schedule_tile
+    tiles << { label: "Jadwal Evaluasi Prodi", hint: "DOPS / Mini-CEX bulan ini",
+               count: counts[:schedules], path: "#jadwal-evaluasi", tone: "violet",
+               icon: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" }
+  end
+
+  tiles << { label: "Agenda 7 Hari", hint: "kegiatan & jadwal Anda",
+             count: @upcoming_agenda.to_a.size, path: "#agenda-mendatang", tone: "indigo", neutral: true,
+             icon: "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" }
+
+  # Kelas ditulis literal per tone agar terbaca pemindai Tailwind & retrofit gelap.
+  tone_classes = {
+    "orange" => { card: "border-orange-200 bg-orange-50 text-orange-700", icon: "bg-orange-500" },
+    "teal"   => { card: "border-teal-200 bg-teal-50 text-teal-700",       icon: "bg-teal-500" },
+    "amber"  => { card: "border-amber-200 bg-amber-50 text-amber-700",    icon: "bg-amber-500" },
+    "rose"   => { card: "border-rose-200 bg-rose-50 text-rose-700",       icon: "bg-rose-500" },
+    "violet" => { card: "border-violet-200 bg-violet-50 text-violet-700", icon: "bg-violet-500" },
+    "indigo" => { card: "border-indigo-200 bg-indigo-50 text-indigo-700", icon: "bg-indigo-500" }
+  }
+  neutral_classes = { card: "border-slate-200 bg-white text-slate-500", icon: "bg-slate-300" }
+  cols_class = { 3 => "lg:grid-cols-3", 4 => "lg:grid-cols-4", 5 => "lg:grid-cols-5", 6 => "lg:grid-cols-6" }
+                 .fetch(tiles.size, "lg:grid-cols-4")
+%>
+
+<section class="rounded-2xl bg-white shadow-sm border border-slate-200 p-5" aria-labelledby="ringkasan-hari-ini" data-testid="faculty-action-summary">
+  <div class="mb-4">
+    <h2 id="ringkasan-hari-ini" class="text-sm font-bold text-slate-700 uppercase tracking-widest">Ringkasan Hari Ini</h2>
+    <% if @action_total.zero? %>
+      <p class="mt-0.5 text-sm text-slate-600">Tidak ada yang menunggu Anda saat ini. Selamat bekerja! 🎉</p>
+    <% else %>
+      <p class="mt-0.5 text-sm text-slate-600">
+        Ada <strong class="text-slate-900"><%= @action_total %> hal</strong> yang perlu Anda tindak lanjuti — klik kartu untuk langsung menuju panelnya.
+      </p>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 <%= cols_class %> gap-3">
+    <% tiles.each do |tile| %>
+      <%
+        active    = tile[:count].to_i.positive?
+        palette   = active ? tone_classes.fetch(tile[:tone]) : neutral_classes
+        clickable = active || tile[:neutral]
+      %>
+      <% body = capture do %>
+        <div class="flex items-center gap-3">
+          <span class="h-9 w-9 shrink-0 rounded-xl text-white flex items-center justify-center <%= palette[:icon] %>">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="<%= tile[:icon] %>"/></svg>
+          </span>
+          <span class="text-3xl font-black tabular-nums leading-none <%= active ? '' : 'text-slate-400' %>"><%= tile[:count] %></span>
+        </div>
+        <p class="mt-3 text-xs font-bold leading-snug <%= active ? '' : 'text-slate-600' %>"><%= tile[:label] %></p>
+        <p class="mt-0.5 text-[11px] leading-snug <%= active ? 'opacity-80' : 'text-slate-400' %>"><%= tile[:hint] %></p>
+        <% if clickable %>
+          <p class="mt-2 text-[11px] font-semibold underline-offset-2 group-hover:underline">Lihat →</p>
+        <% else %>
+          <p class="mt-2 text-[11px] font-semibold text-emerald-600">✓ Beres</p>
+        <% end %>
+      <% end %>
+
+      <% if clickable %>
+        <%= link_to tile[:path], class: "group block rounded-xl border p-4 transition hover:shadow-md hover:-translate-y-0.5 #{palette[:card]}" do %>
+          <%= body %>
+        <% end %>
+      <% else %>
+        <div class="rounded-xl border p-4 <%= palette[:card] %>"><%= body %></div>
+      <% end %>
+    <% end %>
+  </div>
+</section>

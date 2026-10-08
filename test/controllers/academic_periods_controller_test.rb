@@ -18,4 +18,30 @@ class AcademicPeriodsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match academic_periods(:current_period).name, response.body
   end
+
+  test "periode yang masih dipakai tidak bisa dihapus dan rotasinya tidak ikut terhapus" do
+    admin = users(:budi)
+    admin.roles << roles(:admin)
+    sign_in admin
+    period = academic_periods(:current_period)
+
+    assert_no_difference [ "AcademicPeriod.count", "ClinicalRotation.count" ] do
+      delete academic_period_path(period)
+    end
+    assert_redirected_to academic_periods_path
+    assert_match "tidak dapat dihapus", flash[:alert]
+    assert_match "rotasi klinis", flash[:alert]
+  end
+
+  test "periode yang belum dipakai bisa dihapus" do
+    admin = users(:budi)
+    admin.roles << roles(:admin)
+    sign_in admin
+    period = AcademicPeriod.create!(name: "Periode Kosong", start_date: 1.year.from_now.to_date, end_date: (1.year.from_now + 4.months).to_date)
+
+    assert_difference "AcademicPeriod.count", -1 do
+      delete academic_period_path(period)
+    end
+    assert_equal "Periode akademik dihapus.", flash[:notice]
+  end
 end
