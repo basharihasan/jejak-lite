@@ -119,7 +119,7 @@ Lihat bagian "Yang Sengaja Disederhanakan/Ditunda" di [`IMPLEMENTATION_PLAN.md`]
 
 ## Lisensi
 
-Hak cipta © 2026 para kontributor jejak-lite.
+Hak cipta © 2026 Muhammad Hasan Bashari.
 
 Kode sumber jejak-lite dilisensikan di bawah **GNU Affero General Public License v3.0** (AGPL-3.0) — teks lengkapnya di [`LICENSE`](LICENSE). Anda bebas memakai, mempelajari, mengubah, dan menyebarkan ulang aplikasi ini, termasuk meng-hosting-nya untuk institusi Anda sendiri, dengan syarat versi yang Anda ubah juga dirilis di bawah AGPL-3.0. Karena jejak-lite adalah aplikasi web, syarat itu berlaku pula bila versi yang diubah hanya dijalankan sebagai layanan daring: pengguna layanan tersebut harus dapat memperoleh kode sumbernya (pasal 13 AGPL-3.0).
 
