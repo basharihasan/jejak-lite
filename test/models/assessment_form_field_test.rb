@@ -10,4 +10,11 @@ class AssessmentFormFieldTest < ActiveSupport::TestCase
     field = AssessmentFormField.new(assessment_form_template: assessment_form_templates(:tutor_evaluation), label: "X", field_type: "invalid")
     assert_not field.valid?
   end
+
+  test "pesan validasi pilihan kosong memakai nama atribut berbahasa Indonesia" do
+    field = AssessmentFormField.new(assessment_form_template: AssessmentFormTemplate.first, label: "Kelayakan", field_type: "select")
+    assert_not field.valid?
+    assert_includes field.errors.full_messages.join, "Daftar pilihan / jenjang harus diisi"
+    assert_not_includes field.errors.full_messages.join, "Options text"
+  end
 end
