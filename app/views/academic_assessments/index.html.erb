@@ -28,7 +28,7 @@
         <ul class="mt-3 space-y-1.5">
           <% @dops_evaluations.each do |dops| %>
             <li class="text-xs text-gray-500 flex items-center justify-between">
-              <%= link_to dops.procedure_name, dops_evaluation_path(dops), class: "hover:text-indigo-600" %>
+              <%= link_to_if policy(dops).show?, dops.procedure_name, dops_evaluation_path(dops), class: "hover:text-indigo-600" %>
               <span class="font-semibold text-gray-700"><%= dops.average_score || "-" %>/9</span>
             </li>
           <% end %>
@@ -50,7 +50,7 @@
         <ul class="mt-3 space-y-1.5">
           <% @mini_cex_evaluations.each do |mini_cex| %>
             <li class="text-xs text-gray-500 flex items-center justify-between">
-              <%= link_to mini_cex.case_description, mini_cex_evaluation_path(mini_cex), class: "hover:text-indigo-600" %>
+              <%= link_to_if policy(mini_cex).show?, mini_cex.case_description, mini_cex_evaluation_path(mini_cex), class: "hover:text-indigo-600" %>
               <span class="font-semibold text-gray-700"><%= mini_cex.average_score || "-" %>/9</span>
             </li>
           <% end %>

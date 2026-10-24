@@ -28,7 +28,7 @@
       <tbody class="divide-y divide-gray-100">
         <% @mappings.each do |m| %>
           <tr>
-            <td class="py-2 font-medium text-gray-800"><%= link_to m.assessment_event.name, admin_assessment_event_path(m.assessment_event), class: "hover:text-indigo-600" %></td>
+            <td class="py-2 font-medium text-gray-800"><%= link_to_if current_user.has_role?("admin"), m.assessment_event.name, admin_assessment_event_path(m.assessment_event), class: "hover:text-indigo-600" %></td>
             <td class="py-2 text-gray-500"><%= m.assessment_event.type_label %></td>
             <td class="py-2 text-right font-semibold text-gray-700"><%= m.weight %>%</td>
             <td class="py-2 text-right"><%= button_to "Hapus", remove_mapping_admin_learning_unit_path(@unit, mapping_id: m.id), method: :delete, class: "text-xs text-rose-600 hover:underline" %></td>
