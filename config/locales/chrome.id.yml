@@ -70,6 +70,7 @@ id:
     medication_definitions: "Master Obat"
     terminology: "Taksonomi Istilah"
     data_governance: "Data Governance"
+    data_exports: "Ekspor Data (CSV)"
     mobile:
       home: "Beranda"
       activity: "Log Keg."

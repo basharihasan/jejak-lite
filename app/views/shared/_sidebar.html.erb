@@ -24,8 +24,8 @@
   pending_activity_verifications = is_verifier ? ActivityLog.awaiting_verification_by(current_user).count : 0
   brand_title    = "JEJAK"
   brand_subtitle = current_user.study_program&.name || t("chrome.brand_subtitle_default")
-  # Relabel Prodi, Jadwal DOPS & Mini-CEX, dan Learning Unit juga terbuka
-  # untuk kaprodi (terikat prodinya).
+  # Relabel Prodi, Jadwal DOPS & Mini-CEX, Learning Unit, dan Ekspor Data
+  # juga terbuka untuk kaprodi (terikat prodinya).
   is_prodi_manager = is_kaprodi && !is_config_manager
   # Form Builder mengikuti AssessmentFormTemplatePolicy (peran yang
   # disandang, bukan peran aktif): hanya kaprodi & admin.

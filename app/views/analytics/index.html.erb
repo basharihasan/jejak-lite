@@ -103,6 +103,10 @@
       <% elsif @selected_program %>
         <span class="text-sm font-semibold text-indigo-600"><%= @selected_program.name %></span>
       <% end %>
+      <% if @selected_program %>
+        <%= link_to "Ekspor CSV", admin_exports_path(study_program_id: @selected_program.id, academic_period_id: @selected_period&.id),
+              class: "text-sm font-semibold text-indigo-600 hover:text-indigo-800" %>
+      <% end %>
     </div>
 
     <% if @selected_program.nil? %>

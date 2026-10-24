@@ -151,6 +151,8 @@ Rails.application.routes.draw do
     resource :student_relabel, only: %i[new create] do
       get :template, on: :collection
     end
+    # Pusat Ekspor Data (CSV) — admin & kaprodi; :id = kunci dataset DataExport.
+    resources :exports, only: %i[index show]
   end
 
   resources :reflection_entries

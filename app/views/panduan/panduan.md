@@ -64,6 +64,7 @@ Panduan ini disusun menurut **peran**: bab awal berlaku untuk semua orang, lalu 
   - [6.14 Rotasi Klinik dan Enrolment Tutorial](#rotasi-klinik-dan-enrolment-tutorial-1)
   - [6.15 Taksonomi Istilah](#taksonomi-istilah)
   - [6.16 Data Governance](#data-governance)
+  - [6.17 Ekspor Data (CSV)](#ekspor-data-csv)
 - [Bab 7 — Privasi & Keamanan Data Pasien](#bab-7--privasi--keamanan-data-pasien)
 - [Bab 8 — Notifikasi](#bab-8--notifikasi)
 - [Bab 9 — Bagaimana Data Mengalir ke Capaian](#bab-9--bagaimana-data-mengalir-ke-capaian)
@@ -111,7 +112,7 @@ Buka **Ikhtisar → Profil Saya** (`/profile`) lalu **Sunting Profil**. Halaman 
 
 **Program Studi sangat penting bagi mahasiswa**: ia menentukan event asesmen mana yang tampil untuk Anda, target kasus logbook, Learning Unit, kurva persentil kohort, dan tampilan Anda di Dashboard Analitik kaprodi. Program studi tersedia dua: **Sarjana Kedokteran (pssk)** dan **Profesi Dokter (pspd)** — admin dapat menambah lainnya.
 
-Bagi **kaprodi**, isian **Program Studi Binaan** hanya ditampilkan dan tidak dapat diubah sendiri, karena prodi itulah batas hak akses kaprodi (mahasiswa yang dapat dibuka, Dashboard Analitik bagian *Program Studi*, Relabel Prodi, Jadwal DOPS & Mini-CEX, dan Learning Unit). Admin menetapkannya lewat **Konfigurasi → Pengguna → Sunting**.
+Bagi **kaprodi**, isian **Program Studi Binaan** hanya ditampilkan dan tidak dapat diubah sendiri, karena prodi itulah batas hak akses kaprodi (mahasiswa yang dapat dibuka, Dashboard Analitik bagian *Program Studi*, Relabel Prodi, Jadwal DOPS & Mini-CEX, Learning Unit, dan Ekspor Data). Admin menetapkannya lewat **Konfigurasi → Pengguna → Sunting**.
 
 ---
 
@@ -183,8 +184,8 @@ Sidebar hanya memuat enam grup, dan **menyempit mengikuti peran aktif** — buka
 | **Perjalanan Belajar** | Logbook ▾ (Kasus Klinis, Logbook Kegiatan), Rotasi Klinik, Enrolment Tutorial, Refleksi, Tugas Akhir | semua |
 | **Asesmen** | Asesmen & Evaluasi ▾ (Evaluasi Akademik, Workplace Assessment, Rubric-based Assessment, Jurnal Umpan Balik*, Assessment Form Builder†) | semua (*Jurnal hanya mahasiswa; †Form Builder hanya kaprodi & admin) |
 | **Kompetensi & Prestasi** | Peta Kompetensi, Peta EPA & Entrustment | semua |
-| **Coaching Center** | Validasi Kasus Klinis & Validasi Kegiatan (hanya akun yang boleh memverifikasi — dosen / preseptor / admin), Dashboard Analitik, Daftar Mahasiswa, serta Relabel Prodi Mahasiswa, Jadwal DOPS & Mini-CEX, dan Learning Unit & Matrix (kaprodi) | peran aktif dosen / preseptor / kaprodi / admin |
-| **Konfigurasi** | 17 menu pengelolaan (lihat [Bab 6](#bab-6--panduan-admin-konfigurasi)) | akun yang **memiliki** peran admin, apa pun peran aktifnya |
+| **Coaching Center** | Validasi Kasus Klinis & Validasi Kegiatan (hanya akun yang boleh memverifikasi — dosen / preseptor / admin), Dashboard Analitik, Daftar Mahasiswa, serta Relabel Prodi Mahasiswa, Jadwal DOPS & Mini-CEX, Learning Unit & Matrix, dan Ekspor Data (CSV) (kaprodi) | peran aktif dosen / preseptor / kaprodi / admin |
+| **Konfigurasi** | 19 menu pengelolaan (lihat [Bab 6](#bab-6--panduan-admin-konfigurasi)) | akun yang **memiliki** peran admin, apa pun peran aktifnya |
 
 Lencana angka di **Validasi Kasus Klinis** dan **Validasi Kegiatan** menunjukkan jumlah butir yang menunggu verifikasi oleh Anda — kasus/kegiatan milik akun Anda sendiri tidak dihitung.
 
@@ -235,7 +236,7 @@ Halaman **Ikhtisar → Notifikasi** (`/notifications`) memuat semua pemberitahua
 | **Mahasiswa** | Mencatat perjalanan belajar | Mencatat kegiatan & kasus, mengajukan verifikasi, meminta DOPS/Mini-CEX/CBD/Long Case dari kasus, mendaftar & mengumpulkan asesmen rubrik, menulis refleksi, mendaftarkan tugas akhir, melihat nilai, capaian, dan peta EPA miliknya sendiri. |
 | **Dosen** | Pembimbing akademik, tutor, penguji | Memverifikasi kasus (yang menandainya atau tanpa tanda pembimbing) & kegiatan mahasiswa mana pun, menilai DOPS/Mini-CEX, menilai di Lembar Penguji, memberi skor tugas akhir, memutuskan tingkat EPA bagi mahasiswa yang berelasi, Dashboard Analitik bagian *Mahasiswa Bimbingan*. |
 | **Preseptor** | Pembimbing klinis di wahana | Setara dosen untuk verifikasi & penilaian; menjadi penilai bawaan DOPS/Mini-CEX yang diminta dari kasus pada rotasinya; Dashboard Analitik bagian *Mahasiswa di Wahana Anda*. |
-| **Kaprodi** | Pemantau program studi | Membuka halaman mahasiswa **prodi binaannya** (hanya melihat — tidak memverifikasi kasus/kegiatan, tidak menilai DOPS/Mini-CEX, tidak memutuskan EPA), Dashboard Analitik bagian *Program Studi*, Relabel Prodi Mahasiswa, Jadwal DOPS & Mini-CEX, Learning Unit & Matrix — semuanya terkunci ke prodi binaan yang ditetapkan admin — serta **Assessment Form Builder** (kelola penuh) dan Lembar Penguji bila ditunjuk sebagai penguji. |
+| **Kaprodi** | Pemantau program studi | Membuka halaman mahasiswa **prodi binaannya** (hanya melihat — tidak memverifikasi kasus/kegiatan, tidak menilai DOPS/Mini-CEX, tidak memutuskan EPA), Dashboard Analitik bagian *Program Studi*, Relabel Prodi Mahasiswa, Jadwal DOPS & Mini-CEX, Learning Unit & Matrix, **Ekspor Data (CSV)** — semuanya terkunci ke prodi binaan yang ditetapkan admin — serta **Assessment Form Builder** (kelola penuh) dan Lembar Penguji bila ditunjuk sebagai penguji. |
 | **Admin** | Pengelola instalasi | Semua hal di atas ditambah seluruh grup **Konfigurasi**: pengguna, periode, prodi, event asesmen, kurikulum, master data, taksonomi, istilah, dan tata kelola data. |
 
 Aturan yang berlaku lintas peran:
@@ -675,9 +676,10 @@ Tiap baris memuat jumlah kegiatan pada periode terpilih (kolom **Kegiatan Period
 ### 5.10 Khusus kaprodi
 
 - **Relabel Prodi Mahasiswa** (`/admin/student_relabel/new`): unggah CSV `email,npm,angkatan` → pratinjau per baris → terapkan. Kaprodi dapat **Pindah** mahasiswa prodinya sendiri atau **Label ke prodi saya** (mengklaim mahasiswa dari prodi mana pun ke prodi Anda). Rincian format di [Relabel Prodi Mahasiswa](#relabel-prodi-mahasiswa).
-- **Prodi binaan** akun Anda menentukan cakupan mahasiswa yang dapat Anda buka (Dasbor Mahasiswa dan halaman asesmennya), bagian *Program Studi* di Dashboard Analitik, mahasiswa yang boleh Anda pindahkan di Relabel, serta Jadwal DOPS & Mini-CEX dan Learning Unit yang Anda kelola. Prodi ini ditetapkan admin (**Konfigurasi → Pengguna → Sunting**) dan tidak dapat diubah dari Sunting Profil. Bila belum diisi, Relabel Prodi, Jadwal DOPS & Mini-CEX, dan Learning Unit menolak dengan pesan *akun kaprodi belum terhubung ke Program Studi*.
+- **Prodi binaan** akun Anda menentukan cakupan mahasiswa yang dapat Anda buka (Dasbor Mahasiswa dan halaman asesmennya), bagian *Program Studi* di Dashboard Analitik, mahasiswa yang boleh Anda pindahkan di Relabel, serta Jadwal DOPS & Mini-CEX, Learning Unit, dan isi berkas Ekspor Data yang Anda kelola. Prodi ini ditetapkan admin (**Konfigurasi → Pengguna → Sunting**) dan tidak dapat diubah dari Sunting Profil. Bila belum diisi, Relabel Prodi, Jadwal DOPS & Mini-CEX, Learning Unit, dan Ekspor Data menolak dengan pesan *akun kaprodi belum terhubung ke Program Studi*.
 - **Coaching Center → Jadwal DOPS & Mini-CEX** (`/admin/evaluation_schedules`): hanya jadwal mahasiswa prodi Anda yang tampil; mahasiswa dan rotasi prodi lain ditolak saat menyimpan.
 - **Coaching Center → Learning Unit & Matrix** (`/admin/learning_units`): hanya unit prodi Anda; prodi unit baru otomatis dikunci ke prodi Anda, dan komponen Assessment Matrix dipilih dari event prodi Anda atau event lintas prodi. Lihat [Bab 6](#bab-6--panduan-admin-konfigurasi).
+- **Coaching Center → Ekspor Data (CSV)** (`/admin/exports`): unduh data mahasiswa prodi Anda — data mahasiswa, rekap capaian, logbook, kasus (tanpa draf dan tanpa identitas pasien), rotasi, tutorial, tugas akhir, DOPS/Mini-CEX, nilai event asesmen, keputusan EPA, jadwal, dan jawaban Assessment Form. Pilihan prodi terkunci ke prodi Anda; dataset Pengguna & Peran dan Master Data khusus admin. Lihat [Ekspor Data (CSV)](#ekspor-data-csv).
 - Kaprodi **tidak** memverifikasi kasus/kegiatan, tidak menilai DOPS/Mini-CEX, dan tidak memutuskan tingkat EPA, sehingga menu Validasi tidak ditawarkan. Lembar Penguji tetap terbuka bila admin menunjuk Anda sebagai penguji suatu percobaan.
 
 ---
@@ -846,6 +848,47 @@ Rotasi yang sudah punya penilaian **DOPS/Mini-CEX tidak dapat dihapus** — nila
 
 `/admin/data_governance` — sakelar **Contextual Privacy Mode** (bawaan menyala; bila server mengunci lewat variabel lingkungan `PRIVACY_MODE`, sakelar tidak dapat diubah dari sini) dan **Jejak Audit Break Glass**: 100 pembukaan identitas terakhir — siapa, kasus mana, kapan, alasan, alamat IP. Baris audit tidak pernah dihapus.
 
+### 6.17 Ekspor Data (CSV)
+
+**Konfigurasi → Ekspor Data (CSV)** (`/admin/exports`; bagi kaprodi di **Coaching Center**) mengunduh data aplikasi sebagai berkas CSV untuk diolah di Excel, Google Sheets, atau aplikasi statistik — misalnya untuk laporan akreditasi, rapat evaluasi blok, atau arsip.
+
+1. Atur **filter** di kepala halaman: **Program Studi** (admin: satu prodi atau *Semua prodi*; kaprodi: selalu prodi binaannya dan tidak dapat diganti), **Periode Akademik**, **Dari/Sampai tanggal**, dan **Format berkas**.
+2. Tekan **Terapkan filter** untuk melihat jumlah baris tiap dataset sesuai filter (angka di pojok kartu).
+3. Tekan **Unduh CSV** pada kartu dataset yang diinginkan.
+
+Filter yang berlaku untuk tiap dataset ditandai label di kartunya (**Prodi**, **Periode**, **Tanggal**, **Formulir**); filter lain diabaikan. **Periode** menyaring data yang bertaut ke periode (rotasi, enrolment tutorial, event asesmen) atau — untuk data bertanggal — yang tanggalnya jatuh dalam rentang periode; **Dari/Sampai** menyempitkannya lagi. Rotasi dan enrolment ikut bila rentang penempatannya *bersinggungan* dengan Dari/Sampai. Prodi menyaring menurut prodi **mahasiswa**, bukan prodi event.
+
+| Grup | Dataset | Satu baris = … | Untuk |
+|---|---|---|---|
+| Mahasiswa & Pengguna | Data Mahasiswa | satu mahasiswa: NPM, prodi, jenjang, angkatan, kontak, login terakhir | admin, kaprodi |
+| | Rekap Capaian per Mahasiswa | satu mahasiswa: jumlah kegiatan (dan yang terverifikasi), kasus diajukan/terverifikasi, jumlah & rata-rata DOPS/Mini-CEX terkirim, rata-rata nilai event asesmen (percobaan tertinggi per event), jumlah ranah EPA berlevel, status tugas akhir | admin, kaprodi |
+| | Pengguna & Peran | satu akun; empat kolom pertama (`email`, `nama`, `peran`, `prodi`) berformat [impor pengguna](#pengguna--impor-csv) sehingga dapat diimpor ulang | admin |
+| Perjalanan Belajar | Logbook Kegiatan | satu kegiatan: taksonomi, waktu, lokasi, metode, status verifikasi | admin, kaprodi |
+| | Kasus Klinis | satu kasus: diagnosis, ICD-10, SKDI, setting, status, verifier, tingkat entrustment | admin (termasuk draf), kaprodi (tanpa draf) |
+| | Rotasi Klinik · Enrolment Tutorial | satu penempatan: stase/blok, wahana/kelompok, periode, preseptor/tutor | admin, kaprodi |
+| | Tugas Akhir | satu tugas akhir: status, pembimbing, kemajuan milestone, rata-rata nilai penguji | admin, kaprodi |
+| Asesmen & Kompetensi | DOPS · Mini-CEX | satu penilaian: penilai, stase, skor tiap dimensi, rata-rata, penilaian global (Mini-CEX), umpan balik | admin, kaprodi |
+| | Nilai Event Asesmen | satu percobaan: event, tipe, nilai, persentase, penguji, sumber nilai, umpan balik | admin, kaprodi |
+| | Keputusan Entrustment EPA | satu keputusan level EPA, termasuk yang tergantikan atau dicabut | admin, kaprodi |
+| | Jadwal DOPS & Mini-CEX | satu jadwal penilaian | admin, kaprodi |
+| | Jawaban Assessment Form | satu jawaban pertanyaan Form Builder (pilih formulir di kartunya) | admin, kaprodi |
+| Master Data | Master Diagnosis · Keterampilan · Obat | satu butir; header sama dengan impor master data sehingga dapat disunting lalu diimpor ulang | admin |
+
+Jawaban Assessment Form mengikuti akses Form Builder: kaprodi membaca jawaban semua formulir, tetapi pengisi formulir **anonim** tertulis *Anonim* — namanya hanya terbuka bagi admin.
+
+**Format berkas**:
+
+- *Standar (koma)* — untuk Google Sheets, LibreOffice, atau aplikasi statistik. Desimal memakai titik.
+- *Excel Indonesia (titik koma)* — untuk Excel berpengaturan regional Indonesia, yang membuka CSV berkoma sebagai satu kolom. Desimal memakai koma, dan NPM/nomor telepon ditulis sebagai teks supaya nol di depan tidak hilang dan angka panjang tidak berubah menjadi `1,3E+11`.
+
+Keduanya UTF-8 (nama beraksen tampil benar). Tanggal ditulis `TTTT-BB-HH`, waktu `TTTT-BB-HH JJ:MM`. Teks isian bebas yang diawali `=`, `+`, `-`, atau `@` diberi tanda `'` di depannya agar tidak dijalankan sebagai rumus spreadsheet.
+
+**Yang tidak pernah ikut**: identitas pasien (nama, No. RM, tanggal lahir, telepon, alamat), refleksi pribadi mahasiswa (menu Refleksi dan kolom refleksi Logbook Kegiatan), kode pasien logbook, serta kata sandi/token akun.
+
+**Riwayat Ekspor** di bagian bawah halaman mencatat setiap unduhan — waktu, pengguna, dataset, filter, dan jumlah baris. Admin melihat riwayat semua pengguna; kaprodi melihat riwayatnya sendiri. Berkas hasil ekspor berisi data pribadi mahasiswa: simpan di tempat aman dan jangan dibagikan di luar keperluan.
+
+Dari **Dashboard Analitik** bagian *Program Studi*, tautan **Ekspor CSV** membuka halaman ini dengan prodi dan periode yang sedang dilihat.
+
 ---
 
 ## Bab 7 — Privasi & Keamanan Data Pasien
@@ -885,7 +928,7 @@ Prinsip yang diterapkan aplikasi:
 4. **Persetujuan pasien** dikumpulkan lewat lembar QR tanpa login yang tidak menampilkan isi kasus.
 5. **Kode pasien** pada Logbook Kegiatan adalah kode acak — bukan nama, bukan No. RM.
 6. **Anonimitas formulir evaluasi**: pada templat anonim, subjek yang dinilai tidak melihat identitas pengisi.
-7. **Data yang keluar aplikasi** (ekspor CSV Portfolio, feed iCal, paket migrasi) **tidak memuat identitas pasien**; paket migrasi hanya membawanya bila admin server secara eksplisit memintanya.
+7. **Data yang keluar aplikasi** (ekspor CSV Portfolio, [Ekspor Data (CSV)](#ekspor-data-csv), feed iCal, paket migrasi) **tidak memuat identitas pasien**; setiap unduhan Ekspor Data tercatat di Riwayat Ekspor; paket migrasi hanya membawanya bila admin server secara eksplisit memintanya.
 
 Kewajiban pengguna: jangan menulis nama atau nomor identitas pasien pada kolom bebas (keluhan, anamnesis, catatan, judul kegiatan, refleksi) — kolom itu **tidak** terenkripsi dan tidak disamarkan.
 
@@ -1049,6 +1092,7 @@ Seluruh data JEJAK Essential dapat dipindahkan ke jejak.pro tanpa ketik ulang. A
 | Master Diagnosis / Keterampilan / Obat | `/admin/diagnosis_definitions`, `/admin/skill_definitions`, `/admin/medication_definitions` |
 | Taksonomi Istilah | `/admin/terminology` |
 | Data Governance | `/admin/data_governance` |
+| Ekspor Data (CSV) | `/admin/exports` (unduhan: `/admin/exports/<dataset>.csv`) |
 | Lembar persetujuan pasien (publik) | `/persetujuan/<token>` |
 | Panduan ini | `/panduan` |
 

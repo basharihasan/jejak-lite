@@ -1,0 +1,140 @@
+<% content_for :title, "Ekspor Data (CSV)" %>
+<% input_class = "block w-full rounded-xl border-0 py-2 px-3 text-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500" %>
+<div class="max-w-6xl space-y-5">
+  <div>
+    <h1 class="text-xl font-bold text-gray-900">Ekspor Data (CSV)</h1>
+    <p class="text-sm text-gray-500 mt-0.5">
+      Unduh data aplikasi sebagai berkas CSV untuk diolah di Excel, Google Sheets, atau aplikasi statistik.
+      <% if prodi_bound_viewer? %>
+        Sebagai kaprodi, setiap ekspor otomatis dibatasi ke mahasiswa <strong><%= current_user.study_program.name %></strong>.
+      <% else %>
+        Pilih prodi untuk membatasi ekspor ke mahasiswa prodi itu, atau biarkan "Semua prodi".
+      <% end %>
+    </p>
+  </div>
+
+  <div class="rounded-2xl bg-amber-50 ring-1 ring-amber-200 px-5 py-4 text-sm text-amber-900">
+    <p class="font-semibold">Data yang tidak pernah ikut ekspor</p>
+    <p class="mt-1 text-amber-800">
+      Identitas pasien (nama, No. RM, tanggal lahir, telepon, alamat), refleksi pribadi mahasiswa, dan kata sandi/token akun.
+      Setiap unduhan dicatat di <strong>Riwayat Ekspor</strong> di bawah — perlakukan berkasnya sebagai data pribadi mahasiswa.
+    </p>
+  </div>
+
+  <%= form_with url: admin_exports_path, method: :get, data: { turbo: false }, class: "space-y-6" do %>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div>
+          <%= label_tag :study_program_id, "Program Studi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+          <% if prodi_bound_viewer? %>
+            <p class="py-2 text-sm font-semibold text-indigo-600"><%= current_user.study_program.name %></p>
+          <% else %>
+            <%= select_tag :study_program_id,
+                  options_for_select(@study_programs.map { |p| [ p.name, p.id ] }, @filters[:study_program_id]),
+                  include_blank: "Semua prodi", class: input_class %>
+          <% end %>
+        </div>
+        <div>
+          <%= label_tag :academic_period_id, "Periode Akademik", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+          <%= select_tag :academic_period_id,
+                options_for_select(@academic_periods.map { |p| [ p.name, p.id ] }, @filters[:academic_period_id]),
+                include_blank: "Semua periode", class: input_class %>
+        </div>
+        <div>
+          <%= label_tag :from, "Dari tanggal", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+          <%= date_field_tag :from, @filters[:from], class: input_class %>
+        </div>
+        <div>
+          <%= label_tag :to, "Sampai tanggal", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+          <%= date_field_tag :to, @filters[:to], class: input_class %>
+        </div>
+        <div>
+          <%= label_tag :csv_format, "Format berkas", class: "block text-sm font-semibold text-gray-700 mb-1" %>
+          <%= select_tag :csv_format, options_for_select(DataExport::FORMATS.invert, @filters[:format]), class: input_class %>
+        </div>
+      </div>
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-xs text-gray-500 max-w-3xl">
+          <strong>Periode</strong> menyaring data yang bertaut ke periode itu (rotasi, tutorial, event asesmen), atau yang
+          tanggalnya jatuh dalam rentang periode. <strong>Dari/Sampai</strong> menyempitkannya lebih lanjut. Filter yang tidak
+          berlaku untuk suatu dataset diabaikan — lihat label di tiap kartu. Pilih <strong>Excel Indonesia</strong> bila CSV
+          terbuka sebagai satu kolom di Excel Anda.
+        </p>
+        <%= button_tag "Terapkan filter", type: "submit", name: nil,
+              class: "bg-white ring-1 ring-gray-300 hover:bg-gray-50 text-gray-700 font-semibold px-4 py-2 rounded-xl text-sm cursor-pointer" %>
+      </div>
+    </div>
+
+    <% @datasets.each do |group, datasets| %>
+      <section>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3"><%= DataExport::GROUPS[group] %></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <% datasets.each do |dataset| %>
+            <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5 flex flex-col" id="dataset-<%= dataset.key %>">
+              <div class="flex items-start justify-between gap-3">
+                <h3 class="font-semibold text-gray-900"><%= dataset.label %></h3>
+                <span class="shrink-0 text-xs font-semibold text-gray-500 whitespace-nowrap" data-row-count>
+                  <%= number_with_delimiter(@counts[dataset.key], delimiter: ".") %> baris
+                </span>
+              </div>
+              <p class="text-sm text-gray-500 mt-1 flex-1"><%= dataset.description %></p>
+              <% if dataset.filter?(:form_template) %>
+                <%= select_tag :form_template_id,
+                      options_for_select(@form_templates.map { |t| [ t.name, t.id ] }, @filters[:form_template_id]),
+                      include_blank: "Semua formulir", class: "#{input_class} mt-3", aria: { label: "Formulir" } %>
+              <% end %>
+              <div class="mt-4 flex items-center justify-between gap-3">
+                <div class="flex flex-wrap gap-1">
+                  <% if dataset.filters.empty? %>
+                    <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Seluruh data</span>
+                  <% end %>
+                  <% dataset.filters.each do |filter| %>
+                    <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700"><%= DataExport::FILTER_LABELS[filter] %></span>
+                  <% end %>
+                  <% if dataset.admin_only %>
+                    <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Admin</span>
+                  <% end %>
+                </div>
+                <%= button_tag "Unduh CSV", type: "submit", name: nil, formaction: admin_export_path(dataset.key, format: :csv),
+                      class: "shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm cursor-pointer" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  <% end %>
+
+  <section>
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+      Riwayat Ekspor <%= current_user.has_role?("admin") ? "(semua pengguna)" : "Anda" %>
+    </h2>
+    <div class="bg-white rounded-2xl ring-1 ring-gray-200 overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+          <tr>
+            <th class="text-left px-5 py-3">Waktu</th>
+            <th class="text-left px-5 py-3">Pengguna</th>
+            <th class="text-left px-5 py-3">Dataset</th>
+            <th class="text-left px-5 py-3">Filter</th>
+            <th class="text-right px-5 py-3">Baris</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @logs.each do |log| %>
+            <tr>
+              <td class="px-5 py-3 text-gray-700 whitespace-nowrap"><%= l(log.created_at, format: :short) %></td>
+              <td class="px-5 py-3 text-gray-700"><%= log.user.full_name %></td>
+              <td class="px-5 py-3 font-semibold text-gray-800"><%= log.dataset_label %></td>
+              <td class="px-5 py-3 text-gray-500"><%= log.filters.except("format").map { |k, v| "#{k.capitalize}: #{v}" }.join(" · ").presence || "—" %></td>
+              <td class="px-5 py-3 text-right text-gray-700"><%= number_with_delimiter(log.row_count, delimiter: ".") %></td>
+            </tr>
+          <% end %>
+          <% if @logs.empty? %>
+            <tr><td colspan="5" class="px-5 py-6 text-center text-gray-400">Belum ada ekspor.</td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

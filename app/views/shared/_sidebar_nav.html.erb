@@ -144,6 +144,8 @@
           active: active_class.call("/admin/evaluation_schedules") %>
       <%= render "shared/nav_item", label: term("nav.learning_units"), path: admin_learning_units_path,
           active: active_class.call("/admin/learning_units") %>
+      <%= render "shared/nav_item", label: term("nav.data_exports"), path: admin_exports_path,
+          active: active_class.call("/admin/exports") %>
     <% end %>
   </div>
 <% end %>
@@ -188,5 +190,7 @@
         active: active_class.call("/admin/terminology") %>
     <%= render "shared/nav_item", label: term("nav.data_governance"), path: admin_data_governance_path,
         active: active_class.call("/admin/data_governance") %>
+    <%= render "shared/nav_item", label: term("nav.data_exports"), path: admin_exports_path,
+        active: active_class.call("/admin/exports") %>
   </div>
 <% end %>

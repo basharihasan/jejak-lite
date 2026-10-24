@@ -34,6 +34,7 @@ class User < ApplicationRecord
   has_many :assessment_instances, foreign_key: :student_id, inverse_of: :student, dependent: :destroy
   has_many :examined_assessment_instances, class_name: "AssessmentInstance", foreign_key: :examiner_id, inverse_of: :examiner, dependent: :nullify
   has_many :entrustment_decisions, foreign_key: :student_id, inverse_of: :student, dependent: :destroy
+  has_many :data_export_logs, dependent: :destroy
 
   # Peran yang boleh menilai/memverifikasi mahasiswa (DOPS, Mini-CEX, Kasus
   # Klinis) — dosen, preseptor (pembimbing klinis di wahana), dan admin.

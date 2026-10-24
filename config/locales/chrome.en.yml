@@ -70,6 +70,7 @@ en:
     medication_definitions: "Medication Master"
     terminology: "Terminology"
     data_governance: "Data Governance"
+    data_exports: "Data Export (CSV)"
     mobile:
       home: "Home"
       activity: "Activity"
