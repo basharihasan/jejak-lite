@@ -12,7 +12,11 @@ class SearchController < ApplicationController
 
     @users = if @query.present?
       like = "%#{ActiveRecord::Base.sanitize_sql_like(@query)}%"
-      User.where("full_name ILIKE :q OR email ILIKE :q", q: like).order(:full_name).limit(20)
+      scope = User.where("full_name ILIKE :q OR email ILIKE :q", q: like)
+      # Direktori mahasiswa hanya untuk pengajar/kaprodi/admin; selainnya
+      # (mahasiswa) hanya menemukan pengajar & pengelola, bukan sesama mahasiswa.
+      scope = scope.where(id: UserRole.joins(:role).where.not(roles: { code: "mahasiswa" }).select(:user_id)) unless current_user.can_view_students?
+      scope.order(:full_name).limit(20)
     else
       User.none
     end

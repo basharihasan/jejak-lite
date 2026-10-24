@@ -18,12 +18,12 @@ class ApplicationController < ActionController::Base
   # Halaman asesmen mahasiswa (Evaluasi Akademik, Peta Kompetensi, Jurnal,
   # dsb.) bisa dibuka pengajar/kaprodi untuk mahasiswa lain lewat
   # ?student_id= (hanya-baca; pintu masuknya Dasbor Mahasiswa). Tanpa
-  # parameter itu, atau bila tak berhak, selalu diri sendiri.
+  # parameter itu, atau bila tak berhak atas mahasiswa itu (kaprodi di luar
+  # prodi binaannya), selalu diri sendiri.
   def viewed_student
-    @viewed_student ||= if params[:student_id].present? && current_user.can_view_students?
-      User.find(params[:student_id])
-    else
-      current_user
+    @viewed_student ||= begin
+      student = User.find_by(id: params[:student_id]) if params[:student_id].present? && current_user.can_view_students?
+      student && current_user.can_view_student?(student) ? student : current_user
     end
   end
 

@@ -14,6 +14,10 @@ class StudentDashboardsController < ApplicationController
       redirect_to search_path(q: @student.email), alert: "#{@student.full_name} bukan mahasiswa."
       return
     end
+    unless current_user.can_view_student?(@student)
+      redirect_to search_path, alert: "#{@student.full_name} di luar program studi binaan Anda."
+      return
+    end
 
     @pending_count = @student.assessment_instances.awaiting_score.count
     @scored_count = @student.assessment_instances.scored.count

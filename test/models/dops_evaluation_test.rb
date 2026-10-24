@@ -86,4 +86,14 @@ class DopsEvaluationTest < ActiveSupport::TestCase
     assert_not dops.valid?
     assert_includes dops.errors[:clinical_rotation], "bukan rotasi milik mahasiswa yang dinilai"
   end
+
+  test "akun multi-peran tidak menilai dirinya sendiri" do
+    dops = DopsEvaluation.new(
+      student: users(:siti), evaluator: users(:siti), clinical_rotation: clinical_rotations(:ongoing_rotation_siti),
+      procedure_name: "Jahit Luka", evaluated_at: Date.current, status: "requested"
+    )
+
+    assert_not dops.valid?
+    assert_includes dops.errors[:student], "tidak boleh dinilai oleh dirinya sendiri"
+  end
 end

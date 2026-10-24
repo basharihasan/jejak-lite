@@ -29,6 +29,7 @@ module DimensionScorable
     validate :required_dimensions_scored, unless: :requested?
     validate :scores_in_range
     validate :rotation_belongs_to_student
+    validate :evaluator_is_not_student, if: -> { will_save_change_to_evaluator_id? || will_save_change_to_student_id? }
 
     scope :draft, -> { where(status: "draft") }
     scope :requested, -> { where(status: "requested") }
@@ -104,6 +105,14 @@ module DimensionScorable
     return if clinical_rotation.nil? || student_id.nil? || clinical_rotation.user_id == student_id
 
     errors.add(:clinical_rotation, "bukan rotasi milik mahasiswa yang dinilai")
+  end
+
+  # Akun multi-peran (mis. dosen yang juga mahasiswa) tidak menilai dirinya
+  # sendiri — sama dengan larangan memverifikasi kasus milik sendiri.
+  def evaluator_is_not_student
+    return if evaluator_id.nil? || evaluator_id != student_id
+
+    errors.add(:student, "tidak boleh dinilai oleh dirinya sendiri")
   end
 
   def scores_in_range

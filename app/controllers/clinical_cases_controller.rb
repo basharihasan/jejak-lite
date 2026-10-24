@@ -18,7 +18,8 @@ class ClinicalCasesController < ApplicationController
     @clinical_cases = base_scope.includes(:user, :supervisor).recent.page(params[:page])
     @case_targets = @scope == "mine" ? case_target_progress : []
 
-    stats_scope = @scope == "to_verify" ? ClinicalCase.all : base_scope
+    # Draf belum diajukan dan hanya milik pemiliknya — tidak ikut ringkasan.
+    stats_scope = @scope == "to_verify" ? ClinicalCase.where.not(status: "draft") : base_scope
     @stats = {
       total: stats_scope.count,
       by_status: stats_scope.group(:status).count,

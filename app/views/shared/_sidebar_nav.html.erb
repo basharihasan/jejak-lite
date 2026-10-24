@@ -5,8 +5,9 @@
 <%
   is_student            = local_assigns[:is_student] || false
   is_instructor         = local_assigns[:is_instructor] || false
+  is_verifier           = local_assigns[:is_verifier] || false
   is_config_manager     = local_assigns[:is_config_manager] || false
-  is_prodi_relabeler    = local_assigns[:is_prodi_relabeler] || false
+  is_prodi_manager      = local_assigns[:is_prodi_manager] || false
   is_form_manager       = local_assigns[:is_form_manager] || false
   pending_verifications = local_assigns[:pending_verifications] || 0
   pending_activity_verifications = local_assigns[:pending_activity_verifications] || 0
@@ -121,21 +122,28 @@
 <% if is_instructor %>
   <div>
     <p class="px-2 mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500"><%= term("nav.groups.coaching") %></p>
-    <%= render "shared/nav_item", label: term("nav.case_validation"), path: clinical_cases_path(scope: "to_verify"),
-        active: active_class.call("/clinical_cases") && params[:scope].in?(%w[to_verify reviewed]),
-        badge: (pending_verifications.positive? ? (pending_verifications > 9 ? "9+" : pending_verifications) : nil) %>
-    <%= render "shared/nav_item", label: term("nav.activity_validation"), path: activity_logs_path(scope: "to_verify"),
-        active: active_class.call("/activity_logs") && params[:scope] == "to_verify",
-        badge: (pending_activity_verifications.positive? ? (pending_activity_verifications > 9 ? "9+" : pending_activity_verifications) : nil) %>
+    <% if is_verifier %>
+      <%= render "shared/nav_item", label: term("nav.case_validation"), path: clinical_cases_path(scope: "to_verify"),
+          active: active_class.call("/clinical_cases") && params[:scope].in?(%w[to_verify reviewed]),
+          badge: (pending_verifications.positive? ? (pending_verifications > 9 ? "9+" : pending_verifications) : nil) %>
+      <%= render "shared/nav_item", label: term("nav.activity_validation"), path: activity_logs_path(scope: "to_verify"),
+          active: active_class.call("/activity_logs") && params[:scope] == "to_verify",
+          badge: (pending_activity_verifications.positive? ? (pending_activity_verifications > 9 ? "9+" : pending_activity_verifications) : nil) %>
+    <% end %>
     <%= render "shared/nav_item", label: term("nav.analytics"), path: analytics_path,
         active: active_class.call("/analitik") %>
     <%= render "shared/nav_item", label: term("nav.student_directory"), path: search_path,
         active: active_class.call("/cari") %>
-    <%# Kaprodi yang bukan admin tidak melihat grup Konfigurasi, jadi relabel
-        prodi ditawarkan di sini; yang juga admin sudah melihatnya di Konfigurasi. %>
-    <% if is_prodi_relabeler %>
+    <%# Kaprodi yang bukan admin tidak melihat grup Konfigurasi, jadi menu
+        pengelolaan prodi yang terbuka untuknya ditawarkan di sini; yang juga
+        admin sudah melihatnya di Konfigurasi. %>
+    <% if is_prodi_manager %>
       <%= render "shared/nav_item", label: term("nav.student_relabel"), path: new_admin_student_relabel_path,
           active: active_class.call("/admin/student_relabel") %>
+      <%= render "shared/nav_item", label: term("nav.evaluation_schedules"), path: admin_evaluation_schedules_path,
+          active: active_class.call("/admin/evaluation_schedules") %>
+      <%= render "shared/nav_item", label: term("nav.learning_units"), path: admin_learning_units_path,
+          active: active_class.call("/admin/learning_units") %>
     <% end %>
   </div>
 <% end %>

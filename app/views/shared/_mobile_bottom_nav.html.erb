@@ -3,7 +3,9 @@
     Verifikasi (pengajar) atau Asesmen (mahasiswa). %>
 <%
   active_code = (current_user.active_role || current_user.roles.first)&.code
-  instructor  = %w[dosen preseptor kaprodi admin].include?(active_code)
+  # Pintasan Verifikasi hanya bagi yang boleh memverifikasi (sama dengan
+  # sidebar); kaprodi tanpa peran pengajar mendapat Asesmen.
+  verifier    = %w[dosen preseptor kaprodi admin].include?(active_code) && current_user.can_verify_clinical_cases?
   item_class  = ->(active) { "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-150 #{active ? 'nav-item-active' : 'nav-item-inactive'}" }
 %>
 <div class="mobile-bottom-nav lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-slate-200/70 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] flex justify-around items-center px-1 pt-2">
@@ -28,7 +30,7 @@
     <span class="text-[10px] font-semibold"><%= term("nav.mobile.cases") %></span>
   <% end %>
 
-  <% if instructor %>
+  <% if verifier %>
     <% pending = ClinicalCase.awaiting_verification_by(current_user).count %>
     <%= link_to clinical_cases_path(scope: "to_verify"), class: item_class.call(request.path.start_with?("/clinical_cases") && params[:scope].in?(%w[to_verify reviewed])) do %>
       <div class="relative">

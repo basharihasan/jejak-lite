@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 class ClinicalCasePolicy < ApplicationPolicy
+  # Draf belum diajukan ke pembimbing, jadi hanya pemiliknya (dan admin) yang
+  # melihatnya; pengajar lain baru melihat kasus sejak dikirim.
   def show?
-    owner? || user.can_verify_clinical_cases?
+    owner? || user.has_role?("admin") || (user.can_verify_clinical_cases? && record.status != "draft")
   end
 
   def update?

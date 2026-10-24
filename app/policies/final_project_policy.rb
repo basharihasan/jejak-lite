@@ -23,8 +23,9 @@ class FinalProjectPolicy < ApplicationPolicy
     update?
   end
 
+  # Akun multi-peran tidak menguji tugas akhirnya sendiri.
   def score?
-    user.instructor?
+    user.instructor? && !owner?
   end
 
   class Scope < Scope

@@ -11,6 +11,9 @@ class FinalProject < ApplicationRecord
 
   validates :title, presence: true
   validates :status, inclusion: { in: STATUSES.keys }
+  # Pembimbing mendapat hak sunting proyek (FinalProjectPolicy), jadi hanya
+  # akun dosen — sama dengan pilihan di formulir — dan bukan diri sendiri.
+  validate :supervisor_is_eligible, if: :will_save_change_to_supervisor_id?
 
   def status_label
     STATUSES.fetch(status, status)
@@ -25,5 +28,17 @@ class FinalProject < ApplicationRecord
 
   def milestones_completed_count
     final_project_milestones.where.not(completed_at: nil).count
+  end
+
+  private
+
+  def supervisor_is_eligible
+    return if supervisor_id.nil?
+
+    if supervisor_id == student_id
+      errors.add(:supervisor, "tidak boleh diri sendiri")
+    elsif !UserRole.joins(:role).exists?(user_id: supervisor_id, roles: { code: "dosen" })
+      errors.add(:supervisor, "harus dosen")
+    end
   end
 end

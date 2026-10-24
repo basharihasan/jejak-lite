@@ -97,8 +97,11 @@ class ClinicalCase < ApplicationRecord
   scope :awaiting_verification, -> { where(status: "submitted") }
   # Antrean verifikasi milik pengajar ini: kasus yang menandai DIA sebagai
   # pembimbing, plus kasus tanpa tanda — kasus yang menandai pengajar lain
-  # tidak bisa ia verifikasi, jadi tidak ikut antre.
-  scope :awaiting_verification_by, ->(user) { awaiting_verification.where(supervisor_id: [ nil, user.id ]) }
+  # tidak bisa ia verifikasi, jadi tidak ikut antre. Kasus milik akunnya
+  # sendiri (akun multi-peran) juga tidak, karena tak boleh ia verifikasi.
+  scope :awaiting_verification_by, ->(user) {
+    awaiting_verification.where(supervisor_id: [ nil, user.id ]).where.not(user_id: user.id)
+  }
   # Kasus yang pernah diputuskan verifier ini (diverifikasi, diminta revisi,
   # ditolak) — tetap terdaftar walau statusnya berubah lagi sesudahnya.
   scope :reviewed_by, ->(user) {

@@ -142,8 +142,12 @@
         </div>
       </div>
       <p class="text-[11px] text-gray-400">Umpan balik tertulis masuk ke Jurnal Umpan Balik mahasiswa dan mengirim notifikasi.</p>
-      <%= submit_tag (@instance.status == "scored" ? "Perbarui penilaian" : "Simpan penilaian"),
-            class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+      <% if @can_score %>
+        <%= submit_tag (@instance.status == "scored" ? "Perbarui penilaian" : "Simpan penilaian"),
+              class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm cursor-pointer" %>
+      <% else %>
+        <p class="text-xs text-gray-500" data-testid="score-locked">Penilaian ini hanya dapat disimpan oleh penguji yang ditugaskan atau admin.</p>
+      <% end %>
     </div>
   <% end %>
 </div>

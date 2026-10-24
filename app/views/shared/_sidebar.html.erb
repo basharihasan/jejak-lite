@@ -16,17 +16,22 @@
   # has_role?("admin") — bukan peran aktif — jadi di sini pun begitu.
   is_config_manager = current_user.has_role?("admin")
   is_instructor = is_dosen || is_preceptor || is_kaprodi || is_admin
-  pending_verifications = is_instructor ? ClinicalCase.awaiting_verification_by(current_user).count : 0
-  pending_activity_verifications = is_instructor ? ActivityLog.awaiting_verification.count : 0
+  # Validasi Kasus/Kegiatan mengikuti ClinicalCasePolicy/ActivityLogPolicy
+  # (can_verify_clinical_cases?): kaprodi tanpa peran pengajar tidak
+  # memverifikasi, jadi menu dan lencananya tidak ditawarkan — sama dengan beranda.
+  is_verifier = is_instructor && current_user.can_verify_clinical_cases?
+  pending_verifications = is_verifier ? ClinicalCase.awaiting_verification_by(current_user).count : 0
+  pending_activity_verifications = is_verifier ? ActivityLog.awaiting_verification_by(current_user).count : 0
   brand_title    = "JEJAK"
   brand_subtitle = current_user.study_program&.name || t("chrome.brand_subtitle_default")
-  # Relabel Prodi Mahasiswa juga terbuka untuk kaprodi (terikat prodinya).
-  is_prodi_relabeler = is_kaprodi && !is_config_manager
+  # Relabel Prodi, Jadwal DOPS & Mini-CEX, dan Learning Unit juga terbuka
+  # untuk kaprodi (terikat prodinya).
+  is_prodi_manager = is_kaprodi && !is_config_manager
   # Form Builder mengikuti AssessmentFormTemplatePolicy (peran yang
   # disandang, bukan peran aktif): hanya kaprodi & admin.
   is_form_manager = current_user.can_manage_assessment_forms?
-  nav_locals = { is_student: is_student, is_instructor: is_instructor,
-                 is_config_manager: is_config_manager, is_prodi_relabeler: is_prodi_relabeler,
+  nav_locals = { is_student: is_student, is_instructor: is_instructor, is_verifier: is_verifier,
+                 is_config_manager: is_config_manager, is_prodi_manager: is_prodi_manager,
                  is_form_manager: is_form_manager,
                  pending_verifications: pending_verifications,
                  pending_activity_verifications: pending_activity_verifications }

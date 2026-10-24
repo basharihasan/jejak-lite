@@ -10,7 +10,7 @@ class ActivityLogsController < ApplicationController
     @scope = params[:scope] == "to_verify" && current_user.can_verify_clinical_cases? ? "to_verify" : "mine"
     @competency_item_id = params[:competency_item_id].presence
 
-    base = @scope == "to_verify" ? ActivityLog.awaiting_verification.includes(:user) : current_user.activity_logs
+    base = @scope == "to_verify" ? ActivityLog.awaiting_verification_by(current_user).includes(:user) : current_user.activity_logs
     # Chip filter hanya untuk domain yang benar-benar punya kegiatan di tab ini.
     # Parameternya `domain_id`, bukan `domain`: `domain:` adalah opsi host di
     # URL helper Rails dan dibuang diam-diam dari tautan.

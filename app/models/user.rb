@@ -53,6 +53,16 @@ class User < ApplicationRecord
     instructor? || has_role?("kaprodi")
   end
 
+  # Mahasiswa tertentu yang halamannya boleh dibuka: pengajar boleh mahasiswa
+  # mana pun (verifikasi & penilaian lintas prodi), kaprodi hanya mahasiswa
+  # prodi binaannya — cakupan yang sama dengan Dashboard Analitik.
+  def can_view_student?(student)
+    return false unless student&.has_role?("mahasiswa")
+    return true if instructor?
+
+    has_role?("kaprodi") && study_program_id.present? && student.study_program_id == study_program_id
+  end
+
   # Assessment Form Builder (/assessment_form_templates) — membuat, menyunting,
   # mengisi, dan membaca jawaban formulir — hanya untuk kaprodi dan admin.
   def can_manage_assessment_forms?

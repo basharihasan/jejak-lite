@@ -52,6 +52,9 @@ class ActivityLog < ApplicationRecord
   scope :recent, -> { order(activity_date: :desc, started_at: :desc, created_at: :desc) }
   scope :owned_by, ->(user) { where(user: user) }
   scope :awaiting_verification, -> { where(verified_at: nil) }
+  # Antrean Validasi Kegiatan seorang pengajar — tanpa kegiatannya sendiri
+  # (akun multi-peran), yang memang tak boleh ia verifikasi.
+  scope :awaiting_verification_by, ->(user) { awaiting_verification.where.not(user_id: user.id) }
   scope :verified, -> { where.not(verified_at: nil) }
   scope :klinis, -> { where(category: "klinis") }
   scope :non_klinis, -> { where(category: "non_klinis") }

@@ -163,7 +163,7 @@ class DashboardController < ApplicationController
     @pending_case_count = case_queue.count
     # Terlama menunggu didahulukan.
     @pending_cases = case_queue.includes(:user).order(:updated_at).limit(PENDING_CASE_LIST_LIMIT).to_a
-    @pending_activity_count = ActivityLog.awaiting_verification.count
+    @pending_activity_count = ActivityLog.awaiting_verification_by(current_user).count
   end
 
   # "Perlu Dinilai": DOPS/Mini-CEX yang diminta mahasiswa atau masih draf

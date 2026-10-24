@@ -16,12 +16,15 @@ class ExaminerEvaluationsController < ApplicationController
   def index
     @mine = AssessmentInstance.for_examiner(current_user).includes(:student, :assessment_event)
                               .order(Arel.sql("CASE status WHEN 'scored' THEN 1 ELSE 0 END"), :submitted_at)
-    @unassigned = AssessmentInstance.where(examiner_id: nil, status: "submitted").includes(:student, :assessment_event).order(:submitted_at)
+    @unassigned = AssessmentInstance.where(examiner_id: nil, status: "submitted").where.not(student_id: current_user.id)
+                                    .includes(:student, :assessment_event).order(:submitted_at)
+                                    .reject { |i| i.assessment_event.importable? }
   end
 
   def show
     @template = @instance.assessment_event.assessment_form_template
     @submission = @instance.assessment_form_submission
+    @can_score = can_score?(@instance)
   end
 
   def update
@@ -48,8 +51,15 @@ class ExaminerEvaluationsController < ApplicationController
     @instance = AssessmentInstance.includes(:student, :assessment_event, :clinical_case).find(params[:id])
   end
 
+  # Penguji yang ditugaskan atau admin; percobaan belum bertugas hanya boleh
+  # diambil setelah dikumpulkan mahasiswa. Nilai ujian impor (CBT/OSCE) tanpa
+  # penguji tidak boleh ditimpa dari sini, dan tak seorang pun menilai
+  # percobaannya sendiri (akun multi-peran).
   def can_score?(instance)
-    instance.examiner_id.nil? || instance.examiner_id == current_user.id || current_user.has_role?("admin")
+    return false if instance.student_id == current_user.id
+    return true if instance.examiner_id == current_user.id || current_user.has_role?("admin")
+
+    instance.examiner_id.nil? && instance.status == "submitted" && !instance.assessment_event.importable?
   end
 
   def feedback_params

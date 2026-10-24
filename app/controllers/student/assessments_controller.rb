@@ -21,6 +21,12 @@ class Student::AssessmentsController < ApplicationController
   end
 
   def submit
+    # Hanya event rubrik yang menerima pengumpulan (sama dengan form di
+    # halamannya); ujian impor CBT/OSCE dan CBD/Long Case tidak.
+    unless @instance.assessment_event.requires_submission?
+      redirect_to student_assessment_path(@instance), alert: "Asesmen ini tidak menerima pengumpulan dokumen."
+      return
+    end
     unless @instance.assessment_event.submission_open? && @instance.status != "scored"
       redirect_to student_assessment_path(@instance), alert: "Pengumpulan sudah ditutup atau percobaan ini sudah dinilai."
       return
