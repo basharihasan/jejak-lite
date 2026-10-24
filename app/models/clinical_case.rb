@@ -56,9 +56,10 @@ class ClinicalCase < ApplicationRecord
   belongs_to :verified_by, class_name: "User", optional: true
 
   # Identitas pasien — terenkripsi di basis data (Active Record Encryption)
-  # dan DISAMARKAN di tampilan selama Privacy Mode menyala; dibuka hanya lewat
-  # Break Glass beralasan (lihat BreakGlassAccess). Usia persis, jenis kelamin,
-  # dan pekerjaan sengaja tidak termasuk (bukan data sensitif).
+  # dan DISAMARKAN di tampilan selama Privacy Mode menyala; terbuka langsung
+  # bagi pembimbing kasus (#supervised_by?), selainnya hanya lewat Break Glass
+  # beralasan (lihat BreakGlassAccess). Usia persis, jenis kelamin, dan
+  # pekerjaan sengaja tidak termasuk (bukan data sensitif).
   encrypts :patient_name, :patient_medical_record_number, :patient_birth_date, :patient_phone, :patient_address
   SENSITIVE_PATIENT_FIELDS = %i[patient_name patient_medical_record_number patient_birth_date patient_phone patient_address].freeze
 
@@ -196,6 +197,13 @@ class ClinicalCase < ApplicationRecord
 
   def patient_identity_present?
     SENSITIVE_PATIENT_FIELDS.any? { |f| public_send(f).present? }
+  end
+
+  # Pembimbing kasus: dosen verifier kasus ini (termasuk yang meminta revisi
+  # atau menolaknya) dan preseptor rotasi mahasiswa yang mencakup tanggal kasus.
+  def supervised_by?(person)
+    verified_by_id == person.id ||
+      user.clinical_rotations.covering(case_date).where(preceptor: person).exists?
   end
 
   def patient_birth_date_as_date

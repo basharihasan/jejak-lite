@@ -413,7 +413,7 @@ Menu **Logbook → Kasus Klinis** (`/clinical_cases`). Halaman daftar memuat **s
 
 #### Identitas pasien, Privacy Mode, dan Break Glass
 
-Selama **Contextual Privacy Mode** menyala (bawaan), identitas pasien tampil **tersamar untuk semua orang termasuk Anda sendiri**: nama menjadi inisial (`AF***`), No. RM menjadi `RM-****56`, sisanya `••••`. Untuk membukanya sesaat, klik **Break Glass**, tulis alasan (minimal 10 karakter), dan identitas terbuka **30 menit** pada akun Anda. Setiap pembukaan tercatat permanen (siapa, kapan, alasan, alamat IP) dan dapat dilihat admin. Rincian ada di [Bab 7](#bab-7--privasi--keamanan-data-pasien).
+Selama **Contextual Privacy Mode** menyala (bawaan), identitas pasien tampil **tersamar untuk semua orang termasuk Anda sendiri**: nama menjadi inisial (`AF***`), No. RM menjadi `RM-****56`, sisanya `••••`. Satu-satunya pengecualian adalah pembimbing kasus Anda — preseptor rotasi pada tanggal kasus dan dosen yang memverifikasinya — yang melihat identitas langsung. Untuk membukanya sesaat, klik **Break Glass**, tulis alasan (minimal 10 karakter), dan identitas terbuka **30 menit** pada akun Anda. Setiap pembukaan tercatat permanen (siapa, kapan, alasan, alamat IP) dan dapat dilihat admin. Rincian ada di [Bab 7](#bab-7--privasi--keamanan-data-pasien).
 
 #### Persetujuan pasien lewat QR
 
@@ -605,7 +605,7 @@ Jadwal DOPS/Mini-CEX di panel *Jadwal Evaluasi Bulan Ini* hilang sendiri begitu 
 | **Batalkan Verifikasi** | Anda (verifier asal) atau admin salah menyetujui (alasan wajib) | Kasus kembali ke antrean; level EPA dari verifikasi itu dicabut. |
 | **Kirim Komentar** | diskusi tanpa mengubah status | Pemilik/verifier menerima notifikasi. |
 
-Anda tidak dapat memverifikasi kasus milik akun sendiri. Identitas pasien tersamar oleh Privacy Mode; gunakan Break Glass hanya bila benar-benar perlu — semua pembukaan diaudit.
+Anda tidak dapat memverifikasi kasus milik akun sendiri. Bila Anda pembimbing kasus itu — preseptor rotasi mahasiswa pada tanggal kasus, atau dosen yang sudah memverifikasi, meminta revisi, atau menolaknya — identitas pasien tampil langsung. Pengajar lain melihatnya tersamar oleh Privacy Mode; gunakan Break Glass hanya bila benar-benar perlu — semua pembukaan Break Glass diaudit.
 
 ### 5.3 Validasi Kegiatan
 
@@ -864,7 +864,7 @@ Rotasi yang sudah punya penilaian **DOPS/Mini-CEX tidak dapat dihapus** — nila
 Prinsip yang diterapkan aplikasi:
 
 1. **Enkripsi di basis data** untuk nama, No. RM, tanggal lahir, telepon, dan alamat pasien. Kunci enkripsi disimpan di server, terpisah dari data.
-2. **Contextual Privacy Mode** menyamarkan identitas di layar untuk semua pembaca. Usia, jenis kelamin, pekerjaan, dan konteks klinis bukan data sensitif dan tampil terbuka.
+2. **Contextual Privacy Mode** menyamarkan identitas di layar untuk semua pembaca kecuali pembimbing kasus (preseptor rotasi pada tanggal kasus dan dosen verifier kasus itu). Usia, jenis kelamin, pekerjaan, dan konteks klinis bukan data sensitif dan tampil terbuka.
 3. **Break Glass** membuka identitas hanya untuk akun peminta, 30 menit, dengan alasan tertulis, dan **selalu tercatat**. Gunakan hanya untuk kebutuhan pelayanan/pembelajaran yang nyata.
 4. **Persetujuan pasien** dikumpulkan lewat lembar QR tanpa login yang tidak menampilkan isi kasus.
 5. **Kode pasien** pada Logbook Kegiatan adalah kode acak — bukan nama, bukan No. RM.
@@ -959,7 +959,7 @@ Permintaan dari kasus membutuhkan **rotasi klinik** Anda yang mencakup tanggal k
 Terisi hanya bila tepat satu periode akademik mencakup tanggal kegiatan. Pilih manual bila periode tumpang-tindih atau belum dibuat admin.
 
 **Identitas pasien tampak `AF***` padahal saya pemiliknya.**
-Itu Privacy Mode — berlaku untuk semua. Gunakan **Break Glass** bila perlu, dengan alasan yang benar; pembukaan tercatat.
+Itu Privacy Mode — berlaku untuk semua, termasuk pemilik kasus; hanya pembimbing kasus yang melihatnya langsung. Gunakan **Break Glass** bila perlu, dengan alasan yang benar; pembukaan tercatat.
 
 **Kegiatan lama saya tampil "Klinis/Non-Klinis" tanpa domain.**
 Kegiatan yang dicatat sebelum taksonomi ada tidak ditebak domainnya. Sunting kegiatan dan pilih domain — hanya jika Anda ingin.
@@ -1046,7 +1046,7 @@ Seluruh data JEJAK Essential dapat dipindahkan ke jejak.pro tanpa ketik ulang. A
 | **Percobaan (attempt)** | Satu kali keikutsertaan mahasiswa pada sebuah event; nilai tertinggi menjadi wakil. |
 | **Learning Unit** | Blok/modul yang nilainya disusun dari beberapa event lewat Assessment Matrix berbobot. |
 | **Kohort** | Seluruh mahasiswa (gabungan sarjana + profesi) dengan nilai pada tipe asesmen & periode yang sama. |
-| **Privacy Mode** | Penyamaran identitas pasien di layar untuk semua pembaca. |
+| **Privacy Mode** | Penyamaran identitas pasien di layar untuk semua pembaca selain pembimbing kasus. |
 | **Rotasi Klinik / Stase** | Penempatan mahasiswa profesi di satu bagian & wahana pada rentang tanggal. |
 | **Enrolment Tutorial** | Penempatan mahasiswa sarjana pada blok/sistem dengan dosen tutor. |
 | **Taksonomi Istilah** | Penggantian label menu/istilah oleh admin tanpa mengubah kode. |

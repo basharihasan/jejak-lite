@@ -21,6 +21,7 @@ class ClinicalRotation < ApplicationRecord
   scope :for_preceptor, ->(user) { where(preceptor: user) }
   scope :upcoming, -> { where("start_date > ?", Date.current).order(:start_date) }
   scope :ongoing, -> { where("start_date <= ? AND end_date >= ?", Date.current, Date.current) }
+  scope :covering, ->(date) { where("start_date <= :d AND end_date >= :d", d: date) }
   scope :past, -> { where("end_date < ?", Date.current).order(start_date: :desc) }
   scope :chronological, -> { order(:start_date) }
 

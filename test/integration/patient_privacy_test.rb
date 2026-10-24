@@ -52,7 +52,8 @@ class PatientPrivacyTest < ActionDispatch::IntegrationTest
   end
 
   test "Break Glass beralasan membuka identitas 30 menit dan tercatat" do
-    sign_in users(:budi)
+    dosen = instructor("dosen")
+    sign_in dosen
 
     assert_difference "BreakGlassAccess.count", 1 do
       post break_glass_clinical_case_path(@case), params: { reason: "Verifikasi kesesuaian identitas rekam medis" }
@@ -65,13 +66,51 @@ class PatientPrivacyTest < ActionDispatch::IntegrationTest
     assert_match "Terbuka lewat Break Glass", response.body
 
     access = BreakGlassAccess.last
-    assert_equal users(:budi), access.user
+    assert_equal dosen, access.user
     assert_in_delta 30.minutes.from_now, access.expires_at, 5
 
     # Akses kedaluwarsa → tersamar lagi
     access.update!(expires_at: 1.minute.ago)
     get clinical_case_path(@case)
     assert_no_match "Ahmad Fauzi", response.body
+  end
+
+  test "preseptor rotasi yang mencakup tanggal kasus melihat identitas tanpa Break Glass" do
+    sign_in users(:wati)
+    get clinical_case_path(@case)
+
+    assert_response :success
+    assert_match "Ahmad Fauzi", response.body
+    assert_match "00123456", response.body
+    assert_match "pembimbing kasus ini", response.body
+    assert_no_match "Disamarkan oleh Privacy Mode", response.body
+  end
+
+  test "preseptor yang rotasinya tidak mencakup tanggal kasus tetap tersamar" do
+    @case.update!(case_date: 30.days.ago.to_date)
+    sign_in users(:wati)
+    get clinical_case_path(@case)
+
+    assert_response :success
+    assert_no_match "Ahmad Fauzi", response.body
+    assert_match "AF***", response.body
+    assert_match "Break Glass", response.body
+  end
+
+  test "dosen verifier kasus melihat identitas; dosen lain tetap tersamar" do
+    verifier = instructor("dosen")
+    @case.update!(verified_by: verifier)
+
+    sign_in verifier
+    get clinical_case_path(@case)
+    assert_match "Ahmad Fauzi", response.body
+    assert_match "pembimbing kasus ini", response.body
+
+    sign_in instructor("dosen", email: "dosen.lain@example.com")
+    get clinical_case_path(@case)
+    assert_response :success
+    assert_no_match "Ahmad Fauzi", response.body
+    assert_match "AF***", response.body
   end
 
   test "Break Glass tanpa alasan memadai ditolak" do
@@ -249,4 +288,13 @@ test "halaman tambah/sunting master data dan target kasus terbuka untuk admin" d
   get admin_logbook_case_targets_path
   assert_response :success
 end
+
+  private
+
+  # Pengajar yang bukan pembimbing kasus fixture (tidak memegang rotasi siti).
+  def instructor(role_code, email: "#{role_code}.baru@example.com")
+    user = User.create!(full_name: "Pengajar Baru", email: email, password: "password123", confirmed_at: Time.current)
+    user.roles << roles(role_code)
+    user
+  end
 end

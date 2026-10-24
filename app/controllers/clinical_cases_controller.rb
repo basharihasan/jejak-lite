@@ -20,11 +20,11 @@ class ClinicalCasesController < ApplicationController
 
   def show
     authorize @clinical_case
-    # Identitas pasien tersamar selama Privacy Mode menyala, kecuali pengguna
-    # ini memegang Break Glass aktif untuk kasus ini.
+    # Identitas pasien tersamar selama Privacy Mode menyala, kecuali bagi
+    # pembimbing kasus ini atau pengguna yang memegang Break Glass aktif.
     @privacy_mode = AppSetting.privacy_mode?
     @break_glass = BreakGlassAccess.active_for(current_user, @clinical_case) if @privacy_mode
-    @identity_visible = !@privacy_mode || @break_glass.present?
+    @identity_visible = !@privacy_mode || @break_glass.present? || policy(@clinical_case).view_patient_identity?
     @patient_consent = @clinical_case.patient_consent
     # Tombol "Inisiasi CBD / Long Case": event berbasis kasus yang tampil bagi
     # pemilik kasus dan belum dipakai kasus ini.
@@ -213,7 +213,7 @@ class ClinicalCasesController < ApplicationController
 
   def workplace_rotation_for(clinical_case)
     rotations = clinical_case.user.clinical_rotations
-    rotations.where("start_date <= :d AND end_date >= :d", d: clinical_case.case_date).order(start_date: :desc).first ||
+    rotations.covering(clinical_case.case_date).order(start_date: :desc).first ||
       rotations.ongoing.order(start_date: :desc).first
   end
 

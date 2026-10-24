@@ -49,6 +49,12 @@ class ClinicalCasePolicy < ApplicationPolicy
     show?
   end
 
+  # Pembimbing kasus melihat identitas pasien tanpa Break Glass walau Privacy
+  # Mode menyala; pengajar lain dan pemilik kasus tetap lewat Break Glass.
+  def view_patient_identity?
+    show? && !owner? && record.supervised_by?(user)
+  end
+
   def issue_consent?
     owner?
   end
