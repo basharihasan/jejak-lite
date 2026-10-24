@@ -38,7 +38,7 @@
     <%# Opsi khusus CBT — tampil bila CBT Exam Results dipilih. %>
     <div class="hidden group-has-[#importer-type-cbt:checked]:block rounded-xl bg-indigo-50/60 ring-1 ring-indigo-100 p-4 space-y-3">
       <p class="text-xs font-semibold text-indigo-700 uppercase tracking-wide">Opsi khusus CBT (opsional)</p>
-      <p class="text-xs text-indigo-700/80">Bila diisi, menimpa kolom <code>exam_title</code> / <code>held_at</code> untuk seluruh baris. Berkas tanpa kolom <code>exam_code</code> memakai kode dari judul (atau nama berkas) + tanggal ujian.</p>
+      <p class="text-xs text-indigo-700/80">Bila diisi, menimpa judul (<code>exam_title</code>) dan tanggal (<code>Tanggal</code> / <code>held_at</code>) di berkas untuk seluruh baris. Berkas tanpa kolom <code>exam_code</code> — termasuk ekspor hasil ujian per sesi — memakai kode dari judul (atau nama berkas) + tanggal ujian, jadi <strong>isi Judul ujian</strong> agar nama event rapi.</p>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <%= f.label :exam_title, "Judul ujian", class: "block text-xs font-semibold text-gray-600 mb-1" %>

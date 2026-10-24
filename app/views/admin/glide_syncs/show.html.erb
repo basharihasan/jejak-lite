@@ -43,6 +43,15 @@
         </ul>
       </div>
     <% end %>
+    <% [ [ "untested_columns", "kolom tidak dijadikan dimensi — bernilai 0 untuk semua peserta (tidak ada soal kelompok itu di ujian ini)" ],
+         [ "text_columns", "kolom keterangan diabaikan — isinya teks, bukan nilai" ] ].each do |key, note| %>
+      <% columns = Array(@import.options[key]) %>
+      <% next if columns.empty? %>
+      <details data-testid="<%= key.dasherize %>">
+        <summary class="cursor-pointer text-xs text-gray-600"><span class="font-semibold"><%= columns.size %></span> <%= note %></summary>
+        <p class="mt-1 text-xs text-gray-500"><%= columns.join(" · ") %></p>
+      </details>
+    <% end %>
     <% if @import.error_messages.any? %>
       <div>
         <p class="text-xs font-semibold text-rose-600 uppercase tracking-wide">Galat<%= " (#{GlideImport::MAX_ERROR_MESSAGES} pertama dari #{@import.error_count})" if @import.error_count > @import.error_messages.size %></p>

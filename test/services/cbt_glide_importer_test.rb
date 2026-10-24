@@ -108,6 +108,75 @@ class CbtGlideImporterTest < ActiveSupport::TestCase
     assert_not AssessmentInstance.exists?(student: @siti, assessment_event: AssessmentEvent.find_by!(external_code: "CBT-UJI-2"))
   end
 
+  test "ekspor hasil ujian per sesi: kolom keterangan diabaikan, prefiks menjadi kategori, kolom nol semua dilewati" do
+    students = (1..4).map do |n|
+      User.create!(full_name: "Dummy #{n}", email: "dummy.mhs0#{n}@jejaklite.test", password: "password123",
+                   confirmed_at: Time.current).tap { |user| user.roles << roles(:mahasiswa) }
+    end
+    result = import(file_fixture("cbt_exam_results_sesi.csv").read, exam_title: "CBT Blok Gastrointestinal")
+
+    assert_equal 0, result.error_count, result.error_messages.inspect
+    assert_equal 4, result.created_count
+    event = AssessmentEvent.find(result.created_event_ids.sole)
+    assert_equal "CBT Blok Gastrointestinal", event.name
+    assert_equal Date.new(2026, 9, 9), event.exam_date, "kolom Tanggal \"9 Septermber 2026\" terbaca"
+
+    first = event.assessment_instances.find_by!(student: students.first)
+    assert_equal 58.67, first.score.to_f, "Nilai Akhir, koma desimal"
+
+    dimensions = event.assessment_dimensions.to_h { |d| [ d.name, d.category ] }
+    assert_equal 46, dimensions.size
+    assert_empty dimensions.keys & [ "Nomor Ujian", "Nama Peserta", "Sesi", "Jumlah Benar", "Jumlah Raw Nilai", "Nilai Akhir" ]
+    assert_equal "kompetensi", dimensions["Keterampilan klinis"]
+    assert_equal "sistem_organ", dimensions["Gastrointestinal"]
+    assert_equal "tingkat_kemampuan", dimensions["Tingkat Kemampuan 3A"]
+    assert_equal "tingkat_kemampuan", dimensions["Tingkat Kemampuan 4B"], "[TI] 4B = salah ketik [TK]"
+    assert_equal "siklus_kehidupan", dimensions["Adult"]
+    assert_equal "setting_klinis", dimensions["Hospital"]
+    assert_equal "proses_klinis", dimensions["Biostatistics"]
+    assert_equal "kategori_soal", dimensions["Hepatitis B"]
+
+    assert_not dimensions.key?("Komunikasi efektif"), "kolom bernilai 0 untuk semua peserta = tidak ada soal"
+    assert_equal 73, result.options["untested_columns"].size
+    assert_includes result.options["untested_columns"], "[AK] Komunikasi efektif"
+    assert_nil result.options["text_columns"], "Nama Peserta & Sesi dikenali sebagai keterangan"
+
+    third = event.assessment_instances.find_by!(student: students.third)
+    tk3a = event.assessment_dimensions.find_by!(name: "Tingkat Kemampuan 3A")
+    assert_equal 0, third.assessment_dimension_scores.find_by!(assessment_dimension: tk3a).score.to_f,
+                 "nol pada kolom yang diujikan tetap nilai"
+  end
+
+  test "kolom yang seluruh isinya teks diabaikan sebagai keterangan" do
+    csv = "email,Ruang,Nilai Akhir,Kognitif\nsiti@example.com,Lab 1,80,75\nandi@example.com,Lab 2,70,65\n"
+    result = import(csv, exam_title: "Ujian Ruang", exam_date: exam_date)
+
+    assert_equal 2, result.created_count
+    assert_equal [ "Ruang" ], result.options["text_columns"]
+    assert_equal [ "Kognitif" ], AssessmentEvent.find(result.created_event_ids.sole).assessment_dimensions.map(&:name)
+  end
+
+  test "nama dimensi kembar lintas prefiks tidak bertabrakan" do
+    csv = "email,Nilai Akhir,[ST] Reproduksi,[KAT] Reproduksi\nsiti@example.com,80,75,60\n"
+    result = import(csv, exam_title: "Ujian Kembar", exam_date: exam_date)
+
+    event = AssessmentEvent.find(result.created_event_ids.sole)
+    assert_equal({ "Reproduksi" => "sistem_organ", "[KAT] Reproduksi" => "sistem_organ" },
+                 event.assessment_dimensions.to_h { |d| [ d.name, d.category ] })
+  end
+
+  test "event baru tidak ditinggalkan kosong bila semua barisnya galat" do
+    csv = "email,exam_code,total_score,held_at,Kognitif,Reasoning\n" \
+          "siti@example.com,CBT-GAGAL,70,#{exam_date.iso8601},abc,60\n" \
+          "andi@example.com,CBT-GAGAL,60,#{exam_date.iso8601},60,xyz\n"
+    result = import(csv)
+
+    assert_equal 2, result.error_count
+    assert_empty result.created_event_ids
+    assert_empty result.event_ids_touched
+    assert_not AssessmentEvent.exists?(external_code: "CBT-GAGAL")
+  end
+
   test "berkas tanpa kolom email ditolak dengan pesan" do
     result = import("nama,total_score\nSiti,80\n")
     assert_equal 1, result.error_count

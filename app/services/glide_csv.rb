@@ -8,6 +8,13 @@ require "csv"
 # "email_yang_diuji" dibaca sama.
 module GlideCsv
   NUMBER = /\A-?\d+(\.\d+)?\z/
+  # Tiga huruf pertama nama bulan Indonesia/Inggris — dengan singkatannya, dan
+  # toleran salah ketik di belakangnya ("Septermber").
+  MONTHS = {
+    "jan" => 1, "feb" => 2, "peb" => 2, "mar" => 3, "apr" => 4, "mei" => 5, "may" => 5, "jun" => 6,
+    "jul" => 7, "agu" => 8, "agt" => 8, "ags" => 8, "aug" => 8, "sep" => 9, "okt" => 10, "oct" => 10,
+    "nov" => 11, "nop" => 11, "des" => 12, "dec" => 12
+  }.freeze
 
   module_function
 
@@ -49,8 +56,9 @@ module GlideCsv
   end
 
   # Waktu di zona aplikasi (WIB). Diterima ISO-8601 — termasuk "…Z" ekspor
-  # Glide, dikonversi dari UTC — "2026-06-06", dan "06/06/2026" (hari/bulan/
-  # tahun, opsional jam). nil bila kosong, :invalid bila tak terbaca.
+  # Glide, dikonversi dari UTC — "2026-06-06", "06/06/2026" (hari/bulan/
+  # tahun, opsional jam), dan "6 Juni 2026" / "Sabtu, 6 Jun 2026 08:00".
+  # nil bila kosong, :invalid bila tak terbaca.
   def time(raw)
     value = raw.to_s.strip
     return nil if value.empty?
@@ -58,6 +66,9 @@ module GlideCsv
     case value
     when %r{\A(\d\d?)[/.-](\d\d?)[/.-](\d{4})(?:[ T](\d\d?):(\d\d)(?::(\d\d))?)?\z}
       Time.zone.local($3.to_i, $2.to_i, $1.to_i, $4.to_i, $5.to_i, $6.to_i)
+    when /\A(?:[[:alpha:]]+,\s*)?(\d\d?)\s+([[:alpha:]]+)\.?\s+(\d{4})(?:,?\s+(\d\d?)[:.](\d\d))?\z/
+      month = MONTHS[$2[0, 3].downcase]
+      month ? Time.zone.local($3.to_i, month, $1.to_i, $4.to_i, $5.to_i) : :invalid
     when /\A\d{4}-\d\d?-\d\d?/
       Time.zone.parse(value) || :invalid
     else
