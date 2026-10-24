@@ -7,6 +7,7 @@
   is_instructor         = local_assigns[:is_instructor] || false
   is_config_manager     = local_assigns[:is_config_manager] || false
   is_prodi_relabeler    = local_assigns[:is_prodi_relabeler] || false
+  is_form_manager       = local_assigns[:is_form_manager] || false
   pending_verifications = local_assigns[:pending_verifications] || 0
   pending_activity_verifications = local_assigns[:pending_activity_verifications] || 0
 
@@ -99,8 +100,10 @@
         <%= render "shared/nav_item", label: term("nav.feedback_journal"), path: student_feedback_journal_path,
             active: active_class.call("/student/feedback_journal") %>
       <% end %>
-      <%= render "shared/nav_item", label: term("nav.form_templates"), path: assessment_form_templates_path,
-          active: active_class.call(%w[/assessment_form_templates /assessment_form_submissions]) %>
+      <% if is_form_manager %>
+        <%= render "shared/nav_item", label: term("nav.form_templates"), path: assessment_form_templates_path,
+            active: active_class.call(%w[/assessment_form_templates /assessment_form_submissions]) %>
+      <% end %>
     </div>
   </div>
 </div>

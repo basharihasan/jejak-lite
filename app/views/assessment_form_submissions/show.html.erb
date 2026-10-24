@@ -17,5 +17,5 @@
     <% end %>
   </div>
 
-  <%= link_to "← Kembali", assessment_form_template_path(@submission.assessment_form_template), class: "mt-6 inline-block text-sm text-gray-500 hover:text-indigo-600" %>
+  <%= link_to "← Kembali", policy(@submission.assessment_form_template).show? ? assessment_form_template_path(@submission.assessment_form_template) : assessment_form_submissions_path, class: "mt-6 inline-block text-sm text-gray-500 hover:text-indigo-600" %>
 </div>

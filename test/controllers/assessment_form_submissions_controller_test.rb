@@ -4,7 +4,7 @@ class AssessmentFormSubmissionsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   test "mengisi formulir menyimpan jawaban per pertanyaan" do
-    sign_in users(:siti)
+    sign_in users(:dedi)
     template = assessment_form_templates(:tutor_evaluation)
     rating_field = assessment_form_fields(:kejelasan_materi)
 
@@ -22,8 +22,21 @@ class AssessmentFormSubmissionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "4", submission.answer_for(rating_field).value
   end
 
-  test "pertanyaan wajib yang tidak dipilih tidak lagi lolos diam-diam" do
+  test "mahasiswa tidak bisa mengirim jawaban formulir" do
     sign_in users(:siti)
+    template = assessment_form_templates(:tutor_evaluation)
+
+    assert_no_difference "AssessmentFormSubmission.count" do
+      post assessment_form_template_assessment_form_submissions_path(template), params: {
+        assessment_form_submission: { subject_user_id: users(:budi).id },
+        answers: { assessment_form_fields(:kejelasan_materi).id.to_s => "4" }
+      }
+    end
+    assert_redirected_to root_path
+  end
+
+  test "pertanyaan wajib yang tidak dipilih tidak lagi lolos diam-diam" do
+    sign_in users(:dedi)
     template = assessment_form_templates(:tutor_evaluation)
 
     # Meniru radio yang tidak dipilih: parameternya tidak terkirim sama sekali.
@@ -46,6 +59,15 @@ class AssessmentFormSubmissionsControllerTest < ActionDispatch::IntegrationTest
     submission.save!
 
     sign_in users(:budi)
+    get assessment_form_submission_path(submission)
+
+    assert_response :success
+    assert_match "Anonim", response.body
+    assert_no_match users(:siti).full_name, response.body
+    # Subjek bukan pengelola Form Builder: tautan kembali ke daftar jawaban.
+    assert_select "a[href=?]", assessment_form_submissions_path, text: "← Kembali"
+
+    sign_in users(:dedi)
     get assessment_form_submission_path(submission)
 
     assert_response :success

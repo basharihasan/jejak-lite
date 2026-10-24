@@ -17,15 +17,14 @@ class AssessmentFormSubmission < ApplicationRecord
 
   scope :recent, -> { order(submitted_at: :desc) }
 
-  # Identitas responden disembunyikan dari subjek yang dinilai kalau
-  # template ditandai anonim — admin tetap bisa melihat (akuntabilitas),
-  # meniru gerbang reveal_identity JEJAK tanpa membangun UI reveal terpisah.
+  # Identitas responden disembunyikan kalau template ditandai anonim — dari
+  # subjek yang dinilai maupun kaprodi pengelola Form Builder; hanya admin
+  # (akuntabilitas) dan responden sendiri yang melihat, meniru gerbang
+  # reveal_identity JEJAK tanpa membangun UI reveal terpisah.
   def respondent_visible_to?(user)
     return true unless assessment_form_template.anonymous?
-    return true if user.has_role?("admin")
-    return true if user == respondent
 
-    subject_user.nil? || subject_user != user
+    user.has_role?("admin") || user == respondent
   end
 
   def answer_for(field)

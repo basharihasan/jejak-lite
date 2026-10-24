@@ -52,6 +52,7 @@ class AssessmentFormSubmissionTest < ActiveSupport::TestCase
     submission.save!
 
     assert_not submission.respondent_visible_to?(users(:budi)) # subjek yang dinilai
+    assert_not submission.respondent_visible_to?(users(:dedi)) # kaprodi pengelola Form Builder
     assert submission.respondent_visible_to?(users(:siti)) # respondennya sendiri
 
     admin = users(:budi)

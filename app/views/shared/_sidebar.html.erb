@@ -22,8 +22,12 @@
   brand_subtitle = current_user.study_program&.name || t("chrome.brand_subtitle_default")
   # Relabel Prodi Mahasiswa juga terbuka untuk kaprodi (terikat prodinya).
   is_prodi_relabeler = is_kaprodi && !is_config_manager
+  # Form Builder mengikuti AssessmentFormTemplatePolicy (peran yang
+  # disandang, bukan peran aktif): hanya kaprodi & admin.
+  is_form_manager = current_user.can_manage_assessment_forms?
   nav_locals = { is_student: is_student, is_instructor: is_instructor,
                  is_config_manager: is_config_manager, is_prodi_relabeler: is_prodi_relabeler,
+                 is_form_manager: is_form_manager,
                  pending_verifications: pending_verifications,
                  pending_activity_verifications: pending_activity_verifications }
 %>

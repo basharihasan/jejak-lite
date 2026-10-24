@@ -5,15 +5,12 @@ class AssessmentFormTemplatesController < ApplicationController
   before_action :set_template, only: %i[show edit update destroy]
 
   def index
-    @templates = current_user.has_role?("admin") ? AssessmentFormTemplate.all : AssessmentFormTemplate.active
+    authorize AssessmentFormTemplate
+    @templates = AssessmentFormTemplate.all
   end
 
   def show
-    # Template nonaktif hanya untuk pengelola; yang aktif boleh dilihat siapa pun
-    # yang mungkin mengisinya.
-    return if @template.is_active? || policy(@template).manage?
-
-    redirect_to assessment_form_templates_path, alert: "Formulir ini sudah tidak aktif."
+    authorize @template
   end
 
   def new

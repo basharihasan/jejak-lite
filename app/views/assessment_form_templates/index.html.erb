@@ -1,6 +1,6 @@
 <div class="flex items-center justify-between">
   <h1 class="text-xl font-bold text-gray-900">Formulir Evaluasi</h1>
-  <% if current_user.has_role?("admin") %>
+  <% if policy(AssessmentFormTemplate).create? %>
     <%= link_to "+ Formulir Baru", new_assessment_form_template_path,
           class: "bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm" %>
   <% end %>

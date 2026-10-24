@@ -33,7 +33,7 @@ Panduan ini disusun menurut **peran**: bab awal berlaku untuk semua orang, lalu 
   - [4.9 Workplace Assessment (DOPS & Mini-CEX)](#workplace-assessment-dops--mini-cex)
   - [4.10 Rubric-based Assessment (Asesmen Saya)](#rubric-based-assessment-asesmen-saya)
   - [4.11 Jurnal Umpan Balik](#jurnal-umpan-balik)
-  - [4.12 Mengisi formulir evaluasi (Assessment Form)](#mengisi-formulir-evaluasi-assessment-form)
+  - [4.12 Formulir evaluasi (Assessment Form)](#formulir-evaluasi-assessment-form)
   - [4.13 Peta Kompetensi (Analisis Capaian Pembelajaran)](#peta-kompetensi-analisis-capaian-pembelajaran)
   - [4.14 Peta EPA & Tingkat Entrustment](#peta-epa--tingkat-entrustment)
 - [Bab 5 — Panduan Pembimbing (Dosen, Preseptor, Kaprodi)](#bab-5--panduan-pembimbing-dosen-preseptor-kaprodi)
@@ -181,7 +181,7 @@ Sidebar hanya memuat enam grup, dan **menyempit mengikuti peran aktif** — buka
 |---|---|---|
 | **Ikhtisar** | Beranda, Longitudinal Portfolio (mahasiswa), Profil Saya, Notifikasi | semua |
 | **Perjalanan Belajar** | Logbook ▾ (Kasus Klinis, Logbook Kegiatan), Rotasi Klinik, Enrolment Tutorial, Refleksi, Tugas Akhir | semua |
-| **Asesmen** | Asesmen & Evaluasi ▾ (Evaluasi Akademik, Workplace Assessment, Rubric-based Assessment, Jurnal Umpan Balik*, Assessment Form Builder) | semua (*Jurnal hanya mahasiswa) |
+| **Asesmen** | Asesmen & Evaluasi ▾ (Evaluasi Akademik, Workplace Assessment, Rubric-based Assessment, Jurnal Umpan Balik*, Assessment Form Builder†) | semua (*Jurnal hanya mahasiswa; †Form Builder hanya kaprodi & admin) |
 | **Kompetensi & Prestasi** | Peta Kompetensi, Peta EPA & Entrustment | semua |
 | **Coaching Center** | Validasi Kasus Klinis, Validasi Kegiatan, Dashboard Analitik, Daftar Mahasiswa, Relabel Prodi Mahasiswa (kaprodi) | peran aktif dosen / preseptor / kaprodi / admin |
 | **Konfigurasi** | 17 menu pengelolaan (lihat [Bab 6](#bab-6--panduan-admin-konfigurasi)) | akun yang **memiliki** peran admin, apa pun peran aktifnya |
@@ -221,10 +221,10 @@ Halaman **Ikhtisar → Notifikasi** (`/notifications`) memuat semua pemberitahua
 
 | Peran | Fungsi utama | Yang boleh dilakukan |
 |---|---|---|
-| **Mahasiswa** | Mencatat perjalanan belajar | Mencatat kegiatan & kasus, mengajukan verifikasi, meminta DOPS/Mini-CEX/CBD/Long Case dari kasus, mendaftar & mengumpulkan asesmen rubrik, menulis refleksi, mendaftarkan tugas akhir, mengisi formulir evaluasi, melihat nilai, capaian, dan peta EPA miliknya sendiri. |
+| **Mahasiswa** | Mencatat perjalanan belajar | Mencatat kegiatan & kasus, mengajukan verifikasi, meminta DOPS/Mini-CEX/CBD/Long Case dari kasus, mendaftar & mengumpulkan asesmen rubrik, menulis refleksi, mendaftarkan tugas akhir, melihat nilai, capaian, dan peta EPA miliknya sendiri. |
 | **Dosen** | Pembimbing akademik, tutor, penguji | Memverifikasi kasus (yang menandainya atau tanpa tanda pembimbing) & kegiatan mahasiswa mana pun, menilai DOPS/Mini-CEX, menilai di Lembar Penguji, memberi skor tugas akhir, memutuskan tingkat EPA bagi mahasiswa yang berelasi, Dashboard Analitik bagian *Mahasiswa Bimbingan*. |
 | **Preseptor** | Pembimbing klinis di wahana | Setara dosen untuk verifikasi & penilaian; menjadi penilai bawaan DOPS/Mini-CEX yang diminta dari kasus pada rotasinya; Dashboard Analitik bagian *Mahasiswa di Wahana Anda*. |
-| **Kaprodi** | Pemantau program studi | Membuka halaman mahasiswa lain (hanya melihat, tidak menilai), Dashboard Analitik bagian *Program Studi* (terkunci ke prodi binaan yang ditetapkan admin), Relabel Prodi Mahasiswa, Jadwal DOPS & Mini-CEX, Learning Unit & Matrix. |
+| **Kaprodi** | Pemantau program studi | Membuka halaman mahasiswa lain (hanya melihat, tidak menilai), Dashboard Analitik bagian *Program Studi* (terkunci ke prodi binaan yang ditetapkan admin), Relabel Prodi Mahasiswa, Jadwal DOPS & Mini-CEX, Learning Unit & Matrix, **Assessment Form Builder** (kelola penuh). |
 | **Admin** | Pengelola instalasi | Semua hal di atas ditambah seluruh grup **Konfigurasi**: pengguna, periode, prodi, event asesmen, kurikulum, master data, taksonomi, istilah, dan tata kelola data. |
 
 Aturan yang berlaku lintas peran:
@@ -541,9 +541,9 @@ Notifikasi ke Anda **baru terkirim saat evaluasi berstatus Terkirim** — draf p
 
 **Asesmen & Evaluasi → Jurnal Umpan Balik** (`/student/feedback_journal`) menyatukan seluruh umpan balik tertulis — rubrik, CBD/Long Case, DOPS, Mini-CEX — dalam satu linimasa kronologis beserta skor dan nama penguji. Gunakan sebagai bahan refleksi.
 
-### 4.12 Mengisi formulir evaluasi (Assessment Form)
+### 4.12 Formulir evaluasi (Assessment Form)
 
-**Asesmen & Evaluasi → Assessment Form Builder** (`/assessment_form_templates`) bagi mahasiswa berisi formulir **aktif** yang bisa diisi: bawaan aplikasi menyediakan **Evaluasi Dosen Tutor** (anonim, pilih dosen yang dinilai), **Evaluasi Blok** (anonim), dan **Asesmen Tambahan**. Buka formulir → **Isi** → jawab pertanyaan (skala 1–5, skor angka, rubrik berjenjang, pilihan ganda, ya/tidak, teks). Pada formulir **anonim**, identitas Anda disembunyikan dari orang yang dinilai (admin tetap dapat melihat). Jawaban yang pernah Anda kirim ada di `/assessment_form_submissions`.
+**Assessment Form Builder** (`/assessment_form_templates`) — termasuk membuka dan mengisi formulir seperti **Evaluasi Dosen Tutor** dan **Evaluasi Blok** — hanya dapat diakses **kaprodi dan admin**; menunya tidak tampil bagi mahasiswa. Jawaban yang pernah Anda kirim, atau lembar yang menilai Anda, tetap dapat dibuka di `/assessment_form_submissions`; pada formulir **anonim**, identitas responden hanya terlihat oleh responden sendiri dan admin.
 
 ### 4.13 Peta Kompetensi (Analisis Capaian Pembelajaran)
 
@@ -816,7 +816,7 @@ Ketiganya mendukung **impor CSV** (header alias ID/EN dikenali).
 
 ### 6.13 Assessment Form Builder (templat formulir)
 
-`/assessment_form_templates` — admin membuat templat: nama, deskripsi, **aktif**, **anonim**, **wajib pilih subjek** (orang yang dinilai). Tambahkan pertanyaan: label, jenis (Skala 1–5, Skor Angka 0–maks, Rubrik Berjenjang dengan deskriptor per tingkat, Pilihan Ganda, Ya/Tidak, Teks Singkat, Teks Panjang), wajib/opsional, **bobot**, dan **pemetaan ke ranah kompetensi**; urutan diatur dengan ▲▼. Jenis pertanyaan terkunci setelah ada jawaban. Templat dipakai dua cara: diisi langsung oleh pengguna (evaluasi tutor/blok), atau ditunjuk sebagai **rubrik** pada Assessment Event sehingga penguji mengisinya di Lembar Penguji dan nilainya dihitung dari jawaban berbobot. Admin melihat semua jawaban masuk di `/assessment_form_submissions`.
+`/assessment_form_templates` — hanya untuk **kaprodi dan admin** (keduanya mengelola penuh; pengguna lain ditolak dan tidak melihat menunya). Kaprodi/admin membuat templat: nama, deskripsi, **aktif**, **anonim**, **wajib pilih subjek** (orang yang dinilai). Tambahkan pertanyaan: label, jenis (Skala 1–5, Skor Angka 0–maks, Rubrik Berjenjang dengan deskriptor per tingkat, Pilihan Ganda, Ya/Tidak, Teks Singkat, Teks Panjang), wajib/opsional, **bobot**, dan **pemetaan ke ranah kompetensi**; urutan diatur dengan ▲▼. Jenis pertanyaan terkunci setelah ada jawaban. Templat dipakai dua cara: diisi langsung oleh kaprodi/admin lewat **Isi Formulir**, atau ditunjuk sebagai **rubrik** pada Assessment Event sehingga penguji mengisinya di Lembar Penguji (tetap terbuka bagi dosen/preseptor penguji) dan nilainya dihitung dari jawaban berbobot. Kaprodi dan admin melihat semua jawaban masuk di `/assessment_form_submissions`; pada templat **anonim**, identitas responden hanya terlihat oleh admin.
 
 ### 6.14 Rotasi Klinik dan Enrolment Tutorial
 

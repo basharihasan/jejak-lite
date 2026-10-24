@@ -53,6 +53,12 @@ class User < ApplicationRecord
     instructor? || has_role?("kaprodi")
   end
 
+  # Assessment Form Builder (/assessment_form_templates) — membuat, menyunting,
+  # mengisi, dan membaca jawaban formulir — hanya untuk kaprodi dan admin.
+  def can_manage_assessment_forms?
+    has_role?("admin") || has_role?("kaprodi")
+  end
+
   # Kaprodi (bukan admin) terikat ke prodi akunnya: prodi itu membatasi apa
   # yang boleh ia lihat & ubah, jadi hanya admin yang boleh menggantinya.
   def study_program_bound?

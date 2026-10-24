@@ -14,12 +14,14 @@ class AssessmentFormSubmissionsController < ApplicationController
 
   def new
     @template = AssessmentFormTemplate.active.find(params[:assessment_form_template_id])
+    authorize @template, :show?
     @submission = @template.assessment_form_submissions.build(subject_user_id: params[:subject_user_id].presence)
     load_subject_candidates
   end
 
   def create
     @template = AssessmentFormTemplate.active.find(params[:assessment_form_template_id])
+    authorize @template, :show?
     @submission = @template.assessment_form_submissions.build(submission_params)
     @submission.respondent = current_user
     @submission.submitted_at = Time.current
