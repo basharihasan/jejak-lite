@@ -59,4 +59,15 @@ class ClinicalRotationsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to clinical_rotations_path
     assert_match "DOPS/Mini-CEX", flash[:alert]
   end
+
+  test "formulir rotasi menawarkan akun berperan Preseptor sebagai preseptor" do
+    admin = users(:budi)
+    admin.roles << roles(:admin)
+    sign_in admin
+
+    get new_clinical_rotation_path
+    assert_response :success
+    assert_select "select[name='clinical_rotation[preceptor_id]'] option[value='#{users(:wati).id}']", 1
+    assert_select "select[name='clinical_rotation[preceptor_id]'] option[value='#{users(:budi).id}']", 1
+  end
 end

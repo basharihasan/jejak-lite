@@ -59,7 +59,9 @@ class ClinicalRotationsController < ApplicationController
 
   def load_form_collections
     @students = User.joins(:roles).where(roles: { code: "mahasiswa" }).order(:full_name)
-    @preceptors = User.joins(:roles).where(roles: { code: "dosen" }).order(:full_name)
+    # Preseptor rotasi: peran Preseptor (pembimbing klinik) dan Dosen. Dulu
+    # hanya Dosen, sehingga akun berperan Preseptor tidak dapat dipilih.
+    @preceptors = User.joins(:roles).where(roles: { code: %w[preseptor dosen] }).distinct.order(:full_name)
     @academic_periods = AcademicPeriod.ordered
   end
 
