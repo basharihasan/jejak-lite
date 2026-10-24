@@ -90,6 +90,14 @@ class CbtGlideImporterTest < ActiveSupport::TestCase
     assert_equal Date.new(2026, 3, 2), event.exam_date
   end
 
+  test "judul berawalan CBT tidak menghasilkan kode berprefiks ganda" do
+    csv = "email,total_score,Kognitif\nsiti@example.com,80,75\n"
+    import(csv, exam_title: "CBT Oktober 2026", exam_date: Date.new(2026, 10, 24))
+
+    assert AssessmentEvent.exists?(external_code: "CBT-OKTOBER-2026-20261024")
+    assert_not AssessmentEvent.where("external_code LIKE 'CBT-CBT-%'").exists?
+  end
+
   test "tanggal dari judul bergaya jejak.pro: (DDMMYY)" do
     csv = "email,exam_code,exam_title,total_score\nsiti@example.com,X-1,Ujian CBT (060626),80\n"
     import(csv)

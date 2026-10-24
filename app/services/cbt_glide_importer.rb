@@ -316,6 +316,8 @@ class CbtGlideImporter
   def inferred_code(title, held_at)
     base = title.presence || File.basename(@import.filename.to_s, ".*").sub(/\A[a-f0-9]{6,32}[._-]/i, "")
     slug = base.to_s.gsub(/[^a-zA-Z0-9]+/, "-").upcase.delete_prefix("-").delete_suffix("-")
+    # Judul "CBT Oktober 2026" tidak menjadi "CBT-CBT-OKTOBER-…".
+    slug = slug.sub(/\ACBT(?:-|\z)/, "")
     [ "CBT", slug.presence || "EXAM", held_at&.strftime("%Y%m%d") ].compact.join("-")
   end
 
