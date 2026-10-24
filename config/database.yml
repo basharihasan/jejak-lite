@@ -21,7 +21,9 @@ default: &default
   port: <%= ENV.fetch("POSTGRES_PORT", "5432") %>
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
-  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # Ditambah 5 untuk thread Solid Queue yang berbagi pool dengan Puma dalam
+  # mode async (lihat config/puma.rb). DB_POOL menimpa bila perlu.
+  max_connections: <%= ENV.fetch("DB_POOL") { ENV.fetch("RAILS_MAX_THREADS", 5).to_i + 5 } %>
 
 
 development:

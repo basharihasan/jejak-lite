@@ -38,6 +38,13 @@ services:
       # memori PFKV2 — kelas kegagalan yang sama).
       - key: SOLID_QUEUE_IN_PUMA
         value: "true"
+      # Hemat RAM 512 MB plan free: satu thread job cukup untuk notifikasi,
+      # dan glibc dibatasi dua arena malloc (mencegah memori membengkak per
+      # thread). Solid Queue berjalan mode async — lihat config/puma.rb.
+      - key: JOB_THREADS
+        value: "1"
+      - key: MALLOC_ARENA_MAX
+        value: "2"
       # Wajib di production (lihat config/initializers/active_record_encryption.rb)
       # — kolom identitas pasien di ClinicalCase dienkripsi dengan kunci ini.
       # Isi manual di dashboard, hasil `bin/rails db:encryption:init`.
