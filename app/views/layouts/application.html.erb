@@ -57,6 +57,10 @@
     <%# Chartkick (Portfolio, Dashboard Analitik) — dimuat lewat CDN, bukan
         importmap, karena Chartkick tidak menyediakan build ESM resmi. %>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <%# Adapter tanggal untuk sumbu waktu (line_chart berkunci tanggal, mis.
+        tren Evaluasi Akademik). Tanpa ini Chart.js melempar "Check that a
+        complete date adapter is provided" dan grafiknya tidak tampil. %>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartkick@5/dist/chartkick.js"></script>
     <%= javascript_importmap_tags %>
 
