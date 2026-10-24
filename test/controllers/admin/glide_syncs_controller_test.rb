@@ -109,7 +109,7 @@ class Admin::GlideSyncsControllerTest < ActionDispatch::IntegrationTest
     assert_match "tidak dapat di-rollback", flash[:alert]
   end
 
-  test "templat CSV memakai header persis ekspor Glide" do
+  test "templat CSV: OSCE persis ekspor Glide, CBT format ekspor hasil ujian per sesi" do
     sign_in @admin
     get template_admin_glide_syncs_path(type: "osce", format: :csv)
     assert_response :success
@@ -119,7 +119,34 @@ class Admin::GlideSyncsControllerTest < ActionDispatch::IntegrationTest
     assert_match "PerilakuProfesional", header
 
     get template_admin_glide_syncs_path(type: "cbt", format: :csv)
-    assert_match "exam_code", response.body
+    header, example = CSV.parse(response.body.delete_prefix("﻿"))
+    assert_equal [ "Nomor Ujian", "Nama Peserta", "email", "Tanggal", "Sesi", "Jumlah Benar", "Jumlah Raw Nilai", "Nilai Akhir" ], header.first(8)
+    assert header.drop(8).all? { |column| column.start_with?("[") }, "kolom dimensi berprefiks kelompok"
+    assert_equal header.size, example.size
+  end
+
+  test "templat CBT yang diunduh dapat langsung diimpor" do
+    sign_in @admin
+    get template_admin_glide_syncs_path(type: "cbt", format: :csv)
+    template = response.body.sub("mahasiswa@kampus.ac.id", users(:siti).email)
+    post csv_import_admin_glide_syncs_path, params: { importer_type: "cbt", exam_title: "Ujian Templat",
+                                                      csv_file: upload(template, "templat.csv") }
+
+    import = GlideImport.order(:id).last
+    assert_equal 1, import.created_count, import.error_messages.inspect
+    assert_equal 0, import.error_count
+    assert_equal Date.new(2026, 6, 6), AssessmentEvent.find(import.created_event_ids.first).exam_date
+  end
+
+  test "ringkasan menyebut kolom nol semua dan kolom keterangan yang disisihkan" do
+    sign_in @admin
+    csv = "email,Ruang,Nilai Akhir,[AK] Komunikasi efektif,[ST] Respirasi\n#{users(:siti).email},Lab 1,80,0,75\n"
+    post csv_import_admin_glide_syncs_path, params: { importer_type: "cbt", exam_title: "Ujian Ringkasan",
+                                                      exam_date: @date.iso8601, csv_file: upload(csv) }
+    follow_redirect!
+
+    assert_select "[data-testid=untested-columns]", text: /\[AK\] Komunikasi efektif/
+    assert_select "[data-testid=text-columns]", text: /Ruang/
   end
 
   test "tab Station OSCE di halaman event menampilkan rincian per station" do

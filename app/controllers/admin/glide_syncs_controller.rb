@@ -10,13 +10,16 @@ require "csv"
 class Admin::GlideSyncsController < Admin::BaseController
   MAX_FILE_SIZE = 50.megabytes
 
-  # Kolom contoh templat — urutan dan ejaan persis ekspor Glide.
+  # Kolom contoh templat. CBT: ekspor hasil ujian per sesi (kolom dimensi
+  # berprefiks kelompok); format Glide lama (email, exam_code, …) tetap
+  # diterima importer. OSCE: urutan dan ejaan persis ekspor Glide.
   TEMPLATES = {
     "cbt" => {
-      headers: [ "email", "exam_code", "exam_title", "exam_type", "total_score", "held_at",
-                 "Komunikasi efektif", "Ketrampilan dasar klinis", "Saraf dan Perilaku", "Kognitif", "Reasoning" ],
-      example: [ "mahasiswa@kampus.ac.id", "CBT-2026-06-06", "Ujian CBT 6 Juni 2026", "summative", "72.5", "2026-06-06",
-                 "80", "65.22", "70", "75.5", "68" ]
+      headers: [ "Nomor Ujian", "Nama Peserta", "email", "Tanggal", "Sesi", "Jumlah Benar", "Jumlah Raw Nilai", "Nilai Akhir",
+                 "[AK] Komunikasi efektif", "[AK] Keterampilan klinis", "[ST] Respirasi", "[ST] Kardiovaskular",
+                 "[TK] 3A", "[TK] 4A", "[KAT] Adult", "[KAT] Hospital", "[KAT] Knowledge" ],
+      example: [ "", "Contoh Mahasiswa", "mahasiswa@kampus.ac.id", "6 Juni 2026", "Sesi 1", "54", "54", "72,00",
+                 "80", "65,22", "70", "75,5", "100", "60", "72,5", "68", "70" ]
     },
     "osce" => {
       headers: [ "rowID", "emailYangDiuji", "namaYangDiuji", "emailPenguji", "namaPenguji", "tanggalEntry", "station", "kasus", "IDSoal",

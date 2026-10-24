@@ -12,16 +12,26 @@
 #   kolom lain  → dimensi (mata uji / tinjauan) skala 100, dikelompokkan ke
 #                 kategori tinjauan (Area Kompetensi, Sistem Organ, …)
 #
+# Juga menerima ekspor hasil ujian per sesi: Nomor Ujian, Nama Peserta, email,
+# Tanggal ("9 September 2026"), Sesi, Jumlah Benar, Jumlah Raw Nilai, Nilai
+# Akhir, lalu kolom dimensi berprefiks kelompok — "[AK] Komunikasi efektif",
+# "[ST] Respirasi", "[TK] 3A", "[KAT] Adult". Ekspor itu menulis 0 untuk
+# kelompok yang tidak punya soal, jadi kolom yang bernilai 0 untuk SEMUA
+# peserta tidak dijadikan dimensi.
+#
 # Idempoten seperti jejak.pro: mahasiswa yang sudah bernilai pada ujian yang
 # sama dilewati ("sudah diimpor"), jadi mengunggah ulang berkas yang sama
 # aman. Untuk mengoreksi nilai: rollback unggahan lama, lalu unggah ulang.
 class CbtGlideImporter
   class RowError < StandardError; end
 
+  Column = Struct.new(:header, :code, :name, :category)
+
   METADATA_KEYS = %w[
     email examcode examtitle examtype totalscore finalscore nilai nilaiakhir
     rowid heldat no nama npm nim name studentid angkatan kelas prodi
     tanggal tanggalujian date examdate
+    nomorujian nomorpeserta namapeserta namamahasiswa sesi jumlahbenar jumlahsalah jumlahsoal jumlahrawnilai
   ].to_set.freeze
   TOTAL_KEYS = %w[totalscore finalscore nilai nilaiakhir].freeze
   DATE_KEYS = %w[heldat tanggalujian tanggal examdate date].freeze
@@ -57,6 +67,7 @@ class CbtGlideImporter
       diagnosticapproach medicolegalprofessionalism epidemiologybiostatisticsreseachmethodology
       epidemiologybiostatisticsresearchmethodology managementandtherapy clinicalreasoningskills
       mechanismofdiseases healthpromotionandprevention rehabilitation ebcr
+      epidemiology biostatistics reseachmethodology researchmethodology
     ],
     "patomekanisme" => %w[
       penyakitneoplasma penyakitinfeksidanimunologi kelainangenetikdancongenital penyakitakibattraumaataukecelakaan
@@ -66,6 +77,13 @@ class CbtGlideImporter
     "aspek" => %w[proceduralknowledge knowledge attitude healthsystem]
   }.freeze
   DIMENSION_CATEGORIES = CATEGORY_KEYS.flat_map { |category, keys| keys.map { |key| [ key, category ] } }.to_h.freeze
+
+  # Prefiks kolom ekspor per sesi → kategori. [TI] muncul di ekspor aslinya
+  # untuk "4B" — salah ketik [TK]. [KAT] berisi campuran (siklus kehidupan,
+  # setting klinis, … dan topik penyakit), jadi dipilah lewat namanya; yang
+  # tidak dikenal masuk "Kategori Soal".
+  PREFIX = /\A\[\s*([^\]]+?)\s*\]\s*(.+)\z/
+  PREFIX_CATEGORIES = { "ak" => "kompetensi", "st" => "sistem_organ", "tk" => "tingkat_kemampuan", "ti" => "tingkat_kemampuan" }.freeze
 
   # exam_title / exam_date dari formulir unggah menimpa isi berkas untuk semua
   # baris (padanan opsi khusus CBT jejak.pro).
@@ -89,9 +107,9 @@ class CbtGlideImporter
     return abort!("Kolom email tidak ditemukan — berkas ini bukan ekspor CBT Exam Results.") unless keys.value?("email")
     return abort!("Belum ada Tahun/Periode Akademik. Buat dulu sebelum mengimpor.") if @academic_period.nil? && !AcademicPeriod.exists?
 
-    @dimension_headers = headers.reject { |header| keys[header].blank? || METADATA_KEYS.include?(keys[header]) }
     @match_competency = GlideCsv.competency_matcher
     rows = GlideCsv.normalized_rows(table).zip(table.each.to_a)
+    @columns = dimension_columns(headers, keys, rows.map(&:last))
     @students = GlideCsv.students_by_email(rows.map { |normalized, _| normalized["email"].to_s.strip.downcase })
 
     # Satu transaksi per unggahan: cepat, dan galat basis data di tengah jalan
@@ -99,6 +117,7 @@ class CbtGlideImporter
     # dicatat dan barisnya saja yang dilewati (savepoint per baris).
     ActiveRecord::Base.transaction do
       rows.each.with_index(2) { |(normalized, row), line| process(normalized, row, line) }
+      discard_empty_events!
     end
     finish!
   rescue CSV::MalformedCSVError => e
@@ -149,15 +168,62 @@ class CbtGlideImporter
   end
 
   def write_dimensions!(event, instance, row)
-    @dimension_headers.each do |header|
-      value = GlideCsv.number(row[header])
+    @columns.each do |column|
+      value = GlideCsv.number(row[column.header])
       next if value.nil?
-      raise RowError, "nilai \"#{row[header]}\" pada kolom #{header.squish} bukan angka" if value == :invalid
+      raise RowError, "nilai \"#{row[column.header]}\" pada kolom #{column.header.squish} bukan angka" if value == :invalid
 
-      dimension = dimension_for(event, header)
+      dimension = dimension_for(event, column)
       record = instance.assessment_dimension_scores.find_or_initialize_by(assessment_dimension: dimension)
       record.score = value
       record.save!
+    end
+  end
+
+  # Kolom selain identitas yang menjadi dimensi. Dua jenis kolom disisihkan
+  # dan dicatat di ringkasan impor:
+  #   - semua selnya teks (Sesi, Ruang, …) → keterangan, bukan nilai;
+  #   - semua selnya 0 → kelompok itu tidak punya soal pada ujian ini.
+  #     Mengimpornya membuat radar penuh nol palsu dan, bila dimensinya
+  #     terpetakan ke ranah kompetensi, menurunkan Peta Kompetensi.
+  def dimension_columns(headers, keys, rows)
+    columns = headers.filter_map do |header|
+      next if keys[header].blank? || METADATA_KEYS.include?(keys[header])
+
+      Column.new(header, keys[header], *name_and_category(header.squish))
+    end
+    # Nama tanpa prefiks bisa kembar lintas kelompok ("[ST] Reproduksi" &
+    # "[KAT] Reproduksi") — yang berikutnya memakai header lengkapnya.
+    columns.group_by { |column| column.name.downcase }.each_value do |same|
+      same.drop(1).each { |column| column.name = column.header.squish }
+    end
+
+    by_kind = columns.group_by { |column| column_kind(rows.filter_map { |row| GlideCsv.number(row[column.header]) }) }
+    skipped = { "text_columns" => by_kind[:text], "untested_columns" => by_kind[:untested] }
+    @import.options = @import.options.merge(skipped.compact.transform_values { |list| list.map { |column| column.header.squish } })
+    by_kind.fetch(:dimension, [])
+  end
+
+  def column_kind(values)
+    if values.empty? then :empty
+    elsif values.all?(:invalid) then :text
+    elsif values.all? { |value| value == 0 } then :untested
+    else :dimension
+    end
+  end
+
+  # "[AK] Komunikasi efektif" → ["Komunikasi efektif", "kompetensi"]; tanpa
+  # prefiks kategori ditebak dari nama kolom (format Glide).
+  def name_and_category(header)
+    match = header.match(PREFIX)
+    return [ header, DIMENSION_CATEGORIES.fetch(GlideCsv.normalize_key(header), "lainnya") ] if match.nil?
+
+    prefix = GlideCsv.normalize_key(match[1])
+    name = match[2]
+    case (category = PREFIX_CATEGORIES[prefix])
+    when "tingkat_kemampuan" then [ "Tingkat Kemampuan #{name}", category ]
+    when nil then [ name, DIMENSION_CATEGORIES.fetch(GlideCsv.normalize_key(name), prefix == "kat" ? "kategori_soal" : "lainnya") ]
+    else [ name, category ]
     end
   end
 
@@ -182,18 +248,27 @@ class CbtGlideImporter
     end
   end
 
-  def dimension_for(event, header)
+  def dimension_for(event, column)
     cache = @dimensions[event.id] ||= event.assessment_dimensions.to_a
-    key = GlideCsv.normalize_key(header)
-    name = header.squish
-    cache.find { |d| d.code == key || d.name.casecmp?(name) } || begin
+    cache.find { |d| d.code == column.code } || cache.find { |d| d.name.casecmp?(column.name) } || begin
       dimension = event.assessment_dimensions.create!(
-        name: name, code: key, category: DIMENSION_CATEGORIES.fetch(key, "lainnya"),
-        max_score: 100, weight: 1, competency_item: @match_competency.call(name)
+        name: column.name, code: column.code, category: column.category,
+        max_score: 100, weight: 1, competency_item: @match_competency.call(column.name)
       )
       cache << dimension
       dimension
     end
+  end
+
+  # Event yang dibuat unggahan ini tetapi tak satu baris pun masuk (semua
+  # galat) tidak ditinggalkan kosong di daftar ujian.
+  def discard_empty_events!
+    empty = AssessmentEvent.where(id: @import.created_event_ids).where.missing(:assessment_instances).to_a
+    return if empty.empty?
+
+    empty.each(&:destroy!)
+    @import.created_event_ids -= empty.map(&:id)
+    @touched_event_ids.subtract(empty.map(&:id))
   end
 
   # [tipe event, tujuan ujian]
@@ -212,7 +287,7 @@ class CbtGlideImporter
     raw = DATE_KEYS.lazy.map { |key| data[key] }.find(&:present?)
     parsed = GlideCsv.time(raw)
     if parsed == :invalid
-      @import.add_error("Baris #{line}: tanggal ujian \"#{raw}\" tidak dikenali — pakai 2026-06-06 atau 06/06/2026.")
+      @import.add_error("Baris #{line}: tanggal ujian \"#{raw}\" tidak dikenali — pakai 2026-06-06, 06/06/2026, atau 6 Juni 2026.")
       return :invalid
     end
     parsed || time_from_title(title)

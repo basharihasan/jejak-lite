@@ -10,18 +10,21 @@
 # kompetensi — lebih baik kosong daripada salah atribusi.
 class AssessmentDimension < ApplicationRecord
   # Kelompok tinjauan untuk radar per kategori — kode dari impor Glide
-  # (CbtExam::DIMENSION_CATEGORY_MAP / CATEGORY_META jejak.pro).
+  # (CbtExam::DIMENSION_CATEGORY_MAP / CATEGORY_META jejak.pro), ditambah
+  # Tingkat Kemampuan & Kategori Soal dari ekspor hasil ujian per sesi.
   CATEGORY_LABELS = {
-    "kompetensi"       => "Area Kompetensi",
-    "sistem_organ"     => "Sistem Organ",
-    "siklus_kehidupan" => "Siklus Kehidupan",
-    "sistem_kesehatan" => "Sistem Kesehatan",
-    "proses_klinis"    => "Proses Klinis & Kognitif",
-    "patomekanisme"    => "Patomekanisme Penyakit",
-    "setting_klinis"   => "Setting Klinis",
-    "aspek"            => "Aspek Tinjauan",
-    "osce_klinis"      => "Dimensi Klinis OSCE",
-    "lainnya"          => "Lainnya"
+    "kompetensi"        => "Area Kompetensi",
+    "sistem_organ"      => "Sistem Organ",
+    "siklus_kehidupan"  => "Siklus Kehidupan",
+    "sistem_kesehatan"  => "Sistem Kesehatan",
+    "proses_klinis"     => "Proses Klinis & Kognitif",
+    "patomekanisme"     => "Patomekanisme Penyakit",
+    "setting_klinis"    => "Setting Klinis",
+    "aspek"             => "Aspek Tinjauan",
+    "tingkat_kemampuan" => "Tingkat Kemampuan",
+    "kategori_soal"     => "Kategori Soal",
+    "osce_klinis"       => "Dimensi Klinis OSCE",
+    "lainnya"           => "Lainnya"
   }.freeze
 
   belongs_to :assessment_event

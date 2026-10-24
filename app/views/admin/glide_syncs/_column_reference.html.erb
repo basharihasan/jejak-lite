@@ -3,12 +3,15 @@
 <% references = {
      "cbt" => [
        [ "email", "Email mahasiswa (wajib)" ],
-       [ "exam_code", "Kode ujian — satu kode = satu event. Kosong: dibentuk dari judul/nama berkas + tanggal" ],
-       [ "exam_title", "Judul ujian → nama event" ],
-       [ "exam_type", "summative / formative → CBT Sumatif/Formatif; progress_test → event Progress Test" ],
-       [ "total_score", "Nilai total skala 100 (juga dibaca: final_score, nilai, nilai_akhir)" ],
-       [ "held_at", "Tanggal ujian (2026-06-06 atau 06/06/2026) → periode akademik yang memuatnya" ],
-       [ "kolom lain", "Setiap kolom lain = satu dimensi (mata uji/tinjauan) skala 100, dikelompokkan otomatis: Area Kompetensi, Sistem Organ, Sistem Kesehatan, Proses Klinis, Patomekanisme, dst." ]
+       [ "Nilai Akhir", "Nilai total skala 100, koma atau titik desimal (juga dibaca: total_score, final_score, nilai)" ],
+       [ "Tanggal", "Tanggal ujian (9 September 2026, 2026-09-09, atau 09/09/2026) → periode akademik yang memuatnya (juga dibaca: held_at)" ],
+       [ "Nomor Ujian … Jumlah Raw Nilai", "Nomor Ujian, Nama Peserta, Sesi, Jumlah Benar, Jumlah Raw Nilai: keterangan, tidak dinilai. Kolom lain yang seluruh isinya teks juga diabaikan" ],
+       [ "[AK] …", "Dimensi Area Kompetensi, skala 100 — nama tanpa prefiks, mis. \"Komunikasi efektif\"; nama yang sama persis dengan ranah kompetensi langsung dipetakan" ],
+       [ "[ST] …", "Dimensi Sistem Organ" ],
+       [ "[TK] … / [TI] …", "Dimensi Tingkat Kemampuan (1, 2, 3A, 3B, 4A, 4B)" ],
+       [ "[KAT] …", "Dipilah per nama: Siklus Kehidupan (Adult, Geriatric…), Setting Klinis (Hospital, Emergency…), Aspek (Knowledge…), Proses Klinis, Patomekanisme; topik lain → Kategori Soal" ],
+       [ "kolom bernilai 0 semua", "Kelompok tanpa soal di ujian ini — tidak dijadikan dimensi (daftarnya tampil di ringkasan impor)" ],
+       [ "exam_code, exam_title, exam_type", "Format Glide lama, opsional. Tanpa exam_code: kode event dari Judul ujian (formulir) atau nama berkas + tanggal; exam_type progress_test → event Progress Test" ]
      ],
      "osce" => [
        [ "$rowID", "ID unik baris Glide — kunci agar baris tidak terimpor dua kali" ],
