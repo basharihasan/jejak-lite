@@ -6,7 +6,7 @@ gem "dotenv-rails", groups: [ :development, :test ]
 gem "rails", "~> 8.1.3", ">= 8.1.3.1"
 # json 3.x memutus ActiveSupport::JSON.decode (dipakai dekripsi cookie sesi)
 # di Rails 8.1.3.1 — kunci ke seri 2.x yang terbukti kompatibel.
-gem "json", "~> 2.7"
+gem "json", "~> 3.1"
 # Terjemahan Indonesia bawaan (time_ago_in_words, pesan validasi, dsb) — UI
 # aplikasi ini seluruhnya berbahasa Indonesia, jangan biarkan string Rails
 # default nyelip Inggris.
