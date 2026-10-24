@@ -51,6 +51,11 @@ services:
       # Alamat NAS Anda diakses dari jaringan (IP:port atau domain) — dipakai
       # tautan di email konfirmasi/reset password.
       APP_HOST: ${APP_HOST:-localhost:3000}
+      # Opsional: unggahan ke Cloudflare R2 (kosong = volume storage lokal).
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
     ports:
       - "${HOST_PORT:-3000}:3000"
     volumes:

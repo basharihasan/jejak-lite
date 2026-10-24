@@ -6,6 +6,25 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
+# Cloudflare R2 (S3-kompatibel) — dipakai produksi bila R2_BUCKET diisi (lihat
+# config/environments/production.rb). Disk Render free terhapus setiap
+# deploy; R2 menyimpan unggahan (foto profil, lampiran kegiatan & kasus,
+# dokumen asesmen) secara permanen. Bucket boleh privat: berkas disajikan
+# lewat URL bertanda-tangan berumur pendek, dan unggahan lewat server (bukan
+# direct upload) sehingga bucket tidak perlu aturan CORS.
+#
+# SDK aws-sdk-s3 baru menambahkan checksum CRC32 bawaan yang ditolak R2;
+# "when_required" mengembalikan perilaku lama.
+cloudflare:
+  service: S3
+  endpoint: https://<%= ENV["R2_ACCOUNT_ID"] %>.r2.cloudflarestorage.com
+  access_key_id: <%= ENV["R2_ACCESS_KEY_ID"] %>
+  secret_access_key: <%= ENV["R2_SECRET_ACCESS_KEY"] %>
+  region: auto
+  bucket: <%= ENV["R2_BUCKET"] %>
+  request_checksum_calculation: when_required
+  response_checksum_validation: when_required
+
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:
 #   service: S3

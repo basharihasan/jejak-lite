@@ -54,6 +54,18 @@ services:
         sync: false
       - key: AR_ENCRYPTION_KEY_DERIVATION_SALT
         sync: false
+      # Cloudflare R2 untuk unggahan (foto profil, lampiran, dokumen). Disk
+      # plan free terhapus setiap deploy — tanpa R2 semua unggahan hilang.
+      # Isi keempatnya di dashboard; aplikasi otomatis memakai R2 bila
+      # R2_BUCKET terisi (lihat config/storage.yml).
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false
       # Dipakai config.action_mailer.default_url_options — tautan di email
       # (konfirmasi akun, reset password) akan pakai domain ini. Render
       # blueprint memberi domain otomatis <service-name>.onrender.com;

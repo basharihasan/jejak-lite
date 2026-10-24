@@ -110,7 +110,7 @@ Selain test suite, tiap fase diverifikasi dengan **smoke test HTTP sungguhan**: 
 4. Jalankan `bin/rails demo:seed` sekali lewat Render Shell kalau ingin instance demo publik yang bisa langsung dicoba.
 
 Keterbatasan yang perlu diketahui sebelum deploy sungguhan (bukan sekadar demo):
-- `config.active_storage.service = :local` (lihat `config/storage.yml`) — berkas (avatar, bukti kegiatan) tersimpan di disk lokal container, **hilang setiap deploy ulang** di PaaS dengan filesystem sementara seperti Render free tier. Untuk produksi sungguhan, aktifkan `amazon:`/S3 di `config/storage.yml` (gem `aws-sdk-s3` sudah ada di Gemfile) dan ganti `config.active_storage.service`.
+- **Unggahan** (foto profil, lampiran kegiatan & kasus, dokumen asesmen): tanpa konfigurasi tambahan tersimpan di disk lokal container, yang **terhapus setiap deploy ulang** di Render free. Isi `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, dan `R2_BUCKET` (Cloudflare R2, kuota gratis 10 GB) — produksi otomatis memakai layanan `cloudflare` di `config/storage.yml`. Bucket boleh privat dan tidak perlu aturan CORS. Berkas yang diunggah sebelum R2 aktif tidak ikut pindah.
 - Keempat "role" database (primary/cache/queue/cable) sengaja berbagi satu database fisik (lihat komentar di `config/database.yml`) supaya cukup satu instance Postgres gratis — aman karena masing-masing solid_* punya nama tabel unik, tapi berarti backup/restore tidak bisa dipisah per peran.
 
 ## Yang Sengaja Tidak Dibawa dari JEJAK
