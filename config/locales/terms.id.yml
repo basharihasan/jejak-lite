@@ -56,3 +56,12 @@ id:
       terminology_override:
         key: "Kunci"
         value: "Label"
+      # Pesan validasi pertanyaan Form Builder — tanpa ini muncul
+      # "Options text harus diisi" (nama atribut mentah berbahasa Inggris).
+      assessment_form_field:
+        label: "Pertanyaan"
+        help_text: "Petunjuk"
+        field_type: "Tipe jawaban"
+        options_text: "Daftar pilihan / jenjang"
+        max_score: "Skor maksimum"
+        weight: "Bobot"
