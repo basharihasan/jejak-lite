@@ -20,6 +20,9 @@
         <% if @clinical_case.patient_gender.present? %>, <%= @clinical_case.patient_gender %><% end %>
         <% if @clinical_case.patient_occupation.present? %> · <%= @clinical_case.patient_occupation %><% end %>
       </p>
+      <% if @clinical_case.supervisor %>
+        <p class="text-xs text-gray-500 mt-1">Pembimbing: <span class="font-semibold text-gray-700"><%= @clinical_case.supervisor.full_name %></span></p>
+      <% end %>
       <p class="text-xs text-gray-400 mt-1">
         <% [@clinical_case.clinical_setting && ClinicalContextOptions::CLINICAL_SETTINGS[@clinical_case.clinical_setting],
              @clinical_case.case_complexity && "Kompleksitas #{ClinicalContextOptions::CASE_COMPLEXITY[@clinical_case.case_complexity]}",
@@ -44,6 +47,12 @@
   <% if @clinical_case.status == "verified" %>
     <div class="mt-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 text-sm">
       Diverifikasi oleh <%= @clinical_case.verified_by&.full_name %> pada <%= l(@clinical_case.verified_at, format: :long) %>.
+    </div>
+  <% end %>
+
+  <% if @clinical_case.status == "submitted" && @clinical_case.supervisor && !policy(@clinical_case).verify? %>
+    <div class="mt-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm">
+      Menunggu verifikasi dari <strong><%= @clinical_case.supervisor.full_name %></strong> — hanya pembimbing yang ditandai yang dapat memverifikasi kasus ini.
     </div>
   <% end %>
 

@@ -222,7 +222,7 @@ Halaman **Ikhtisar → Notifikasi** (`/notifications`) memuat semua pemberitahua
 | Peran | Fungsi utama | Yang boleh dilakukan |
 |---|---|---|
 | **Mahasiswa** | Mencatat perjalanan belajar | Mencatat kegiatan & kasus, mengajukan verifikasi, meminta DOPS/Mini-CEX/CBD/Long Case dari kasus, mendaftar & mengumpulkan asesmen rubrik, menulis refleksi, mendaftarkan tugas akhir, mengisi formulir evaluasi, melihat nilai, capaian, dan peta EPA miliknya sendiri. |
-| **Dosen** | Pembimbing akademik, tutor, penguji | Memverifikasi kasus & kegiatan mahasiswa mana pun, menilai DOPS/Mini-CEX, menilai di Lembar Penguji, memberi skor tugas akhir, memutuskan tingkat EPA bagi mahasiswa yang berelasi, Dashboard Analitik bagian *Mahasiswa Bimbingan*. |
+| **Dosen** | Pembimbing akademik, tutor, penguji | Memverifikasi kasus (yang menandainya atau tanpa tanda pembimbing) & kegiatan mahasiswa mana pun, menilai DOPS/Mini-CEX, menilai di Lembar Penguji, memberi skor tugas akhir, memutuskan tingkat EPA bagi mahasiswa yang berelasi, Dashboard Analitik bagian *Mahasiswa Bimbingan*. |
 | **Preseptor** | Pembimbing klinis di wahana | Setara dosen untuk verifikasi & penilaian; menjadi penilai bawaan DOPS/Mini-CEX yang diminta dari kasus pada rotasinya; Dashboard Analitik bagian *Mahasiswa di Wahana Anda*. |
 | **Kaprodi** | Pemantau program studi | Membuka halaman mahasiswa lain (hanya melihat, tidak menilai), Dashboard Analitik bagian *Program Studi* (terkunci ke prodi binaan yang ditetapkan admin), Relabel Prodi Mahasiswa, Jadwal DOPS & Mini-CEX, Learning Unit & Matrix. |
 | **Admin** | Pengelola instalasi | Semua hal di atas ditambah seluruh grup **Konfigurasi**: pengguna, periode, prodi, event asesmen, kurikulum, master data, taksonomi, istilah, dan tata kelola data. |
@@ -230,7 +230,7 @@ Halaman **Ikhtisar → Notifikasi** (`/notifications`) memuat semua pemberitahua
 Aturan yang berlaku lintas peran:
 
 - **Kepemilikan**: mahasiswa hanya melihat data miliknya; pembimbing dapat membuka kasus/kegiatan siapa pun (untuk verifikasi) dan DOPS/Mini-CEX/tugas akhir yang berkaitan dengannya; admin melihat semuanya.
-- **Anti-konflik**: verifikasi kasus/kegiatan tidak bisa dilakukan atas data milik sendiri, dan hanya verifier asal atau admin yang boleh **membatalkan** verifikasi.
+- **Anti-konflik**: verifikasi kasus/kegiatan tidak bisa dilakukan atas data milik sendiri, kasus yang menandai pembimbing hanya bisa diverifikasi pembimbing itu, dan hanya verifier asal atau admin yang boleh **membatalkan** verifikasi.
 - **Relasi pembimbingan** (dipakai Peta EPA & Dashboard Analitik): seseorang dianggap membimbing mahasiswa bila pernah menilai DOPS/Mini-CEX-nya, membimbing tugas akhirnya, memverifikasi kasusnya, menjadi tutor enrolmennya, atau preseptor rotasinya.
 
 ---
@@ -362,7 +362,7 @@ Menu **Logbook → Kasus Klinis** (`/clinical_cases`). Halaman daftar memuat **s
 
 | Langkah | Isian |
 |---|---|
-| 1. Identitas & Demografi | Tanggal kasus*, Keluhan utama*, kelompok usia (Anak/Dewasa/Lansia), jenis kelamin, **usia** dan **pekerjaan** pasien (tidak sensitif, tampil terbuka), setting klinis (Rawat Jalan, Rawat Inap, IGD, ICU, Kamar Operasi, Pelayanan Primer), kompleksitas (Rendah/Sedang/Tinggi), dan blok **Identitas Pasien** (nama, No. RM, tanggal lahir, telepon, alamat) yang disimpan **terenkripsi**. |
+| 1. Identitas & Demografi | Tanggal kasus*, Keluhan utama*, kelompok usia (Anak/Dewasa/Lansia), jenis kelamin, **usia** dan **pekerjaan** pasien (tidak sensitif, tampil terbuka), setting klinis (Rawat Jalan, Rawat Inap, IGD, ICU, Kamar Operasi, Pelayanan Primer), kompleksitas (Rendah/Sedang/Tinggi), blok **Identitas Pasien** (nama, No. RM, tanggal lahir, telepon, alamat) yang disimpan **terenkripsi**, dan **Dosen/Preseptor Pembimbing** (opsional — lihat di bawah). |
 | 2. Anamnesis, PF & Tanda Vital | Anamnesis, keadaan umum, pemeriksaan fisik, riwayat keluarga, tanda vital (suhu, TD, nadi, respirasi, BB, TB) — **BMI** dihitung otomatis. |
 | 3. Pemeriksaan Penunjang | Hasil laboratorium, radiologi, pemeriksaan lain. |
 | 4. Diagnosis & Tatalaksana | Diagnosis (isian ber-autocomplete dari **Master Diagnosis**; kode ICD-10 dan level SKDI terisi otomatis bila cocok) dan tatalaksana. |
@@ -406,7 +406,7 @@ Menu **Logbook → Kasus Klinis** (`/clinical_cases`). Halaman daftar memuat **s
 </svg>
 
 - **Draf** dan **Perlu Revisi** dapat Anda sunting; **Draf** dapat dihapus (refleksi yang menautkan draf itu tetap tersimpan, hanya tautannya dilepas).
-- **Kirim untuk Verifikasi** mengirim kasus ke antrean semua pembimbing. Setelah dikirim, kasus tidak bisa disunting sampai diminta revisi.
+- **Kirim untuk Verifikasi** mengirim kasus ke antrean pembimbing. Bila Anda menandai **Dosen/Preseptor Pembimbing**, kasus hanya masuk antrean dia, dia menerima notifikasi, dan **hanya dia** yang dapat memverifikasi, meminta revisi, atau menolaknya; tanpa tanda, kasus masuk antrean semua pembimbing. Tanda dapat diubah selama kasus masih Draf atau Perlu Revisi. Setelah dikirim, kasus tidak bisa disunting sampai diminta revisi.
 - **Terverifikasi** membawa **level entrustment** (Diobservasi … Mengajari Junior), catatan pembimbing, kemungkinan **rekomendasi remediasi**, dan bila pembimbing memilih ranah EPA, **Peta EPA Anda ikut terisi**.
 - **Ditolak** bersifat final (kasus tidak layak dijadikan bukti, mis. duplikat).
 - **Riwayat Verifikasi** menampilkan setiap transisi beserta catatannya; **Kirim Komentar** memungkinkan diskusi dengan pembimbing tanpa mengubah status.
@@ -595,7 +595,7 @@ Jadwal DOPS/Mini-CEX di panel *Jadwal Evaluasi Bulan Ini* hilang sendiri begitu 
 
 ### 5.2 Validasi Kasus Klinis
 
-**Coaching Center → Validasi Kasus Klinis** (`/clinical_cases?scope=to_verify`) adalah antrean semua kasus berstatus *Menunggu Verifikasi* dari mahasiswa mana pun. Buka kasus, baca seluruh langkah, lalu pilih salah satu:
+**Coaching Center → Validasi Kasus Klinis** (`/clinical_cases?scope=to_verify`) adalah antrean kasus berstatus *Menunggu Verifikasi* yang menandai Anda sebagai pembimbing, ditambah kasus tanpa tanda pembimbing dari mahasiswa mana pun. Kasus yang menandai pengajar lain tidak masuk antrean Anda dan tidak dapat Anda verifikasi. Buka kasus, baca seluruh langkah, lalu pilih salah satu:
 
 | Aksi | Kapan | Efek |
 |---|---|---|
@@ -607,7 +607,7 @@ Jadwal DOPS/Mini-CEX di panel *Jadwal Evaluasi Bulan Ini* hilang sendiri begitu 
 
 Kasus yang sudah Anda verifikasi, minta revisi, atau tolak keluar dari antrean, tetapi tetap bisa dibuka ulang lewat tab **Riwayat Verifikasi** (`/clinical_cases?scope=reviewed`) di halaman yang sama.
 
-Anda tidak dapat memverifikasi kasus milik akun sendiri. Bila Anda pembimbing kasus itu — preseptor rotasi mahasiswa pada tanggal kasus, atau dosen yang sudah memverifikasi, meminta revisi, atau menolaknya — identitas pasien tampil langsung. Pengajar lain melihatnya tersamar oleh Privacy Mode; gunakan Break Glass hanya bila benar-benar perlu — semua pembukaan Break Glass diaudit.
+Anda tidak dapat memverifikasi kasus milik akun sendiri. Bila Anda pembimbing kasus itu — yang ditandai mahasiswa, preseptor rotasi mahasiswa pada tanggal kasus, atau dosen yang sudah memverifikasi, meminta revisi, atau menolaknya — identitas pasien tampil langsung. Pengajar lain melihatnya tersamar oleh Privacy Mode; gunakan Break Glass hanya bila benar-benar perlu — semua pembukaan Break Glass diaudit.
 
 ### 5.3 Validasi Kegiatan
 
@@ -881,8 +881,9 @@ Kewajiban pengguna: jangan menulis nama atau nomor identitas pasien pada kolom b
 
 | Peristiwa | Penerima |
 |---|---|
+| Kasus dikirim untuk verifikasi | dosen/preseptor pembimbing yang ditandai |
 | Kasus diverifikasi / perlu revisi / ditolak / verifikasi dibatalkan | pemilik kasus |
-| Komentar baru pada kasus | pemilik atau verifier (lawan bicara) |
+| Komentar baru pada kasus | pemilik atau verifier — sebelum ada verifier, pembimbing yang ditandai (lawan bicara) |
 | Kegiatan diverifikasi | pemilik kegiatan |
 | Permintaan DOPS / Mini-CEX / CBD / Long Case dari kasus | penilai yang ditunjuk |
 | DOPS / Mini-CEX terkirim | mahasiswa |

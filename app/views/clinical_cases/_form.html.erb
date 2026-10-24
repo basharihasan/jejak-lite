@@ -136,6 +136,18 @@
         <%= f.text_field :chief_complaint, placeholder: "Contoh: Demam 3 hari, Nyeri perut kanan bawah",
               class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
       </div>
+
+      <%# Tanda pembimbing (opsional): bila diisi, HANYA dosen/preseptor ini
+          yang dapat memverifikasi kasus — pengajar lain tidak. %>
+      <div class="mt-4">
+        <%= f.label :supervisor_id, class: "block text-sm font-semibold text-gray-700 mb-1" do %>
+          Dosen/Preseptor Pembimbing <span class="font-normal text-gray-400">(opsional)</span>
+        <% end %>
+        <p class="text-xs text-gray-400 mb-1">Bila dipilih, hanya dosen/preseptor ini yang dapat memverifikasi kasus Anda. Biarkan kosong agar kasus dapat diverifikasi dosen/preseptor mana pun.</p>
+        <%= f.collection_select :supervisor_id, User.case_supervisors.where.not(id: clinical_case.user_id), :id, :full_name,
+              { include_blank: "— Tidak ditandai —" },
+              class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+      </div>
     </div>
 
     <div data-wizard-target="step" hidden>

@@ -65,3 +65,7 @@ id:
         options_text: "Daftar pilihan / jenjang"
         max_score: "Skor maksimum"
         weight: "Bobot"
+      # Tanpa ini pesan validasi tanda pembimbing kasus berbunyi
+      # "Supervisor harus dosen atau preseptor".
+      clinical_case:
+        supervisor: "Dosen/preseptor pembimbing"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_010001) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_24_010002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -357,12 +357,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_010001) do
     t.boolean "recommend_remediation", default: false, null: false
     t.string "skdi_level"
     t.string "status", default: "draft", null: false
+    t.bigint "supervisor_id"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.datetime "verified_at"
     t.bigint "verified_by_id"
     t.jsonb "vital_signs", default: {}, null: false
     t.index ["status"], name: "index_clinical_cases_on_status"
+    t.index ["supervisor_id"], name: "index_clinical_cases_on_supervisor_id"
     t.index ["user_id", "status"], name: "index_clinical_cases_on_user_id_and_status"
     t.index ["user_id"], name: "index_clinical_cases_on_user_id"
     t.index ["verified_by_id"], name: "index_clinical_cases_on_verified_by_id"
@@ -891,6 +893,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_010001) do
   add_foreign_key "case_verification_comments", "clinical_cases"
   add_foreign_key "case_verification_comments", "users"
   add_foreign_key "clinical_cases", "users"
+  add_foreign_key "clinical_cases", "users", column: "supervisor_id"
   add_foreign_key "clinical_cases", "users", column: "verified_by_id"
   add_foreign_key "clinical_rotations", "academic_periods"
   add_foreign_key "clinical_rotations", "users"

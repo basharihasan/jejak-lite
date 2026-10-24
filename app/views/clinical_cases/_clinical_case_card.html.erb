@@ -16,6 +16,9 @@
         <%= l(clinical_case.case_date, format: :long) %>
         <% if clinical_case.user != current_user %> · <%= clinical_case.user.full_name %><% end %>
       </p>
+      <% if clinical_case.supervisor %>
+        <p class="text-[11px] text-gray-500 mt-0.5">Pembimbing: <%= clinical_case.supervisor == current_user ? "Anda" : clinical_case.supervisor.full_name %></p>
+      <% end %>
     </div>
   </div>
 <% end %>

@@ -5,16 +5,17 @@ class ClinicalCasesController < ApplicationController
   before_action :set_clinical_case, only: %i[show edit update destroy submit verify request_revision reject cancel_verification comment initiate_workplace_assessment break_glass issue_consent revoke_consent initiate_assessment]
 
   def index
-    # to_verify = antrean semua kasus "Menunggu Verifikasi"; reviewed = kasus
-    # yang pernah diputuskan pengajar ini, supaya bisa dibuka ulang.
+    # to_verify = antrean kasus "Menunggu Verifikasi" yang boleh diverifikasi
+    # pengajar ini (tanpa tanda pembimbing, atau menandai dia); reviewed =
+    # kasus yang pernah diputuskan pengajar ini, supaya bisa dibuka ulang.
     @scope = (params[:scope].presence_in(%w[to_verify reviewed]) if current_user.can_verify_clinical_cases?) || "mine"
     base_scope =
       case @scope
-      when "to_verify" then ClinicalCase.awaiting_verification
+      when "to_verify" then ClinicalCase.awaiting_verification_by(current_user)
       when "reviewed" then ClinicalCase.reviewed_by(current_user)
       else current_user.clinical_cases
       end
-    @clinical_cases = base_scope.recent.page(params[:page])
+    @clinical_cases = base_scope.includes(:user, :supervisor).recent.page(params[:page])
     @case_targets = @scope == "mine" ? case_target_progress : []
 
     stats_scope = @scope == "to_verify" ? ClinicalCase.all : base_scope
@@ -248,7 +249,7 @@ class ClinicalCasesController < ApplicationController
       :clinical_setting, :case_complexity,
       :anamnesis, :general_condition, :physical_examination, :family_history,
       :laboratory_results, :radiology_results, :other_investigations,
-      :diagnosis, :management, :learning_points, evidence_files: [],
+      :diagnosis, :management, :learning_points, :supervisor_id, evidence_files: [],
       prescription_items_attributes: %i[id medication_name strength dosage_form quantity signa route notes _destroy],
       vital_signs: ClinicalCase::VITAL_SIGN_FIELDS.keys
     )

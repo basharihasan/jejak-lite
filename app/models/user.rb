@@ -16,6 +16,7 @@ class User < ApplicationRecord
   has_many :activity_logs, dependent: :destroy
   has_many :clinical_cases, dependent: :destroy
   has_many :verified_clinical_cases, class_name: "ClinicalCase", foreign_key: :verified_by_id, inverse_of: :verified_by, dependent: :nullify
+  has_many :supervised_clinical_cases, class_name: "ClinicalCase", foreign_key: :supervisor_id, inverse_of: :supervisor, dependent: :nullify
   has_many :clinical_rotations, dependent: :destroy # sebagai mahasiswa
   has_many :precepted_rotations, class_name: "ClinicalRotation", foreign_key: :preceptor_id, inverse_of: :preceptor, dependent: :nullify
   has_many :tutorial_enrollments, dependent: :destroy # sebagai mahasiswa (PSSK)
@@ -40,6 +41,11 @@ class User < ApplicationRecord
     has_role?("dosen") || has_role?("preseptor") || has_role?("admin")
   end
   alias can_verify_clinical_cases? instructor?
+
+  # Calon pembimbing yang boleh ditandai mahasiswa pada kasus klinis.
+  scope :case_supervisors, -> {
+    where(id: UserRole.joins(:role).where(roles: { code: %w[dosen preseptor] }).select(:user_id)).order(:full_name)
+  }
 
   # Boleh membuka halaman mahasiswa lain (Peta EPA dsb.) — pengajar, plus
   # kaprodi yang memantau tanpa menilai.

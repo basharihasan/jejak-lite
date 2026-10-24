@@ -19,9 +19,10 @@ class ClinicalCasePolicy < ApplicationPolicy
 
   # Bukan cuma "punya peran dosen/admin" — akun yang kebetulan juga
   # menyandang peran mahasiswa (multi-peran diperbolehkan di app ini) tidak
-  # boleh memverifikasi kasus miliknya sendiri.
+  # boleh memverifikasi kasus miliknya sendiri. Kasus yang menandai
+  # pembimbing hanya boleh diverifikasi pembimbing itu, bukan pengajar lain.
   def verify?
-    !owner? && user.can_verify_clinical_cases? && record.status == "submitted"
+    !owner? && user.can_verify_clinical_cases? && record.status == "submitted" && assigned_verifier?
   end
 
   def request_revision?
@@ -83,5 +84,9 @@ class ClinicalCasePolicy < ApplicationPolicy
 
   def owner?
     record.user_id == user.id
+  end
+
+  def assigned_verifier?
+    record.supervisor_id.nil? || record.supervisor_id == user.id
   end
 end
