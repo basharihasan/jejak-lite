@@ -16,7 +16,7 @@
   # has_role?("admin") — bukan peran aktif — jadi di sini pun begitu.
   is_config_manager = current_user.has_role?("admin")
   is_instructor = is_dosen || is_preceptor || is_kaprodi || is_admin
-  pending_verifications = is_instructor ? ClinicalCase.awaiting_verification.count : 0
+  pending_verifications = is_instructor ? ClinicalCase.awaiting_verification_by(current_user).count : 0
   pending_activity_verifications = is_instructor ? ActivityLog.awaiting_verification.count : 0
   brand_title    = "JEJAK"
   brand_subtitle = current_user.study_program&.name || t("chrome.brand_subtitle_default")

@@ -54,6 +54,10 @@ class ClinicalCase < ApplicationRecord
 
   belongs_to :user
   belongs_to :verified_by, class_name: "User", optional: true
+  # Dosen/preseptor yang ditandai mahasiswa (opsional). Bila terisi, HANYA
+  # dia yang boleh memverifikasi kasus ini (ClinicalCasePolicy#verify?);
+  # kosong = terbuka bagi pengajar mana pun.
+  belongs_to :supervisor, class_name: "User", optional: true
 
   # Identitas pasien — terenkripsi di basis data (Active Record Encryption)
   # dan DISAMARKAN di tampilan selama Privacy Mode menyala; terbuka langsung
@@ -86,10 +90,15 @@ class ClinicalCase < ApplicationRecord
   validates :patient_gender, inclusion: { in: GENDERS }, allow_blank: true
   validates :patient_age, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than: 150 }, allow_nil: true
   validate :patient_birth_date_is_a_date
+  validate :supervisor_is_eligible, if: :will_save_change_to_supervisor_id?
 
   scope :recent, -> { order(case_date: :desc, created_at: :desc) }
   scope :owned_by, ->(user) { where(user: user) }
   scope :awaiting_verification, -> { where(status: "submitted") }
+  # Antrean verifikasi milik pengajar ini: kasus yang menandai DIA sebagai
+  # pembimbing, plus kasus tanpa tanda — kasus yang menandai pengajar lain
+  # tidak bisa ia verifikasi, jadi tidak ikut antre.
+  scope :awaiting_verification_by, ->(user) { awaiting_verification.where(supervisor_id: [ nil, user.id ]) }
   # Kasus yang pernah diputuskan verifier ini (diverifikasi, diminta revisi,
   # ditolak) — tetap terdaftar walau statusnya berubah lagi sesudahnya.
   scope :reviewed_by, ->(user) {
@@ -123,6 +132,12 @@ class ClinicalCase < ApplicationRecord
   def submit!
     update!(status: "submitted")
     case_verification_comments.create!(user: user, action: "submitted")
+    return unless supervisor
+
+    Notification.notify!(
+      recipient: supervisor, sender: user, notifiable: self,
+      title: "Kasus klinis menunggu verifikasi Anda", message: "#{user.full_name}: #{chief_complaint}"
+    )
   end
 
   def verify!(by:, entrustment_level: nil, recommend_remediation: false, comment: nil, epa_item_ids: [])
@@ -175,7 +190,7 @@ class ClinicalCase < ApplicationRecord
   # Komentar verifikasi tanpa mengubah status — diskusi pemilik ↔ verifier.
   def add_verification_comment!(by:, body:)
     comment = case_verification_comments.create!(user: by, action: "commented", body: body)
-    recipient = by.id == user_id ? verified_by : user
+    recipient = by.id == user_id ? (verified_by || supervisor) : user
     if recipient && recipient.id != by.id
       Notification.notify!(recipient: recipient, sender: by, notifiable: self,
                            title: "Komentar baru pada kasus klinis", message: body)
@@ -204,10 +219,11 @@ class ClinicalCase < ApplicationRecord
     SENSITIVE_PATIENT_FIELDS.any? { |f| public_send(f).present? }
   end
 
-  # Pembimbing kasus: dosen verifier kasus ini (termasuk yang meminta revisi
-  # atau menolaknya) dan preseptor rotasi mahasiswa yang mencakup tanggal kasus.
+  # Pembimbing kasus: dosen/preseptor yang ditandai mahasiswa, dosen verifier
+  # kasus ini (termasuk yang meminta revisi atau menolaknya), dan preseptor
+  # rotasi mahasiswa yang mencakup tanggal kasus.
   def supervised_by?(person)
-    verified_by_id == person.id ||
+    supervisor_id == person.id || verified_by_id == person.id ||
       user.clinical_rotations.covering(case_date).where(preceptor: person).exists?
   end
 
@@ -273,6 +289,18 @@ class ClinicalCase < ApplicationRecord
     return if patient_birth_date.blank?
 
     errors.add(:patient_birth_date, "bukan tanggal yang valid") if patient_birth_date_as_date.nil?
+  end
+
+  # Hanya dicek saat tanda diubah — kasus lama tetap bisa disimpan (mis. saat
+  # diverifikasi) walau peran pembimbingnya kemudian dicabut.
+  def supervisor_is_eligible
+    return if supervisor_id.nil?
+
+    if supervisor_id == user_id
+      errors.add(:supervisor, "tidak boleh diri sendiri")
+    elsif !User.case_supervisors.exists?(supervisor_id)
+      errors.add(:supervisor, "harus dosen atau preseptor")
+    end
   end
 
   # Cocokkan teks diagnosis dengan master DiagnosisDefinition supaya kode
