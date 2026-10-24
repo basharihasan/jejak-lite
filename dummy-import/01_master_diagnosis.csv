@@ -1,0 +1,6 @@
+nama,icd10,skdi,sistem
+Dummy Demam Berdarah Dengue,A91,4A,Infeksi Tropis
+Dummy Gastroenteritis Akut,A09,4A,Gastrointestinal
+Dummy Pneumonia Komunitas,J18.9,4A,Respirasi
+Dummy Hipertensi Esensial,I10,4A,Kardiovaskular
+Dummy Diabetes Melitus Tipe 2,E11.9,4A,Endokrin
