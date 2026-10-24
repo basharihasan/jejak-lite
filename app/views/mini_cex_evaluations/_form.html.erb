@@ -9,12 +9,13 @@
     <div>
       <%= f.label :student_id, "Mahasiswa", class: "block text-sm font-semibold text-gray-700 mb-1" %>
       <%= f.collection_select :student_id, @students, :id, :full_name, { include_blank: "Pilih mahasiswa..." },
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm", data: { controller: "searchable-select" } %>
     </div>
     <div>
       <%= f.label :clinical_rotation_id, "Rotasi", class: "block text-sm font-semibold text-gray-700 mb-1" %>
       <%= f.collection_select :clinical_rotation_id, @clinical_rotations, :id, ->(r) { "#{r.station_name} — #{r.user.full_name}" }, { include_blank: "Pilih rotasi..." },
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm",
+            data: { controller: "searchable-select", searchable_select_placeholder_value: "Ketik nama stase atau mahasiswa…" } %>
     </div>
   </div>
 

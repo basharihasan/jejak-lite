@@ -214,6 +214,12 @@ Kotak **Cari** di topbar dan menu **Daftar Mahasiswa** (`/cari`) mencari **pengg
 
 Pencarian belum mencakup isi logbook atau kasus.
 
+**Memilih nama di formulir.** Setiap kolom pilihan nama mahasiswa atau pengajar dapat **diketik untuk mencari** — antara lain mahasiswa & preseptor di Rotasi Klinik, mahasiswa & tutor di Enrolment Tutorial, mahasiswa & rotasi di DOPS/Mini-CEX, dosen pembimbing Tugas Akhir, pembimbing kasus klinis, subjek formulir evaluasi, serta peserta & penguji di Assessment Events dan Jadwal DOPS & Mini-CEX.
+
+- Klik kolomnya lalu ketik sebagian nama; daftar langsung tersaring. Huruf besar/kecil dan urutan kata tidak berpengaruh — `sari dew` menemukan "Dewi Sari". Kolom rotasi juga bisa dicari dengan nama stase.
+- Pilih dengan klik, atau dengan tombol **↑/↓** lalu **Enter**. **Esc** menutup daftar tanpa mengubah pilihan.
+- Pada kolom opsional, hapus teksnya atau pilih **— Kosongkan pilihan —** untuk mengosongkan. Teks yang tidak cocok dengan nama mana pun dikembalikan ke pilihan sebelumnya.
+
 ### 2.6 Notifikasi
 
 Halaman **Ikhtisar → Notifikasi** (`/notifications`) memuat semua pemberitahuan: kasus diverifikasi/perlu revisi/ditolak, kegiatan diverifikasi, DOPS/Mini-CEX baru, nilai keluar, permintaan penilaian, komentar kasus, tingkat entrustment diperbarui, skor ujian tugas akhir, dan jadwal. Tiap butir bisa **ditandai dibaca** atau **diarsipkan**; tombol **Tandai semua dibaca** membersihkan lencana sekaligus.

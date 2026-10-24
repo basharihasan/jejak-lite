@@ -146,7 +146,7 @@
         <p class="text-xs text-gray-400 mb-1">Bila dipilih, hanya dosen/preseptor ini yang dapat memverifikasi kasus Anda. Biarkan kosong agar kasus dapat diverifikasi dosen/preseptor mana pun.</p>
         <%= f.collection_select :supervisor_id, User.case_supervisors.where.not(id: clinical_case.user_id), :id, :full_name,
               { include_blank: "— Tidak ditandai —" },
-              class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+              class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm", data: { controller: "searchable-select" } %>
       </div>
     </div>
 

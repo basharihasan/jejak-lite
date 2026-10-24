@@ -7,9 +7,9 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div><%= f.label :kind, "Jenis", class: lbl %><%= f.select :kind, EvaluationSchedule::KINDS.invert, {}, class: cls %></div>
     <div><%= f.label :scheduled_at, "Waktu", class: lbl %><%= f.datetime_local_field :scheduled_at, class: cls %></div>
-    <div><%= f.label :student_id, "Mahasiswa", class: lbl %><%= f.collection_select :student_id, @students, :id, :full_name, { include_blank: "Pilih..." }, class: cls %></div>
-    <div><%= f.label :evaluator_id, "Penilai", class: lbl %><%= f.collection_select :evaluator_id, @evaluators, :id, :full_name, { include_blank: "—" }, class: cls %></div>
-    <div><%= f.label :clinical_rotation_id, "Rotasi (opsional)", class: lbl %><%= f.collection_select :clinical_rotation_id, @rotations, :id, ->(r) { "#{r.user.full_name} — #{r.station_name}" }, { include_blank: "—" }, class: cls %></div>
+    <div><%= f.label :student_id, "Mahasiswa", class: lbl %><%= f.collection_select :student_id, @students, :id, :full_name, { include_blank: "Pilih..." }, class: cls, data: { controller: "searchable-select" } %></div>
+    <div><%= f.label :evaluator_id, "Penilai", class: lbl %><%= f.collection_select :evaluator_id, @evaluators, :id, :full_name, { include_blank: "—" }, class: cls, data: { controller: "searchable-select" } %></div>
+    <div><%= f.label :clinical_rotation_id, "Rotasi (opsional)", class: lbl %><%= f.collection_select :clinical_rotation_id, @rotations, :id, ->(r) { "#{r.user.full_name} — #{r.station_name}" }, { include_blank: "—" }, class: cls, data: { controller: "searchable-select", searchable_select_placeholder_value: "Ketik nama mahasiswa atau stase…" } %></div>
     <div><%= f.label :status, "Status", class: lbl %><%= f.select :status, EvaluationSchedule::STATUSES.invert, {}, class: cls %></div>
   </div>
   <div><%= f.label :topic, "Topik / prosedur (opsional)", class: lbl %><%= f.text_field :topic, class: cls %></div>

@@ -46,11 +46,11 @@
     <%= form_with url: add_instance_admin_assessment_event_path(@event), method: :post, class: "flex flex-wrap items-end gap-3" do |f| %>
       <div class="flex-1 min-w-48">
         <label class="block text-xs font-semibold text-gray-500 mb-1">Mahasiswa</label>
-        <%= f.collection_select :student_id, @students, :id, :full_name, { include_blank: "Pilih..." }, required: true, class: "#{cls} w-full" %>
+        <%= f.collection_select :student_id, @students, :id, :full_name, { include_blank: "Pilih..." }, required: true, class: "#{cls} w-full", data: { controller: "searchable-select" } %>
       </div>
       <div class="min-w-48">
         <label class="block text-xs font-semibold text-gray-500 mb-1">Penguji (opsional)</label>
-        <%= f.collection_select :examiner_id, @examiners, :id, :full_name, { include_blank: "—" }, class: "#{cls} w-full" %>
+        <%= f.collection_select :examiner_id, @examiners, :id, :full_name, { include_blank: "—" }, class: "#{cls} w-full", data: { controller: "searchable-select" } %>
       </div>
       <div>
         <label class="block text-xs font-semibold text-gray-500 mb-1">Jadwal (opsional)</label>
@@ -80,7 +80,7 @@
             <td class="px-4 py-2.5"><span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full <%= i.status == 'scored' ? 'bg-emerald-50 text-emerald-700' : (i.status == 'submitted' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-600') %>"><%= i.status_label %></span></td>
             <td class="px-4 py-2.5">
               <%= form_with model: i, url: admin_assessment_instance_path(i), method: :patch, class: "flex flex-wrap items-center gap-2" do |f| %>
-                <%= f.collection_select :examiner_id, @examiners, :id, :full_name, { include_blank: "— penguji —" }, class: "#{cls} py-1" %>
+                <%= f.collection_select :examiner_id, @examiners, :id, :full_name, { include_blank: "— penguji —" }, class: "#{cls} py-1", data: { controller: "searchable-select", searchable_select_placeholder_value: "Cari penguji…" } %>
                 <%= f.datetime_local_field :scheduled_at, value: i.scheduled_at&.strftime("%Y-%m-%dT%H:%M"), class: "#{cls} py-1" %>
                 <%= f.submit "Simpan", class: "text-xs font-semibold text-indigo-600 hover:underline cursor-pointer bg-transparent border-0" %>
               <% end %>

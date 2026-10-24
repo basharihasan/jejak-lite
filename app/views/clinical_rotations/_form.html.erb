@@ -9,12 +9,12 @@
     <div>
       <%= f.label :user_id, "Mahasiswa", class: "block text-sm font-semibold text-gray-700 mb-1" %>
       <%= f.collection_select :user_id, @students, :id, :full_name, { include_blank: "Pilih mahasiswa..." },
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm", data: { controller: "searchable-select" } %>
     </div>
     <div>
       <%= f.label :preceptor_id, "Preseptor (opsional)", class: "block text-sm font-semibold text-gray-700 mb-1" %>
       <%= f.collection_select :preceptor_id, @preceptors, :id, :full_name, { include_blank: "-" },
-            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm" %>
+            class: "block w-full rounded-xl border-0 py-2.5 px-3.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-500 text-sm", data: { controller: "searchable-select" } %>
     </div>
   </div>
 
