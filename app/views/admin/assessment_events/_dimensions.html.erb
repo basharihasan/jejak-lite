@@ -19,7 +19,15 @@
     <p class="mt-3 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">Belum ada Kerangka Kompetensi. Buat dulu di <%= link_to "Konfigurasi → Kerangka Kompetensi", competency_frameworks_path, class: "underline" %> agar dimensi bisa dipetakan.</p>
   <% end %>
 
-  <%= form_with url: bulk_map_admin_assessment_event_assessment_dimensions_path(event), method: :patch, class: "mt-4" do |f| %>
+  <%# Formulir pemetaan sengaja kosong & berdiri sendiri: pilihan ranah dan
+      tombol Simpan terhubung lewat atribut form="dimension-map-form". Dulu
+      tabelnya dibungkus formulir ini, padahal tiap baris memuat formulir
+      "Hapus" (button_to) — formulir bersarang membuat browser menutup
+      formulir luar di baris pertama, sehingga hanya dimensi pertama yang
+      tersimpan. %>
+  <%= form_with url: bulk_map_admin_assessment_event_assessment_dimensions_path(event), method: :patch,
+        id: "dimension-map-form", class: "hidden" do %><% end %>
+  <div class="mt-4">
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
         <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
@@ -43,7 +51,7 @@
               <td class="px-3 py-2">
                 <%= select_tag "competency_item_ids[#{dimension.id}]",
                       options_for_select(competency_items, dimension.competency_item_id),
-                      include_blank: "— belum dipetakan —", class: "#{cls} w-full min-w-48" %>
+                      include_blank: "— belum dipetakan —", form: "dimension-map-form", class: "#{cls} w-full min-w-48" %>
               </td>
               <td class="px-3 py-2 text-right text-gray-600"><%= dimension.assessment_dimension_scores.size %></td>
               <td class="px-3 py-2 text-right">
@@ -60,9 +68,10 @@
       </table>
     </div>
     <% if dimensions.any? %>
-      <%= f.submit "Simpan Pemetaan", class: "mt-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 cursor-pointer" %>
+      <%= submit_tag "Simpan Pemetaan", form: "dimension-map-form", name: nil,
+            class: "mt-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 cursor-pointer" %>
     <% end %>
-  <% end %>
+  </div>
 </div>
 
 <div class="bg-white rounded-2xl ring-1 ring-gray-200 p-5">
