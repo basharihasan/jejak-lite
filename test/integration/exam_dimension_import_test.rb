@@ -237,4 +237,16 @@ class ExamDimensionImportTest < ActionDispatch::IntegrationTest
 
     assert_empty CompetencyAchievementCalculator.new(student: users(:siti), period: @period).call
   end
+
+  test "tab dimensi: semua pilihan ranah terhubung ke formulir pemetaan, tanpa formulir bersarang" do
+    sign_in @admin
+    get admin_assessment_event_path(@cbt, tab: "dimensi")
+    assert_response :success
+    assert_no_nested_forms(response.body)
+    assert_select "form#dimension-map-form[action=?]", bulk_map_admin_assessment_event_assessment_dimensions_path(@cbt)
+    [ @penalaran, @literasi ].each do |dimension|
+      assert_select "select[name='competency_item_ids[#{dimension.id}]'][form='dimension-map-form']"
+    end
+    assert_select "input[type=submit][value='Simpan Pemetaan'][form='dimension-map-form']"
+  end
 end
