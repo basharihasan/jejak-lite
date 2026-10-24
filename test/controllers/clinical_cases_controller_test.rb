@@ -144,4 +144,43 @@ class ClinicalCasesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "mandiri", kasus.entrustment_level
     assert kasus.recommend_remediation?
   end
+
+  test "kasus yang sudah diverifikasi dosen tetap bisa dibuka ulang dari Riwayat Verifikasi" do
+    sign_in users(:budi)
+    kasus = clinical_cases(:submitted_case_siti)
+    patch verify_clinical_case_path(kasus)
+
+    get clinical_cases_path(scope: "to_verify")
+    assert_no_match kasus.chief_complaint, response.body
+
+    get clinical_cases_path(scope: "reviewed")
+    assert_response :success
+    assert_select "a[href=?]", clinical_case_path(kasus), text: /#{kasus.chief_complaint}/
+    assert_no_match clinical_cases(:draft_case_siti).chief_complaint, response.body
+
+    sign_in users(:wati)
+    get clinical_cases_path(scope: "reviewed")
+    assert_no_match kasus.chief_complaint, response.body
+    assert_match "Belum ada kasus yang Anda verifikasi", response.body
+  end
+
+  test "Riwayat Verifikasi tetap memuat kasus yang diminta revisi walau lalu diverifikasi dosen lain" do
+    kasus = clinical_cases(:submitted_case_siti)
+    kasus.request_revision!(by: users(:budi), comment: "Lengkapi pemeriksaan fisik.")
+    kasus.submit!
+    kasus.verify!(by: users(:wati))
+
+    sign_in users(:budi)
+    get clinical_cases_path(scope: "reviewed")
+    assert_match kasus.chief_complaint, response.body
+  end
+
+  test "mahasiswa yang membuka Riwayat Verifikasi jatuh ke Punya Saya" do
+    sign_in users(:siti)
+    get clinical_cases_path(scope: "reviewed")
+
+    assert_response :success
+    assert_no_match "Riwayat Verifikasi", response.body
+    assert_match clinical_cases(:draft_case_siti).chief_complaint, response.body
+  end
 end

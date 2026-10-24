@@ -90,6 +90,11 @@ class ClinicalCase < ApplicationRecord
   scope :recent, -> { order(case_date: :desc, created_at: :desc) }
   scope :owned_by, ->(user) { where(user: user) }
   scope :awaiting_verification, -> { where(status: "submitted") }
+  # Kasus yang pernah diputuskan verifier ini (diverifikasi, diminta revisi,
+  # ditolak) — tetap terdaftar walau statusnya berubah lagi sesudahnya.
+  scope :reviewed_by, ->(user) {
+    where(verified_by: user).or(where(id: CaseVerificationComment.where(user: user, action: CaseVerificationComment::REVIEW_ACTIONS).select(:clinical_case_id)))
+  }
 
   def status_label
     { "draft" => "Draf", "submitted" => "Menunggu Verifikasi", "verified" => "Terverifikasi", "needs_revision" => "Perlu Revisi", "rejected" => "Ditolak" }.fetch(status, status)

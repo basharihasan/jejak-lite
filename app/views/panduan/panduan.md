@@ -605,6 +605,8 @@ Jadwal DOPS/Mini-CEX di panel *Jadwal Evaluasi Bulan Ini* hilang sendiri begitu 
 | **Batalkan Verifikasi** | Anda (verifier asal) atau admin salah menyetujui (alasan wajib) | Kasus kembali ke antrean; level EPA dari verifikasi itu dicabut. |
 | **Kirim Komentar** | diskusi tanpa mengubah status | Pemilik/verifier menerima notifikasi. |
 
+Kasus yang sudah Anda verifikasi, minta revisi, atau tolak keluar dari antrean, tetapi tetap bisa dibuka ulang lewat tab **Riwayat Verifikasi** (`/clinical_cases?scope=reviewed`) di halaman yang sama.
+
 Anda tidak dapat memverifikasi kasus milik akun sendiri. Bila Anda pembimbing kasus itu — preseptor rotasi mahasiswa pada tanggal kasus, atau dosen yang sudah memverifikasi, meminta revisi, atau menolaknya — identitas pasien tampil langsung. Pengajar lain melihatnya tersamar oleh Privacy Mode; gunakan Break Glass hanya bila benar-benar perlu — semua pembukaan Break Glass diaudit.
 
 ### 5.3 Validasi Kegiatan
@@ -999,7 +1001,7 @@ Seluruh data JEJAK Essential dapat dipindahkan ke jejak.pro tanpa ketik ulang. A
 | Profil Saya / Sunting | `/profile`, `/profile/edit` |
 | Pengaturan Saya / Pengaturan Akun | `/pengaturan`, `/users/edit` |
 | Notifikasi | `/notifications` |
-| Kasus Klinis / Validasi Kasus | `/clinical_cases`, `/clinical_cases?scope=to_verify` |
+| Kasus Klinis / Validasi Kasus / Riwayat Verifikasi | `/clinical_cases`, `/clinical_cases?scope=to_verify`, `/clinical_cases?scope=reviewed` |
 | Logbook Kegiatan / Validasi Kegiatan / Kalender | `/activity_logs`, `/activity_logs?scope=to_verify`, `/kalender` |
 | Rotasi Klinik | `/clinical_rotations` |
 | Enrolment Tutorial | `/tutorial_enrollments` |

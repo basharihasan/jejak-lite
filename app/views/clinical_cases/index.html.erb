@@ -16,6 +16,7 @@
   <div class="mt-4 flex items-center gap-2">
     <%= link_to "Punya Saya", clinical_cases_path, class: "text-xs px-3 py-1.5 rounded-full font-medium #{@scope == 'mine' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
     <%= link_to "Perlu Diverifikasi", clinical_cases_path(scope: "to_verify"), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@scope == 'to_verify' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
+    <%= link_to "Riwayat Verifikasi", clinical_cases_path(scope: "reviewed"), class: "text-xs px-3 py-1.5 rounded-full font-medium #{@scope == 'reviewed' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}" %>
   </div>
 <% end %>
 
@@ -67,7 +68,8 @@
     <%= render partial: "clinical_case_card", collection: @clinical_cases, as: :clinical_case %>
   <% else %>
     <p class="text-sm text-gray-400 col-span-2">
-      <%= @scope == "to_verify" ? "Tidak ada kasus yang menunggu verifikasi." : "Belum ada kasus klinis tercatat." %>
+      <%= { "to_verify" => "Tidak ada kasus yang menunggu verifikasi.",
+            "reviewed" => "Belum ada kasus yang Anda verifikasi, minta revisi, atau tolak." }.fetch(@scope, "Belum ada kasus klinis tercatat.") %>
     </p>
   <% end %>
 </div>

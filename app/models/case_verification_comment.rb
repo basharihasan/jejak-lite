@@ -14,6 +14,9 @@ class CaseVerificationComment < ApplicationRecord
     "commented" => "Komentar"
   }.freeze
 
+  # Keputusan verifier atas kasus — dasar tab "Riwayat Verifikasi".
+  REVIEW_ACTIONS = %w[verified revision_requested rejected].freeze
+
   # Aksi yang wajib beralasan: mahasiswa harus tahu apa yang salah.
   BODY_REQUIRED = %w[revision_requested rejected verification_cancelled commented].freeze
 

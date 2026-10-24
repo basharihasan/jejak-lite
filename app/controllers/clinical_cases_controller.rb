@@ -5,12 +5,19 @@ class ClinicalCasesController < ApplicationController
   before_action :set_clinical_case, only: %i[show edit update destroy submit verify request_revision reject cancel_verification comment initiate_workplace_assessment break_glass issue_consent revoke_consent initiate_assessment]
 
   def index
-    @scope = params[:scope] == "to_verify" && current_user.can_verify_clinical_cases? ? "to_verify" : "mine"
-    base_scope = @scope == "to_verify" ? ClinicalCase.awaiting_verification : current_user.clinical_cases
+    # to_verify = antrean semua kasus "Menunggu Verifikasi"; reviewed = kasus
+    # yang pernah diputuskan pengajar ini, supaya bisa dibuka ulang.
+    @scope = (params[:scope].presence_in(%w[to_verify reviewed]) if current_user.can_verify_clinical_cases?) || "mine"
+    base_scope =
+      case @scope
+      when "to_verify" then ClinicalCase.awaiting_verification
+      when "reviewed" then ClinicalCase.reviewed_by(current_user)
+      else current_user.clinical_cases
+      end
     @clinical_cases = base_scope.recent.page(params[:page])
     @case_targets = @scope == "mine" ? case_target_progress : []
 
-    stats_scope = @scope == "to_verify" ? ClinicalCase.all : current_user.clinical_cases
+    stats_scope = @scope == "to_verify" ? ClinicalCase.all : base_scope
     @stats = {
       total: stats_scope.count,
       by_status: stats_scope.group(:status).count,
