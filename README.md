@@ -100,6 +100,22 @@ bin/rails test   # 237 test, semua hijau per Fase 26
 
 Selain test suite, tiap fase diverifikasi dengan **smoke test HTTP sungguhan**: login sebagai tiap akun demo lalu membuka seluruh halaman sidebar, memastikan nol 500. Cara cepat melakukannya sendiri: jalankan server, lalu buka halaman-halaman itu sebagai `admin.demo@jejaklite.test` dan `mahasiswa1.demo@jejaklite.test`.
 
+## Deploy self-hosted (Docker / Podman — pull GHCR, tanpa Ruby di host)
+
+Image produksi dipublish ke **`ghcr.io/basharihasan/jejak-lite:latest`** (CI). Host tidak perlu Ruby.
+
+```bash
+# 1) .env tanpa Ruby
+./script/setup-env.sh --host 192.168.1.50:3000          # Linux/macOS
+# Windows: script\setup-env.cmd  atau  .\script\setup-env.ps1
+
+# 2) jalanin
+docker compose pull && docker compose up -d
+docker compose exec web bin/rails demo:seed   # opsional
+```
+
+Detail QNAP / Podman / HTTPS / troubleshooting `unauthorized`: [`NAS_DEPLOY.md`](NAS_DEPLOY.md).
+
 ## Deploy (Render, opsional)
 
 `render.yaml` menyediakan blueprint satu web service + satu Postgres gratis (tanpa Docker — Render mendeteksi Ruby dari `Gemfile`). Langkah:

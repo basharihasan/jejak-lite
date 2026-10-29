@@ -30,8 +30,10 @@ Rails.application.configure do
   # Render (dan PaaS sejenis) mengakhiri SSL di reverse proxy-nya, jadi
   # aplikasi sendiri menerima trafik HTTP biasa — dua baris ini yang membuat
   # Rails tetap menganggap koneksi aman (cookie secure, redirect HTTP→HTTPS).
-  config.assume_ssl = true
-  config.force_ssl = true
+  # Self-host LAN (docker-compose.yml) set ASSUME_SSL/FORCE_SSL=false — kalau
+  # tetap true di HTTP polos, cookie Secure hilang dan login POST → 422.
+  config.assume_ssl = ActiveModel::Type::Boolean.new.cast(ENV.fetch("ASSUME_SSL", "true"))
+  config.force_ssl  = ActiveModel::Type::Boolean.new.cast(ENV.fetch("FORCE_SSL", "true"))
 
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }

@@ -37,7 +37,7 @@ services:
       retries: 20
 
   web:
-    image: ghcr.io/basharihasan/jejak-lite:latest
+    image: ${JEJAK_IMAGE:-ghcr.io/basharihasan/jejak-lite:latest}
     restart: unless-stopped
     depends_on:
       db:
@@ -45,13 +45,15 @@ services:
     # Sengaja TANPA `ports:` — akses publik hanya lewat Caddy.
     environment:
       RAILS_ENV: production
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?isi RAILS_MASTER_KEY di .env}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?isi SECRET_KEY_BASE di .env}
       DATABASE_URL: postgresql://jejak_lite:${POSTGRES_PASSWORD}@db:5432/jejak_lite_production
       RAILS_LOG_TO_STDOUT: "true"
       RAILS_SERVE_STATIC_FILES: "true"
       WEB_CONCURRENCY: "1"
       SOLID_QUEUE_IN_PUMA: "true"
-      AR_ENCRYPTION_PRIMARY_KEY: ${AR_ENCRYPTION_PRIMARY_KEY:?isi di .env, hasil bin/rails db:encryption:init}
+      ASSUME_SSL: ${ASSUME_SSL:-true}
+      FORCE_SSL: ${FORCE_SSL:-true}
+      AR_ENCRYPTION_PRIMARY_KEY: ${AR_ENCRYPTION_PRIMARY_KEY:?isi di .env}
       AR_ENCRYPTION_DETERMINISTIC_KEY: ${AR_ENCRYPTION_DETERMINISTIC_KEY:?isi di .env}
       AR_ENCRYPTION_KEY_DERIVATION_SALT: ${AR_ENCRYPTION_KEY_DERIVATION_SALT:?isi di .env}
       # Domain publik — dipakai tautan email & asset_host (https://APP_HOST).
