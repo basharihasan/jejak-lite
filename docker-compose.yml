@@ -1,16 +1,16 @@
 # Deployment self-hosted (NAS QNAP/Synology, VPS, dsb.) — dua kontainer:
-# Postgres (data sendiri, tidak keluar dari NAS) + web (image jadi dari GHCR,
-# dibangun otomatis oleh .github/workflows/docker-publish.yml).
+# Postgres + web. Image web dari GHCR (dibangun CI — lihat
+# .github/workflows/docker-publish.yml). Host tidak perlu Ruby/Rails.
 #
-# Cara pakai (lihat NAS_DEPLOY.md untuk instruksi lengkap per platform):
-#   1. Salin .env.example -> .env, isi semua nilainya.
-#   2. docker compose up -d
-#   3. Sekali saja, untuk akun demo: docker compose exec web bin/rails demo:seed
+# Cara pakai (lihat NAS_DEPLOY.md):
+#   1. ./script/setup-env.sh   (Linux/macOS)  atau  script\setup-env.cmd (Windows)
+#   2. docker compose pull && docker compose up -d
+#   3. docker compose exec web bin/rails demo:seed
 #
-# Di QNAP Container Station: import file ini lewat "Create Application" ->
-# tab "Create with docker-compose.yml", lalu isi variabel di bagian
-# "Environment Variables" sesuai .env.example (Container Station tidak
-# selalu membaca file .env terpisah saat import manual).
+# Podman: ganti `docker compose` → `podman-compose` (atau `podman compose`).
+#
+# Di QNAP Container Station: import YAML ini, isi Environment Variables
+# sesuai .env.example (Station sering mengabaikan file .env terpisah).
 
 services:
   db:
@@ -29,38 +29,35 @@ services:
       retries: 20
 
   web:
-    image: ghcr.io/basharihasan/jejak-lite:latest
+    image: ${JEJAK_IMAGE:-ghcr.io/basharihasan/jejak-lite:latest}
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
       RAILS_ENV: production
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?isi RAILS_MASTER_KEY di .env, lihat config/master.key}
+      # Image self-hosted tidak memuat credentials.yml.enc — pakai SECRET_KEY_BASE.
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?isi SECRET_KEY_BASE di .env (jalankan script/setup-env)}
       DATABASE_URL: postgresql://jejak_lite:${POSTGRES_PASSWORD}@db:5432/jejak_lite_production
       RAILS_LOG_TO_STDOUT: "true"
       RAILS_SERVE_STATIC_FILES: "true"
       WEB_CONCURRENCY: "1"
       SOLID_QUEUE_IN_PUMA: "true"
-      # Wajib — aplikasi menolak boot tanpa ini (identitas pasien
-      # terenkripsi). Hasil `bin/rails db:encryption:init`, KHUSUS
-      # deployment ini, jangan dipakai ulang di deployment lain.
-      AR_ENCRYPTION_PRIMARY_KEY: ${AR_ENCRYPTION_PRIMARY_KEY:?isi di .env, hasil bin/rails db:encryption:init}
+      # LAN HTTP: false agar cookie Secure tidak mematahkan login (422).
+      ASSUME_SSL: ${ASSUME_SSL:-false}
+      FORCE_SSL: ${FORCE_SSL:-false}
+      AR_ENCRYPTION_PRIMARY_KEY: ${AR_ENCRYPTION_PRIMARY_KEY:?isi di .env}
       AR_ENCRYPTION_DETERMINISTIC_KEY: ${AR_ENCRYPTION_DETERMINISTIC_KEY:?isi di .env}
       AR_ENCRYPTION_KEY_DERIVATION_SALT: ${AR_ENCRYPTION_KEY_DERIVATION_SALT:?isi di .env}
-      # Alamat NAS Anda diakses dari jaringan (IP:port atau domain) — dipakai
-      # tautan di email konfirmasi/reset password.
       APP_HOST: ${APP_HOST:-localhost:3000}
-      # Opsional: unggahan ke Cloudflare R2 (kosong = volume storage lokal).
       R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
       R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
       R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
       R2_BUCKET: ${R2_BUCKET:-}
     ports:
+      # Host port → 3000 di dalam kontainer (Puma). Jangan ":HOST_PORT:HOST_PORT".
       - "${HOST_PORT:-3000}:3000"
     volumes:
-      # File yang diunggah pengguna (foto bukti kegiatan, dsb.) — di luar
-      # image, bertahan lintas update image.
       - jejak_lite_storage:/rails/storage
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/up"]

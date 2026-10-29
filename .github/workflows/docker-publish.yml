@@ -1,13 +1,15 @@
 name: Build & publish Docker image
 
 # Membangun image untuk deployment self-hosted (NAS, VPS) dan mendorongnya ke
-# GitHub Container Registry — QNAP/Synology tinggal menarik image jadi,
-# bukan membangun sendiri (banyak NAS terlalu lemah untuk bundle install +
-# tailwindcss build). Multi-arsitektur (amd64 + arm64) supaya cocok dengan
-# NAS ber-CPU Intel/AMD maupun ARM tanpa perlu tahu dulu jenisnya.
+# GitHub Container Registry — pengguna tinggal `docker compose pull`, bukan
+# membangun sendiri (banyak NAS terlalu lemah untuk bundle install +
+# tailwindcss build). Multi-arsitektur (amd64 + arm64).
 #
-# Image PRIVAT (mengikuti visibilitas repo) — jangan diubah jadi publik:
-# lapisan image memuat source .rb apa adanya, bukan bytecode terkompilasi.
+# Visibilitas: diusahakan PUBLIK supaya `docker compose pull` jalan tanpa
+# `docker login` / PAT. Kode sumber tetap AGPL di git; lapisan image memang
+# berisi .rb — sama transparan dengan clone repo. Jika langkah "Make public"
+# gagal (izin token), owner harus sekali saja: GitHub → Packages →
+# jejak-lite → Package settings → Change visibility → Public.
 
 on:
   push:
@@ -23,6 +25,7 @@ permissions:
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}
+  PACKAGE_NAME: jejak-lite
 
 jobs:
   build-and-push:
@@ -55,3 +58,21 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Make GHCR package public (pull tanpa login)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          OWNER="${{ github.repository_owner }}"
+          PKG="${{ env.PACKAGE_NAME }}"
+          # User-owned vs org-owned package endpoints differ.
+          if gh api --method PUT "user/packages/container/${PKG}/visibility" -f visibility=public; then
+            echo "Package visibility set to public (user)."
+          elif gh api --method PUT "orgs/${OWNER}/packages/container/${PKG}/visibility" -f visibility=public; then
+            echo "Package visibility set to public (org)."
+          else
+            echo "::warning::Could not set package public via API. Set manually: Packages → ${PKG} → Change visibility → Public"
+            exit 1
+          fi
