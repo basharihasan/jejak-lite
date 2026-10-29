@@ -19,54 +19,50 @@ Rencana lengkap & status tiap fase (0–26, semua ✅) ada di [`IMPLEMENTATION_P
 
 ## Menjalankan secara lokal
 
+Cara utama: **Docker atau Podman** — tarik image dari GHCR. **Tidak perlu** install Ruby/Rails/Node di host.
 
-**Prasyarat:** Ruby (sesuai `.ruby-version`), PostgreSQL yang berjalan, dan Node tidak diperlukan (Tailwind & importmap tanpa bundler JS).
+**Prasyarat:** Docker Compose **atau** Podman Compose.
 
-1. Buat `.env` berisi kredensial Postgres lokal:
+1. Buat `.env` (tanpa Ruby):
 
-   ```env
-   POSTGRES_USER=postgres
-   POSTGRES_PASSWORD=...
-   POSTGRES_HOST=127.0.0.1
-   POSTGRES_PORT=5432
+   ```bash
+   # Linux / macOS
+   chmod +x script/setup-env.sh
+   ./script/setup-env.sh --host 127.0.0.1:3000 --port 3000
    ```
 
-2. `bundle install`
-3. `bin/rails db:setup` (create + migrate + seed data rujukan: peran, program studi, templat formulir, kerangka kompetensi & blueprint, master diagnosis & keterampilan, contoh Learning Unit)
-4. `bin/dev` → buka <http://localhost:3000>
+   ```bat
+   REM Windows
+   script\setup-env.cmd -HostAddress 127.0.0.1:3000 -Port 3000
+   ```
 
-`bin/dev` menjalankan Rails server + Tailwind watcher sekaligus (lewat `Procfile.dev`). Ganti port dengan `PORT=3060 bin/dev`.
+   Skrip mengisi `POSTGRES_PASSWORD`, `SECRET_KEY_BASE`, dan tiga kunci `AR_ENCRYPTION_*`. Sesuaikan `APP_HOST` jika akses dari mesin lain (IP LAN).
 
-Kalau tidak ingin memakai foreman, jalankan dua terminal:
+2. Tarik image & jalankan:
 
-```bash
-ruby bin/rails server            # terminal 1
-ruby bin/rails tailwindcss:watch # terminal 2 — hanya perlu saat mengubah tampilan
-```
+   ```bash
+   docker compose pull && docker compose up -d
+   # Podman: podman compose pull && podman compose up -d
+   ```
 
-> **Windows:** panggil lewat `ruby bin/rails ...` (bukan `bin/rails ...`) bila shell Anda menolak menjalankan skrip tanpa ekstensi. Bila port 3000 sudah dipakai proses lain, hentikan dulu (`netstat -ano | findstr :3000`, lalu `taskkill /PID <pid> /F`) atau pakai port lain.
+   Image default: `ghcr.io/basharihasan/jejak-lite:latest`. Kalau `pull` gagal `unauthorized`, paket GHCR masih privat — `docker login ghcr.io` (PAT `read:packages`) atau minta owner set Packages → Public. Detail: [`NAS_DEPLOY.md`](NAS_DEPLOY.md).
 
-Login Google (opsional) aktif otomatis kalau `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` diisi di `.env`. Web Push (opsional) aktif kalau `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT` diisi.
+3. Seed data rujukan + akun demo (opsional):
 
-### Kunci enkripsi data pasien
+   ```bash
+   docker compose exec web bin/rails db:seed
+   docker compose exec web bin/rails demo:seed
+   ```
 
-Identitas pasien pada Kasus Klinis (nama, No. RM, tanggal lahir, telepon, alamat) disimpan terenkripsi (Active Record Encryption). Di **development/test** kuncinya diturunkan otomatis dari `secret_key_base` — tidak perlu setup. Di **production** wajib diisi, kalau tidak aplikasi sengaja menolak boot:
+4. Buka <http://127.0.0.1:3000> (atau `http://<APP_HOST>`).
 
-```env
-AR_ENCRYPTION_PRIMARY_KEY=...
-AR_ENCRYPTION_DETERMINISTIC_KEY=...
-AR_ENCRYPTION_KEY_DERIVATION_SALT=...
-```
+Hentikan: `docker compose down` (jalankan dari folder repo yang sama tempat `.env` / `up` dijalankan).
 
-Hasilkan ketiganya dengan `bin/rails db:encryption:init`. Opsional: `PRIVACY_MODE=true|false` mengunci sakelar Contextual Privacy Mode dari server (bawaannya menyala, diatur admin lewat **Konfigurasi → Data Governance**).
+QNAP/Synology, HTTPS (Caddy), R2: [`NAS_DEPLOY.md`](NAS_DEPLOY.md).
 
-### Data demo (opsional, untuk mencoba semua fitur)
+### Data demo (akun contoh)
 
-```bash
-bin/rails demo:seed
-```
-
-Membuat 8 akun contoh (password sama semua: `password123`, sengaja lemah — **hanya untuk demo**, jangan pernah dipakai untuk akun sungguhan):
+`demo:seed` membuat akun contoh (password semua: `password123` — **hanya demo**):
 
 | Email | Peran | Kegunaan |
 |---|---|---|
@@ -79,7 +75,18 @@ Membuat 8 akun contoh (password sama semua: `password123`, sengaja lemah — **h
 | `mahasiswa2.demo@jejaklite.test` | Mahasiswa | Kasus klinis & nilai ujian (untuk melihat agregasi lintas mahasiswa) |
 | `demo@jejaklite.test` | Mahasiswa + Dosen | Akun serba-guna untuk mencoba cepat |
 
-Task ini idempoten (aman dijalankan berkali-kali) dan terpisah dari `db/seeds.rb` karena isinya akun contoh berpassword publik, bukan data rujukan aplikasi.
+Idempoten; terpisah dari `db/seeds.rb` (data rujukan aplikasi).
+
+### Alternatif: Ruby native (pengembang)
+
+Untuk ubah kode tanpa container: Ruby (lihat `.ruby-version`), PostgreSQL lokal, Node tidak perlu.
+
+1. `.env` dengan `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_HOST` / `POSTGRES_PORT`
+2. `bundle install` → `bin/rails db:setup` → `bin/dev` → <http://localhost:3000>
+
+`bin/dev` = Rails + Tailwind watcher. Port lain: `PORT=3060 bin/dev`. Windows: `ruby bin/rails ...` bila shell menolak skrip tanpa ekstensi.
+
+Di **development/test**, kunci enkripsi pasien diturunkan dari `secret_key_base`. Di **production** (termasuk Compose) wajib `AR_ENCRYPTION_*` di `.env` (disiapkan `setup-env`). Login Google / Web Push opsional lewat env (`GOOGLE_*`, `VAPID_*`).
 
 ## Pindah ke jejak.pro
 

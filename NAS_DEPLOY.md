@@ -1,97 +1,79 @@
-# Menjalankan JEJAK Essential di NAS (QNAP)
+# Menjalankan JEJAK Lite di NAS / VPS (Docker atau Podman)
 
-Dokumen ini untuk deployment **self-hosted** lewat Docker — cocok untuk QNAP
-(Container Station), Synology (Container Manager), TrueNAS SCALE, Unraid,
-atau server Linux mana pun yang punya Docker. Image dibangun otomatis oleh
-GitHub Actions (`.github/workflows/docker-publish.yml`) setiap push ke
-`master`, jadi NAS tinggal **menarik** image jadi — tidak perlu build sendiri.
+Self-host lewat Compose: image **sudah dibangun CI** →
+`ghcr.io/basharihasan/jejak-lite:latest`. Host **tidak perlu** Ruby/Rails.
+Cocok untuk QNAP, Synology, VPS Linux, atau Windows + Docker Desktop.
 
-## Sekali di awal (di komputer Anda, bukan di NAS)
+## Prasyarat
 
-1. **Buat Personal Access Token GitHub** untuk NAS menarik image privat:
-   - github.com → foto profil → **Settings** → **Developer settings** →
-     **Personal access tokens** → **Tokens (classic)** → **Generate new token**
-   - Scope: centang **`read:packages`** saja
-   - Simpan tokennya (cuma tampil sekali)
+- Docker Engine + Compose plugin, **atau** Podman + `podman-compose`
+- (Sekali) generator `.env`: `openssl` di Linux/macOS, atau PowerShell di Windows
 
-2. **Buat kunci enkripsi KHUSUS deployment NAS ini** (jangan pakai ulang kunci
-   dari deployment trial online sebelumnya):
-   ```
-   bin/rails db:encryption:init
-   ```
-   Catat 3 nilainya.
+## 1. Siapkan `.env` (tanpa Ruby)
 
-3. **Salin isi `config/master.key`** (satu baris).
-
-## Di QNAP — Container Station
-
-### A. Login ke GitHub Container Registry
-
-Container Station → **Preferences** (ikon gerigi) → **Registry** → **Add** →
-- Registry: `ghcr.io`
-- Username: akun GitHub Anda (`basharihasan`)
-- Password: Personal Access Token dari langkah 1 (bukan password akun)
-
-### B. Buat aplikasi dari docker-compose.yml
-
-1. Container Station → **Applications** → **Create** → tab
-   **"Create with docker-compose.yml"** (nama tab bisa "YAML" di versi lain)
-2. Nama aplikasi: `jejak-lite`
-3. Tempel isi [`docker-compose.yml`](docker-compose.yml) dari repo ini
-4. Di bagian **Environment Variables** (Container Station biasanya
-   menyediakan kolom ini terpisah dari YAML, karena tidak selalu membaca
-   `.env`), isi semua yang ada di [`.env.example`](.env.example):
-
-   | Variabel | Isi dengan |
-   |---|---|
-   | `POSTGRES_PASSWORD` | kata sandi acak pilihan Anda |
-   | `RAILS_MASTER_KEY` | isi `config/master.key` |
-   | `AR_ENCRYPTION_PRIMARY_KEY` | dari `db:encryption:init` |
-   | `AR_ENCRYPTION_DETERMINISTIC_KEY` | dari `db:encryption:init` |
-   | `AR_ENCRYPTION_KEY_DERIVATION_SALT` | dari `db:encryption:init` |
-   | `APP_HOST` | IP NAS Anda + port, mis. `192.168.1.50:3000`, atau domain QNAP DDNS (`namananda.myqnapcloud.com:3000`) |
-   | `HOST_PORT` | `3000` (atau port lain kalau 3000 sudah dipakai) |
-
-5. **Create** — Container Station menarik `postgres:16-alpine` dan
-   `ghcr.io/basharihasan/jejak-lite:latest`, lalu menjalankan keduanya.
-
-### C. Isi akun demo (sekali saja)
-
-Setelah kontainer `web` berstatus **Running**:
-
-Container Station → aplikasi `jejak-lite` → kontainer `web` → **Terminal**
-(atau **Exec**), jalankan:
+```bash
+# Linux / macOS (Debian, Ubuntu, Fedora, RHEL, Arch, …)
+chmod +x script/setup-env.sh
+./script/setup-env.sh --host 192.168.1.50:3000 --port 3000
 ```
-bin/rails demo:seed
+
+```bat
+REM Windows (cmd)
+script\setup-env.cmd -HostAddress 192.168.1.50:3000 -Port 3000
 ```
-Ini membuat akun admin/dosen/preseptor/mahasiswa contoh (password
-`password123`) untuk langsung dicoba.
 
-### D. Akses aplikasi
+```powershell
+# Windows PowerShell
+.\script\setup-env.ps1 -HostAddress 192.168.1.50:3000 -Port 3000
+```
 
-Buka `http://<IP-NAS-Anda>:3000` (atau port yang Anda pilih) dari perangkat
-mana pun di jaringan yang sama.
+Atau salin `.env.example` → `.env` dan isi manual (`openssl rand -hex …`).
 
-## Memperbarui ke versi kode terbaru
+Simpan `.env`. Ganti kunci enkripsi nanti = data pasien lama tidak terbaca.
 
-Tiap kali ada perubahan yang di-push ke `master`, image baru otomatis
-terbangun (~5-8 menit, bisa dipantau di tab **Actions** repo GitHub). Di
-Container Station: buka aplikasi `jejak-lite` → **Update** (atau hapus &
-buat ulang kontainer `web` saja, `db` dan datanya tidak ikut terhapus karena
-tersimpan di volume terpisah) — Container Station menarik ulang tag
-`:latest` yang baru.
+## 2. Tarik image & jalankan (tanpa build)
 
-## Membuka akses dari luar jaringan rumah/kantor (opsional)
+```bash
+docker compose pull
+docker compose up -d
+docker compose exec web bin/rails db:seed
+docker compose exec web bin/rails demo:seed   # opsional
+```
 
-Bawaan di atas hanya bisa diakses dari jaringan lokal yang sama dengan NAS.
-Untuk diakses dari luar (mis. dicoba tim yang tidak sekantor):
-- **QNAP myQNAPcloud** (DDNS bawaan QNAP) + port forwarding di router ke
-  port yang dipetakan di langkah B, ATAU
-- Reverse proxy dengan HTTPS (QNAP App Center → **QuMagie**/`Container
-  Station` bawaan reverse proxy, atau pasang Caddy/Nginx Proxy Manager
-  sebagai kontainer terpisah) — supaya lalu lintas terenkripsi TLS, bukan
-  HTTP polos, sebelum ini dianggap layak diakses dari internet.
+Podman: ganti dengan `podman-compose` / `podman compose`.
 
-Membuka NAS langsung ke internet tanpa HTTPS/firewall yang benar berisiko —
-kalau butuh bantuan menyiapkan reverse proxy + TLS, beri tahu, jangan
-langsung port-forward tanpa itu.
+Buka `http://<APP_HOST>`. Demo: lihat README (`password123`).
+
+Kalau `pull` → **unauthorized**: paket GHCR masih privat. Owner repo harus
+**Packages → jejak-lite → Change visibility → Public** (atau workflow
+`docker-publish` yang sudah mencoba set public setelah push). Sementara:
+`docker login ghcr.io` + PAT `read:packages`.
+
+## 3. Port
+
+`HOST_PORT` di host → **3000 di dalam** kontainer. Contoh benar:
+`"6969:3000"`. Salah: `"6969:6969"`.
+
+## QNAP Container Station
+
+1. Create with `docker-compose.yml`
+2. Environment Variables = isi `.env` (`SECRET_KEY_BASE`, tiga
+   `AR_ENCRYPTION_*`, `POSTGRES_PASSWORD`, `APP_HOST`, `HOST_PORT`, …
+   — **bukan** `RAILS_MASTER_KEY`)
+3. Setelah Running → Exec `web` → `bin/rails demo:seed`
+
+## Update versi
+
+Setelah CI publish image baru ke `:latest`:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Volume DB/unggahan tetap (jangan `down -v` kecuali sengaja wipe).
+
+## HTTPS publik (opsional)
+
+[`docker-compose.https.yml`](docker-compose.https.yml) + Caddy. Set
+`CADDY_DOMAIN`; `ASSUME_SSL`/`FORCE_SSL` true di belakang TLS.
