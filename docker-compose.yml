@@ -14,7 +14,8 @@
 
 services:
   db:
-    image: postgres:16-alpine
+    # Fully qualified — Podman short-name otherwise prompts Fedora/RH/docker.io.
+    image: docker.io/library/postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: jejak_lite
