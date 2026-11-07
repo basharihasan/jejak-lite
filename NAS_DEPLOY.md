@@ -1,8 +1,11 @@
-# Menjalankan JEJAK Lite di NAS / VPS (Docker atau Podman)
+# Menjalankan JEJAK Essential di NAS / VPS (Docker atau Podman)
 
 Self-host lewat Compose: image **sudah dibangun CI** →
 `ghcr.io/basharihasan/jejak-lite:latest`. Host **tidak perlu** Ruby/Rails.
 Cocok untuk QNAP, Synology, VPS Linux, atau Windows + Docker Desktop.
+
+Nama `jejak-lite` / `jejak_lite` pada image, database, dan volume sengaja tidak
+diganti: instalasi yang sudah berjalan menyimpan datanya di bawah nama itu.
 
 ## Prasyarat
 

@@ -2,7 +2,7 @@
 
 # Role — peran akun.
 # Cukup kode + nama tampilan; tidak ada category/domain_permissions/capability
-# karena jejak-lite tidak butuh IAM enterprise, hanya "akun ini boleh lihat
+# karena JEJAK Essential tidak butuh IAM enterprise, hanya "akun ini boleh lihat
 # menu apa" lewat has_role?/active_role.
 class Role < ApplicationRecord
   # Peran yang boleh dipilih sendiri di form Daftar publik — hanya mahasiswa.

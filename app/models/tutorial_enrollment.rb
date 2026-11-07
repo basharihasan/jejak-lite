@@ -4,7 +4,7 @@
 # terdaftar pada satu blok/sistem dengan satu dosen tutor pada satu periode
 # akademik. Menjadi dasar "mahasiswa bimbingan" tutor di Dashboard Analitik
 # dan penyaring event asesmen blok (Fase 25). Blok masih teks bebas —
-# jejak-lite sengaja tanpa Curriculum Blueprint.
+# JEJAK Essential sengaja tanpa Curriculum Blueprint.
 class TutorialEnrollment < ApplicationRecord
   belongs_to :user # mahasiswa
   belongs_to :tutor, class_name: "User", optional: true

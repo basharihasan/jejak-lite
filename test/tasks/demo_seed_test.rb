@@ -17,7 +17,7 @@ class DemoSeedTaskTest < ActiveSupport::TestCase
   test "akun demo terbentuk, terkonfirmasi, dan bisa masuk; aman diulang" do
     ENV.delete("DEMO_PASSWORD")
     run_seed
-    admin = User.find_by!(email: "admin.demo@jejaklite.test")
+    admin = User.find_by!(email: "admin.demo@jejakessential.test")
     assert admin.valid_password?("password123")
     assert admin.active_for_authentication?
 
@@ -30,13 +30,13 @@ class DemoSeedTaskTest < ActiveSupport::TestCase
 
     ENV["DEMO_PASSWORD"] = "sandi-demo-baru-42"
     out, = run_seed
-    assert User.find_by!(email: "dosen.demo@jejaklite.test").valid_password?("sandi-demo-baru-42")
+    assert User.find_by!(email: "dosen.demo@jejakessential.test").valid_password?("sandi-demo-baru-42")
     assert_no_match "sandi-demo-baru-42", out
   end
 
   test "DEMO_PASSWORD kosong tidak menghapus sandi" do
     ENV["DEMO_PASSWORD"] = ""
     run_seed
-    assert User.find_by!(email: "admin.demo@jejaklite.test").valid_password?("password123")
+    assert User.find_by!(email: "admin.demo@jejakessential.test").valid_password?("password123")
   end
 end

@@ -117,7 +117,7 @@ class User < ApplicationRecord
   # Akun contoh `bin/rails demo:seed` sengaja berkata sandi publik dan dipakai
   # bergantian banyak orang — tidak dipaksa ganti kata sandi, kalau tidak
   # pengunjung pertama mengunci semua pengunjung berikutnya.
-  DEMO_EMAIL_DOMAIN = "jejaklite.test"
+  DEMO_EMAIL_DOMAIN = "jejakessential.test"
 
   # Huruf/angka yang tak mudah tertukar saat didikte atau disalin dari kertas
   # (tanpa 0/O, 1/l/I).

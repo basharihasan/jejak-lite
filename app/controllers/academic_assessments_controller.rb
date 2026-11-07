@@ -52,7 +52,7 @@ class AcademicAssessmentsController < ApplicationController
 
   # Milestone dibandingkan dengan rata-rata KESELURUHAN DOPS+Mini-CEX
   # mahasiswa periode ini — BUKAN skor spesifik ranah kompetensi itu,
-  # karena jejak-lite sengaja tidak membangun linkage skor-per-domain
+  # karena JEJAK Essential sengaja tidak membangun linkage skor-per-domain
   # (lihat IMPLEMENTATION_PLAN.md § Fase 20). Ini proksi capaian umum,
   # dilabeli jelas sebagai itu di tampilan, bukan diklaim presisi per-ranah.
   def overall_average(dops_scope, mini_cex_scope)

@@ -5,7 +5,7 @@ self.addEventListener("push", (event) => {
   const data = event.data ? event.data.json() : {};
 
   event.waitUntil(
-    self.registration.showNotification(data.title || "Jejak Lite", {
+    self.registration.showNotification(data.title || "JEJAK Essential", {
       body: data.body || "",
       icon: "/icon.png",
       badge: "/icon.png"

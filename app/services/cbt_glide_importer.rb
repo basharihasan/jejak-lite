@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Impor "CBT Exam Results" berformat ekspor Glide (data_cbt_exams_glide.csv),
-# dipetakan ke model jejak-lite:
+# dipetakan ke model JEJAK Essential:
 #
 #   exam_code   → AssessmentEvent (external_code); dibuat bila belum ada
 #   exam_title  → nama event

@@ -3,7 +3,7 @@
 # Tingkat entrustment EPA 1–5 per mahasiswa × ranah
 # kompetensi. Setiap keputusan baru MENGGANTIKAN (supersede) yang lama —
 # riwayat tetap tersimpan untuk audit. EPA = ranah tingkat atas kerangka
-# kompetensi (CompetencyFramework#domains); jejak-lite sengaja tanpa
+# kompetensi (CompetencyFramework#domains); JEJAK Essential sengaja tanpa
 # katalog EPA terpisah.
 class EntrustmentDecision < ApplicationRecord
   LEVELS = {

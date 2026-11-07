@@ -1,4 +1,4 @@
-# Reverse proxy + HTTPS otomatis (Let's Encrypt) untuk jejak-lite.
+# Reverse proxy + HTTPS otomatis (Let's Encrypt) untuk JEJAK Essential.
 # Domain diambil dari ENV CADDY_DOMAIN (lihat docker-compose.https.yml).
 # Caddy meneruskan X-Forwarded-Proto=https & Host apa adanya; Rails
 # production.rb sudah assume_ssl=true sehingga tidak terjadi loop redirect.

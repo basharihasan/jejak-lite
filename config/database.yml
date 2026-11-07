@@ -28,13 +28,13 @@ default: &default
 
 development:
   <<: *default
-  database: jejak_lite_development
+  database: jejak_essential_development
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
   # When left blank, PostgreSQL will use the default role. This is
   # the same name as the operating system user running Rails.
-  #username: jejak_lite
+  #username: jejak_essential
 
   # The password associated with the PostgreSQL role (username).
   #password:
@@ -62,7 +62,7 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: jejak_lite_test
+  database: jejak_essential_test
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -92,7 +92,7 @@ test:
 #
 # Produksi memakai satu DATABASE_URL (konvensi umum PaaS seperti Render) untuk
 # keempat "role" (primary/cache/queue/cable) — bukan 4 database fisik terpisah
-# seperti scaffold Rails 8 default. jejak-lite sengaja single-tenant & ringan,
+# seperti scaffold Rails 8 default. JEJAK Essential sengaja single-tenant & ringan,
 # jadi cukup satu instance Postgres gratis; solid_cache/solid_queue/solid_cable
 # masing-masing punya tabel bernama unik jadi aman berbagi satu database.
 production:

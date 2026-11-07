@@ -1,6 +1,6 @@
 unread_for_budi:
   recipient: budi
-  title: Selamat datang di Jejak Lite
+  title: Selamat datang di JEJAK Essential
   message: Lengkapi profil Anda untuk memulai.
   created_at: <%= 1.hour.ago %>
 

@@ -31,7 +31,7 @@ class NotificationDeliveryJob < ApplicationJob
       p256dh: token.p256dh_key,
       auth: token.auth_key,
       vapid: {
-        subject: ENV.fetch("VAPID_SUBJECT", "mailto:admin@jejaklite.test"),
+        subject: ENV.fetch("VAPID_SUBJECT", "mailto:admin@jejakessential.test"),
         public_key: ENV["VAPID_PUBLIC_KEY"],
         private_key: ENV["VAPID_PRIVATE_KEY"]
       }

@@ -2,7 +2,7 @@
 
 # Dashboard Analitik — tiga sudut pandang berbeda dalam satu halaman (bukan
 # tiga controller terpisah) karena akun bisa menyandang lebih dari satu
-# peran sekaligus (pilar multi-peran jejak-lite): dosen melihat mahasiswa
+# peran sekaligus (pilar multi-peran JEJAK Essential): dosen melihat mahasiswa
 # bimbingannya, preseptor melihat mahasiswa di rotasi yang dibimbingnya,
 # Kaprodi melihat seluruh mahasiswa satu program studi. Admin melihat
 # ketiganya sekaligus (tanpa filter kepemilikan).

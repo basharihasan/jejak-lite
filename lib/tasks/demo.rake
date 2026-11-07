@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# Data demo untuk mencoba SEMUA fitur jejak-lite tanpa mendaftar manual —
+# Data demo untuk mencoba SEMUA fitur JEJAK Essential tanpa mendaftar manual —
 # terpisah dari db/seeds.rb (yang cuma berisi data rujukan wajib: peran,
 # prodi, templat formulir baku) karena ini akun & data CONTOH dengan
 # password lemah yang diketahui publik, bukan data rujukan aplikasi.
 # Idempoten: aman dijalankan berkali-kali (find_or_create_by! di semua titik).
 namespace :demo do
-  desc "Buat akun & data demo untuk mencoba semua fitur jejak-lite (password: DEMO_PASSWORD, bawaan password123)"
+  desc "Buat akun & data demo untuk mencoba semua fitur JEJAK Essential (password: DEMO_PASSWORD, bawaan password123)"
   task seed: :environment do
     # Akun demo, termasuk Admin, bebas dari kewajiban ganti kata sandi dan
     # bawaannya berkata sandi publik. Di production harus diminta eksplisit
@@ -41,13 +41,13 @@ namespace :demo do
     sarjana = StudyProgram.find_or_create_by!(name: "Sarjana Kedokteran")
     profesi = StudyProgram.find_or_create_by!(name: "Profesi Dokter")
 
-    admin = demo_user("admin.demo@jejaklite.test", full_name: "Admin Demo", roles: %w[admin])
-    dosen = demo_user("dosen.demo@jejaklite.test", full_name: "Dosen Demo", roles: %w[dosen])
-    preseptor = demo_user("preseptor.demo@jejaklite.test", full_name: "Preseptor Demo", roles: %w[preseptor])
-    kaprodi = demo_user("kaprodi.demo@jejaklite.test", full_name: "Kaprodi Demo", roles: %w[kaprodi], study_program: sarjana)
-    multirole = demo_user("multirole.demo@jejaklite.test", full_name: "Multi Peran Demo", roles: %w[mahasiswa dosen], study_program: profesi)
-    mahasiswa1 = demo_user("mahasiswa1.demo@jejaklite.test", full_name: "Andi Mahasiswa", roles: %w[mahasiswa], study_program: sarjana)
-    mahasiswa2 = demo_user("mahasiswa2.demo@jejaklite.test", full_name: "Citra Mahasiswa", roles: %w[mahasiswa], study_program: sarjana)
+    admin = demo_user("admin.demo@jejakessential.test", full_name: "Admin Demo", roles: %w[admin])
+    dosen = demo_user("dosen.demo@jejakessential.test", full_name: "Dosen Demo", roles: %w[dosen])
+    preseptor = demo_user("preseptor.demo@jejakessential.test", full_name: "Preseptor Demo", roles: %w[preseptor])
+    kaprodi = demo_user("kaprodi.demo@jejakessential.test", full_name: "Kaprodi Demo", roles: %w[kaprodi], study_program: sarjana)
+    multirole = demo_user("multirole.demo@jejakessential.test", full_name: "Multi Peran Demo", roles: %w[mahasiswa dosen], study_program: profesi)
+    mahasiswa1 = demo_user("mahasiswa1.demo@jejakessential.test", full_name: "Andi Mahasiswa", roles: %w[mahasiswa], study_program: sarjana)
+    mahasiswa2 = demo_user("mahasiswa2.demo@jejakessential.test", full_name: "Citra Mahasiswa", roles: %w[mahasiswa], study_program: sarjana)
 
     period = AcademicPeriod.find_or_create_by!(name: "2026/2027 Ganjil") do |p|
       p.start_date = 1.month.ago.to_date

@@ -1,4 +1,4 @@
-# Jejak Lite
+# JEJAK Essential
 
 Aplikasi pencatatan perjalanan belajar klinis yang berdiri sendiri — logbook kegiatan, kasus klinis, rotasi, asesmen (DOPS/Mini-CEX/Progress Test/CBT/OSCE), kurikulum (blueprint & peta kompetensi), dan dashboard analitik untuk dosen/preseptor/Kaprodi. Aplikasi Rails 8 single-tenant yang bisa di-hosting sendiri.
 
@@ -75,15 +75,15 @@ Pada pengembangan lokal (Ruby native) kata sandi bawaannya `password123`.
 
 | Email | Peran | Kegunaan |
 |---|---|---|
-| `admin.demo@jejaklite.test` | Admin | Akses penuh — kelola periode, impor nilai, kurikulum |
-| `dosen.demo@jejaklite.test` | Dosen | Membimbing tugas akhir, menilai DOPS/Mini-CEX |
-| `preseptor.demo@jejaklite.test` | Preseptor | Membimbing mahasiswa di rotasi/wahana |
-| `kaprodi.demo@jejaklite.test` | Kaprodi | Dashboard Analitik satu program studi |
-| `multirole.demo@jejaklite.test` | Mahasiswa + Dosen | Contoh satu akun berperan ganda (fitur Ganti Peran) |
-| `mahasiswa1.demo@jejaklite.test` | Mahasiswa | Punya logbook, kasus klinis, DOPS/Mini-CEX, tugas akhir, nilai ujian |
-| `mahasiswa2.demo@jejaklite.test` | Mahasiswa | Kasus klinis & nilai ujian (untuk melihat agregasi lintas mahasiswa) |
+| `admin.demo@jejakessential.test` | Admin | Akses penuh — kelola periode, impor nilai, kurikulum |
+| `dosen.demo@jejakessential.test` | Dosen | Membimbing tugas akhir, menilai DOPS/Mini-CEX |
+| `preseptor.demo@jejakessential.test` | Preseptor | Membimbing mahasiswa di rotasi/wahana |
+| `kaprodi.demo@jejakessential.test` | Kaprodi | Dashboard Analitik satu program studi |
+| `multirole.demo@jejakessential.test` | Mahasiswa + Dosen | Contoh satu akun berperan ganda (fitur Ganti Peran) |
+| `mahasiswa1.demo@jejakessential.test` | Mahasiswa | Punya logbook, kasus klinis, DOPS/Mini-CEX, tugas akhir, nilai ujian |
+| `mahasiswa2.demo@jejakessential.test` | Mahasiswa | Kasus klinis & nilai ujian (untuk melihat agregasi lintas mahasiswa) |
 
-Idempoten; terpisah dari `db/seeds.rb` (data rujukan aplikasi, aman dijalankan ulang). Akun berdomain `@jejaklite.test` sengaja dikecualikan dari kewajiban ganti kata sandi supaya bisa dipakai bergantian saat mencoba.
+Idempoten; terpisah dari `db/seeds.rb` (data rujukan aplikasi, aman dijalankan ulang). Akun berdomain `@jejakessential.test` sengaja dikecualikan dari kewajiban ganti kata sandi supaya bisa dipakai bergantian saat mencoba.
 
 ### Alternatif: Ruby native (pengembang)
 
@@ -102,7 +102,7 @@ Di **development/test**, kunci enkripsi pasien diturunkan dari `secret_key_base`
 bin/rails test   # ±530 test — semuanya harus hijau
 ```
 
-Selain test suite, tiap fase diverifikasi dengan **smoke test HTTP sungguhan**: login sebagai tiap akun demo lalu membuka seluruh halaman sidebar, memastikan nol 500. Cara cepat melakukannya sendiri: jalankan server, lalu buka halaman-halaman itu sebagai `admin.demo@jejaklite.test` dan `mahasiswa1.demo@jejaklite.test`.
+Selain test suite, tiap fase diverifikasi dengan **smoke test HTTP sungguhan**: login sebagai tiap akun demo lalu membuka seluruh halaman sidebar, memastikan nol 500. Cara cepat melakukannya sendiri: jalankan server, lalu buka halaman-halaman itu sebagai `admin.demo@jejakessential.test` dan `mahasiswa1.demo@jejakessential.test`.
 
 ## Deploy (Render, opsional)
 
@@ -139,6 +139,6 @@ Lihat bagian "Yang Sengaja Disederhanakan/Ditunda" di [`IMPLEMENTATION_PLAN.md`]
 
 Hak cipta © 2026 Muhammad Hasan Bashari.
 
-Kode sumber jejak-lite dilisensikan di bawah **GNU Affero General Public License v3.0** (AGPL-3.0) — teks lengkapnya di [`LICENSE`](LICENSE). Anda bebas memakai, mempelajari, mengubah, dan menyebarkan ulang aplikasi ini, termasuk meng-hosting-nya untuk institusi Anda sendiri, dengan syarat versi yang Anda ubah juga dirilis di bawah AGPL-3.0. Karena jejak-lite adalah aplikasi web, syarat itu berlaku pula bila versi yang diubah hanya dijalankan sebagai layanan daring: pengguna layanan tersebut harus dapat memperoleh kode sumbernya (pasal 13 AGPL-3.0).
+Kode sumber JEJAK Essential dilisensikan di bawah **GNU Affero General Public License v3.0** (AGPL-3.0) — teks lengkapnya di [`LICENSE`](LICENSE). Anda bebas memakai, mempelajari, mengubah, dan menyebarkan ulang aplikasi ini, termasuk meng-hosting-nya untuk institusi Anda sendiri, dengan syarat versi yang Anda ubah juga dirilis di bawah AGPL-3.0. Karena JEJAK Essential adalah aplikasi web, syarat itu berlaku pula bila versi yang diubah hanya dijalankan sebagai layanan daring: pengguna layanan tersebut harus dapat memperoleh kode sumbernya (pasal 13 AGPL-3.0).
 
 Logo Universitas Padjadjaran, AIPKI, dan Kemdiktisaintek (di `public/branding/` serta `app/views/shared/_aipki_logo.html.erb` dan `_diktisaintek_logo.html.erb`) adalah milik lembaga masing-masing dan **tidak termasuk** dalam lisensi ini.

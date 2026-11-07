@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Target skor per domain kompetensi untuk SATU periode akademik. jejak-lite
+# Target skor per domain kompetensi untuk SATU periode akademik. JEJAK Essential
 # sengaja cuma satu target per domain per periode, tanpa mesin kohort/tren
 # (lihat catatan arsitektur di IMPLEMENTATION_PLAN.md § Fase 20).
 class CompetencyMilestone < ApplicationRecord

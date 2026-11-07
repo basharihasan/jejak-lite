@@ -118,7 +118,7 @@ class CbtGlideImporterTest < ActiveSupport::TestCase
 
   test "ekspor hasil ujian per sesi: kolom keterangan diabaikan, prefiks menjadi kategori, kolom nol semua dilewati" do
     students = (1..4).map do |n|
-      User.create!(full_name: "Dummy #{n}", email: "dummy.mhs0#{n}@jejaklite.test", password: "password123",
+      User.create!(full_name: "Dummy #{n}", email: "dummy.mhs0#{n}@jejakessential.test", password: "password123",
                    confirmed_at: Time.current).tap { |user| user.roles << roles(:mahasiswa) }
     end
     result = import(file_fixture("cbt_exam_results_sesi.csv").read, exam_title: "CBT Blok Gastrointestinal")

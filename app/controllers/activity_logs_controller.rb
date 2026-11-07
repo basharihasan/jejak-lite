@@ -167,7 +167,7 @@ class ActivityLogsController < ApplicationController
     logs.each do |log|
       lines.concat([
         "BEGIN:VEVENT",
-        "UID:activity-log-#{log.id}@jejaklite",
+        "UID:activity-log-#{log.id}@jejakessential",
         "DTSTAMP:#{log.created_at.utc.strftime('%Y%m%dT%H%M%SZ')}",
         "DTSTART;VALUE=DATE:#{log.activity_date.strftime('%Y%m%d')}",
         "SUMMARY:#{ics_escape(log.title)}",

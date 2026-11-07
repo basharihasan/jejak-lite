@@ -3,7 +3,7 @@
 require "csv"
 
 # Relabel prodi mahasiswa secara massal dari CSV (Konfigurasi → Relabel Prodi
-# Mahasiswa), tanpa mode "Tandai Lulus" karena jejak-lite tidak punya
+# Mahasiswa), tanpa mode "Tandai Lulus" karena JEJAK Essential tidak punya
 # status/persona alumni.
 #
 # Dua aksi, keduanya berujung sama (users.study_program_id diganti):

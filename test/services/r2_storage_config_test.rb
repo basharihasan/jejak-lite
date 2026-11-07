@@ -6,7 +6,7 @@ require "test_helper"
 class R2StorageConfigTest < ActiveSupport::TestCase
   R2_ENV = {
     "R2_ACCOUNT_ID" => "acct0123456789", "R2_ACCESS_KEY_ID" => "uji-akses",
-    "R2_SECRET_ACCESS_KEY" => "uji-rahasia", "R2_BUCKET" => "jejak-lite-uji"
+    "R2_SECRET_ACCESS_KEY" => "uji-rahasia", "R2_BUCKET" => "jejak-essential-uji"
   }.freeze
 
   def with_r2_env
@@ -23,7 +23,7 @@ class R2StorageConfigTest < ActiveSupport::TestCase
       service = ActiveStorage::Service.configure(:cloudflare, configs)
 
       assert_kind_of ActiveStorage::Service::S3Service, service
-      assert_equal "jejak-lite-uji", service.bucket.name
+      assert_equal "jejak-essential-uji", service.bucket.name
       config = service.client.client.config
       assert_equal "acct0123456789.r2.cloudflarestorage.com", config.endpoint.host
       assert_equal "auto", config.region
